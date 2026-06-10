@@ -96,6 +96,14 @@ export default function Laporan() {
                                 }}>
                                     {fmt(row.pajak)}
                                 </td>
+                                <td style = {{
+                                    padding: '12px 16px',
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                    color: COLOR.green,
+                                }}>
+                                    {fmt(row.bersih)}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
