@@ -124,7 +124,66 @@ export default function DataMember() {
                     alignItems: 'center',
                     borderTop: `1px solid ${COLOR.border}`,
                 }}>
-                    
+                    <span style = {{
+                        fontSize: 12,
+                        color: COLOR.textMuted,
+                    }}>
+                        Menampilkan {filtered.leght} dari 400 member
+                    </span>
+                    <div style = {{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                    }}>
+                        <button onClick = {() => setPage(p => Math.max(1, p -1))} style = {{
+                            width: 30,
+                            height: 30,
+                            border: `1px solid ${COLOR.border}`,
+                            borderRadius: 6,
+                            background: '#fff',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                            <ChevronLeft size = {14} />
+                        </button>
+                        {[1, 2, 3].map(n => (
+                            <button key = {n} onClick = {() => setPage(n)} style = {{
+                                width: 30,
+                                height: 30,
+                                border: `1px solid ${page === n ? COLOR.amber : COLOR.border}`,
+                                borderRadius: 6,
+                                background: page === n ? COLOR.amber : '#fff',
+                                color: page === n ? '#fff' : COLOR.text,
+                                cursor: 'pointer',
+                                fontWeight: page === n ? 700 : 400,
+                                fontSize: 13,
+                                fontFamily: 'Geist',
+                            }}>
+                                {n}
+                            </button>
+                        ))}
+                        <span style = {{
+                            color: COLOR.textMuted,
+                            fontSize: 12,
+                        }}>
+                            —
+                        </span>
+                        <button onClick = {() => setPage(p => p + 1)} style = {{
+                            width: 30,
+                            height: 30,
+                            border: `1px solid ${COLOR.border}`,
+                            borderRadius: 6,
+                            background: '#fff',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                            <ChevronRight size = {14} />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
