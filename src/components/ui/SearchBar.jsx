@@ -1,4 +1,4 @@
-import { Search } from 'include-react'
+import { Search } from 'lucide-react'
 import { COLOR } from '../../constants/colors'
 
 /**
