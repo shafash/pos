@@ -4,13 +4,13 @@ import { COLOR } from '../../constants/colors'
  * @param {{ children, onCLick?, icon?: LucideIcon, small?: boolean }} props
 */
 
-export default function PrimaryBtn({ children, onCLick, icon: Icon, small = false }) {
+export default function PrimaryBtn({ children, onClick, icon: Icon, small = false }) {
     return (
         <button onClick = {onClick} style = {{
-            backgorund: COLOR.amber,
+            background: COLOR.amber,
             color: '#fff',
             border: 'none',
-            borderRadius: '8',
+            borderRadius: 8,
             padding: small ? '8px 14px' : '10px 18px',
             fontWeight: 700,
             fontSize: small ? 12 : 13,

@@ -52,7 +52,7 @@ export default function Laporan() {
                 <ResponsiveContainer width = "100%" height = {250}>
                     <BarChart data = {laporanBulananData}>
                         <CartesianGrid strokeDasharray = "3 3" stroke = {COLOR.border} />
-                        <Xaxis dataKey = "bulan" tick = {{ fontSize: 12 }} axisLine = {false} tickLine = {false} />
+                        <XAxis dataKey = "bulan" tick = {{ fontSize: 12 }} axisLine = {false} tickLine = {false} />
                         <YAxis tick = {{ fontSize: 12 }} axisLine = {false} tickLine = {false} />
                         <Tooltip formatter = {v => fmt(v)} />
                             <Bar dataKey= "value" fill = {COLOR.amber} radius = {[ 6, 6, 0, 0]} />

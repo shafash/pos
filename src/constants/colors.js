@@ -11,7 +11,9 @@ export const COLOR = {
     brownDark: '#333333',
 
     red: '#B01212',
-    RedLight: '#FFECEC',
+    redlight: '#FFECEC',
+    green: '#10B981',
+    greenLight: '#ECFDF5',
     orange: '#FF8D28',
 
     sidebar: '#FFFFFF',

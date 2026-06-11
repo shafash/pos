@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Filter, Plus, Pencil, Trash2, Database } from 'lucide-react'
+import { Filter, Plus, Pencil, Trash2 } from 'lucide-react'
 import { COLOR } from '../constants/colors'
 import { produkListData, barangBaruData } from '../constants/mockData'
 import StatCard from '../components/ui/StatCard'
 import Badge from '../components/ui/Badge'
-import tableHeader from '../components/ui/TableHeader'
+import TableHeader from '../components/ui/TableHeader'
 import SearchBar from '../components/ui/SearchBar'
 import PrimaryBtn from '../components/ui/PrimaryBtn'
 import ActionBtn from '../components/ui/ActionBtn'
@@ -64,7 +64,7 @@ export default function StokBarang() {
                             cursor: 'pointer',
                             fontFamily: 'Geist',
                         }}>
-                            <Filter sie = {14} /> Filter
+                            <Filter size = {14} /> Filter
                         </button>
                         <PrimaryBtn icon = {Plus}>Tambah Barang</PrimaryBtn>
                     </div>
@@ -103,7 +103,7 @@ export default function StokBarang() {
                                             </div>
                                         </td>
                                         <td style = {{ padding: '12px 16px '}}>
-                                            <Badge color = {p.kaetgori === 'Basah' ? 'amber' : 'gray' }>
+                                            <Badge color = {p.kategori === 'Basah' ? 'amber' : 'gray' }>
                                                 {p.kategori}
                                             </Badge>
                                         </td>
@@ -175,7 +175,7 @@ export default function StokBarang() {
                             padding: '8px 16px', 
                             fontWeight: 700,
                             fontSize: 13,
-                            cursor: 'ponter',
+                            cursor: 'pointer',
                             fontFamily: 'Geist',
                         }}>
                             Mulai Opname
@@ -214,7 +214,7 @@ export default function StokBarang() {
                                 alignItems: 'center',
                                 gap: 10,
                                 padding: '8px 0',
-                                borderBottom: i < barangBaruData.lenght - 1 ? `1px solid ${COLOR.border}` : 'none',
+                                borderBottom: i < barangBaruData.length - 1 ? `1px solid ${COLOR.border}` : 'none',
                             }}>
                                 <ProductImage width = {36} height = {28} />
                                 <div>

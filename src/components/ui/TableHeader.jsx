@@ -4,7 +4,7 @@ import { COLOR } from '../../constants/colors'
  * @param {{ cols: string[] }} props
 */
 
-export default function tableHeader({ cols }) {
+export default function TableHeader({ cols }) {
     return (
         <thead>
             <tr>

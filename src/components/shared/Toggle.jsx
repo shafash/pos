@@ -13,16 +13,16 @@ export default function Toggle({
             height: 24,
             borderRadius: 12,
             cursor: 'pointer',
-            background: value? COLOR.amber : #D1D5DB,
+            background: value ? COLOR.amber : '#D1D5DB',
             position: 'relative',
             transition: 'background 0.2s',
             flexShrink: 0,
         }}>
-            <siv style= {{
+            <div style= {{
                 width: 20,
                 height: 20,
                 borderRadius: '50%',
-                background: #fff,
+                background: '#fff',
                 position: 'absolute',
                 top: 2,
                 left: value ? 22 : 2,

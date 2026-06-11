@@ -1,7 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { COLOR } from '../constants/colors'
-import { omsetData, CabangData, stokMenipisData, transaksiTerakhirData } from '../constants/mockData'
+import { omsetData, cabangData, stokMenipisData, transaksiTerakhirData } from '../constants/mockData'
 import StatCard from '../components/ui/StatCard'
 import Badge from '../components/ui/Badge'
 import TableHeader from '../components/ui/TableHeader'
@@ -39,7 +39,7 @@ export default function Dashboard() {
                 <div style = {{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    aligItems: 'center',
+                    alignItems: 'center',
                     marginBottom: 20,
                 }}>
                     <span style = {{
@@ -152,7 +152,7 @@ export default function Dashboard() {
                             borderBottom: i < stokMenipisData.length - 1 ? `1px solid ${COLOR.border}` : 'none',
                         }}>
                             <span style = {{ fontSize: 13 }}>
-                                {s.name}
+                                {s.nama}
                             </span>
                             <div style = {{ display: 'flex', alignItems:'center', gap: 12 }}>
                                 <Badge color = {s.critical ? 'red' : 'amber'}>• {s.unit} unit</Badge>
@@ -177,7 +177,7 @@ export default function Dashboard() {
                     <tbody>
                         {transaksiTerakhirData.map((t, i) => (
                             <tr key = {i} style = {{ borderBottom: `1px solid ${COLOR.border}` }}>
-                                {[ t.id, t.waktu. t.jumlah, t.harga, t.total].map((val, j) => (
+                                {[ t.id, t.waktu, t.jumlah, t.harga, t.total].map((val, j) => (
                                     <td key = {j} style = {{padding: '12px 16px', fontSize:13, color: COLOR.text }}>
                                         {val}
                                     </td>

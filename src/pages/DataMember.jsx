@@ -128,7 +128,7 @@ export default function DataMember() {
                         fontSize: 12,
                         color: COLOR.textMuted,
                     }}>
-                        Menampilkan {filtered.leght} dari 400 member
+                        Menampilkan {filtered.length} dari 400 member
                     </span>
                     <div style = {{
                         display: 'flex',
