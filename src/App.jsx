@@ -24,7 +24,7 @@ export default function App() {
 
   return (
     <div style={{
-      fontFamily: "'Geist', 'Poppins', sans-serif",
+      fontFamily: "'Geist', sans-serif",
       background: COLOR.bg,
       minHeight:  '100vh',
     }}>

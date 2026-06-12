@@ -14,7 +14,6 @@ const NAV_ITEMS = [
 ]
 
 /**
- * Sidebar navigasi utama — fixed di kiri layar.
  * @param {{ active: string, onNav: (key: string) => void }} props
  */
 export default function Sidebar({ active, onNav }) {
@@ -33,7 +32,6 @@ export default function Sidebar({ active, onNav }) {
         zIndex:        10,
       }}
     >
-      {/* ── Logo ─────────────────────────────── */}
       <div style={{
         padding:    '20px 20px 10px',
         display:    'flex',
@@ -60,7 +58,6 @@ export default function Sidebar({ active, onNav }) {
         Menu
       </div>
 
-      {/* ── Nav Items ─────────────────────────── */}
       <nav style={{ flex: 1, padding: '0 10px' }}>
         {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
           const isActive = active === key
@@ -94,12 +91,10 @@ export default function Sidebar({ active, onNav }) {
         })}
       </nav>
 
-      {/* ── User + Bottom Actions ─────────────── */}
       <div style={{
         padding:    '16px 16px 8px',
         borderTop:  `1px solid ${COLOR.border}`,
       }}>
-        {/* Avatar */}
         <div style={{
           display:    'flex',
           alignItems: 'center',
@@ -128,7 +123,6 @@ export default function Sidebar({ active, onNav }) {
           </div>
         </div>
 
-        {/* Settings */}
         <button
           onClick={() => onNav('settings')}
           style={{
@@ -152,7 +146,6 @@ export default function Sidebar({ active, onNav }) {
           Settings
         </button>
 
-        {/* Logout */}
         <button
           style={{
             display:    'flex',

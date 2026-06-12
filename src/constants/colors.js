@@ -1,6 +1,6 @@
 export const FONT = {
-  heading: "'Poppins', sans-serif",
-  body:    "'Geist', 'Poppins', sans-serif",
+  heading: "'Geist', sans-serif",
+  body:    "'Geist', sans-serif",
 }
 
 export const COLOR = {
