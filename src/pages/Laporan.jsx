@@ -17,7 +17,7 @@ export default function Laporan() {
     return (
         <div>
             <h1 style = {{
-                fontSize: 2, 
+                fontSize: 22, 
                 fontWeight: 800,
                 color: COLOR.text,
                 marginBottom: 20,

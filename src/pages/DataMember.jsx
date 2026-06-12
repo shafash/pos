@@ -58,7 +58,7 @@ export default function DataMember() {
                     width: '100%',
                     borderCollapse: 'collapse',
                 }}>
-                    <TableHeader cols = {[ 'No', 'ID Member', 'No.Telepon', 'Alamat', 'Poin', 'Aksi' ]} />
+                    <TableHeader cols = {[ 'No', 'ID Member', 'Nama', 'No.Telepon', 'Alamat', 'Poin', 'Aksi' ]} />
                     <tbody>
                         {filtered.map((m, i) => (
                             <tr key = {m.id} style = {{borderBottom: `1px solid ${COLOR.border}`}}>
