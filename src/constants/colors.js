@@ -20,16 +20,16 @@ export const COLOR = {
   orange:          '#FF8D28',
 
   sidebar:         '#FFFFFF',
-  bg:              '#F4F5F7',
+  bg:              '#FBFBFB',
   card:            '#FFFFFF',
   cardAlt:         '#FBFBFB',
-  border:          '#CCCCCC',
+  border:          '#F4F5F7',
 
   text:            '#000000',
   textDark:        '#2A2A2A',
   textSub:         '#333333',
   textMuted:       '#7D7D7D',
 
-  tableHeader:     '#FFA500',
+  tableHeader:     '#FFCD71',
   tableHeaderText: '#000000',
 }
