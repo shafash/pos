@@ -67,7 +67,7 @@ export default function Settings() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: COLOR.text, marginBottom: 20 }}>
+      <h1 style={{ fontSize: 22, fontWeight: 500, color: COLOR.text, marginBottom: 20 }}>
         Settings
       </h1>
 

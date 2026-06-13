@@ -21,7 +21,7 @@ export default function DataMember() {
         <div>
             <h1 style = {{
                 fontSize: 22, 
-                fontWeight: 800,
+                fontWeight: 500,
                 color: COLOR.text,
                 marginBottom: 20,
             }}>

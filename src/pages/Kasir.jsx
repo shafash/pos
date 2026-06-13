@@ -140,7 +140,7 @@ export default function Kasir() {
     <div style={{ display: 'flex', minHeight: '100vh' }}>
 
       <div style={{ flex: 1, overflowY: 'auto', paddingRight: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: COLOR.text, marginBottom: 20 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 500, color: COLOR.text, marginBottom: 20 }}>
           Kasir
         </h1>
 

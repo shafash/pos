@@ -14,7 +14,7 @@ import TableHeader  from '../components/ui/TableHeader'
 export default function Dashboard() {
   return (
     <div>
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: COLOR.text, marginBottom: 24 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 500, color: COLOR.text, marginBottom: 24 }}>
         Dashboard
       </h1>
 
