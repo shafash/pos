@@ -5,30 +5,47 @@ import PrimaryBtn from '../components/ui/PrimaryBtn'
 
 export default function Settings() {
   const [storeInfo, setStoreInfo] = useState({ name: '', phone: '', address: '', branch: '', npwp: '' })
-  
+
+  const [toggles, setToggles] = useState({
+    negativeStock: true,
+    skuAuto:       true,
+    barcode:       true,
+    autoprint:     false,
+    pointSystem:   true,
+    twofa:         false,
+  })
+
+  const setToggle = (key) => setToggles(prev => ({ ...prev, [key]: !prev[key] }))
+
   const activityLogs = [
     { id: 1, time: '10:42 WIB', category: 'Inventory', desc: 'Stock adjustment: GS Astra Premium NS60 (+5 units) by Admin' },
     { id: 2, time: '10:42 WIB', category: 'Inventory', desc: 'Stock adjustment: GS Astra Premium NS60 (+5 units) by Admin' },
     { id: 3, time: '10:42 WIB', category: 'Inventory', desc: 'Stock adjustment: GS Astra Premium NS60 (+5 units) by Admin' },
   ]
 
-  const Toggle = ({ active }) => (
-    <div style={{
-      width: 36, height: 20, borderRadius: 20,
-      background: active ? COLOR.amber || '#F59E0B' : '#E5E7EB',
-      position: 'relative', cursor: 'pointer', transition: '0.2s'
-    }}>
+  const Toggle = ({ value, onToggle }) => (
+    <div
+      onClick={onToggle}
+      style={{
+        width: 36, height: 20, borderRadius: 20,
+        background: value ? COLOR.amber : '#E5E7EB',
+        position: 'relative', cursor: 'pointer', transition: '0.2s',
+        flexShrink: 0,
+      }}
+    >
       <div style={{
         width: 16, height: 16, borderRadius: '50%', background: '#fff',
-        position: 'absolute', top: 2, left: active ? 18 : 2, transition: '0.2s',
+        position: 'absolute', top: 2,
+        left: value ? 18 : 2,
+        transition: '0.2s',
         boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
       }} />
     </div>
   )
 
   const SectionTitle = ({ icon: Icon, title }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, color: COLOR.amber || '#F59E0B', fontWeight: 600 }}>
-      <Icon size={18} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontWeight: 600 }}>
+      <Icon size={18} color={COLOR.amber} />
       <span style={{ color: COLOR.text, fontSize: 15 }}>{title}</span>
     </div>
   )
@@ -37,11 +54,11 @@ export default function Settings() {
     width: '100%', padding: '10px 14px', borderRadius: 8,
     border: `1px solid ${COLOR.border}`, background: '#fff',
     fontSize: 13, fontFamily: 'inherit', color: COLOR.text,
-    boxSizing: 'border-box', marginTop: 6
+    boxSizing: 'border-box', marginTop: 6, outline: 'none',
   }
 
   const cardStyle = {
-    background: COLOR.card || '#fff',
+    background: COLOR.card,
     border: `1px solid ${COLOR.border}`,
     borderRadius: 12, padding: 24,
   }
@@ -49,13 +66,13 @@ export default function Settings() {
   return (
     <div style={{ paddingBottom: 40 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        
+
+        {/* ── Store Information ─────────────────── */}
         <div style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <SectionTitle icon={Store} title="Store Information" />
             <PrimaryBtn icon={Save}>Save Changes</PrimaryBtn>
           </div>
-          
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Store Name</label>
@@ -75,13 +92,14 @@ export default function Settings() {
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Store Address</label>
-              <textarea style={{...inputStyle, resize: 'vertical', minHeight: 80}} placeholder="Alamat lengkap toko" />
+              <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 80 }} placeholder="Alamat lengkap toko" />
             </div>
           </div>
         </div>
 
+        {/* ── Inventory & Transaction ───────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-          
+
           <div style={cardStyle}>
             <SectionTitle icon={Package} title="Inventory & Stock" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -90,28 +108,28 @@ export default function Settings() {
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Low Stock Threshold</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Alert when stock hits below units</div>
                 </div>
-                <input style={{...inputStyle, width: 60, textAlign: 'center', marginTop: 0}} type="number" defaultValue={5} />
+                <input style={{ ...inputStyle, width: 60, textAlign: 'center', marginTop: 0 }} type="number" defaultValue={5} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Negative Stock Protection</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Prevent sales of out-of-stock items</div>
                 </div>
-                <Toggle active={true} />
+                <Toggle value={toggles.negativeStock} onToggle={() => setToggle('negativeStock')} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>SKU Auto-generation</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Automatic unique ID creation</div>
                 </div>
-                <Toggle active={true} />
+                <Toggle value={toggles.skuAuto} onToggle={() => setToggle('skuAuto')} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Barcode Scanner Integration</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Enable HID/USB scanner support</div>
                 </div>
-                <Toggle active={true} />
+                <Toggle value={toggles.barcode} onToggle={() => setToggle('barcode')} />
               </div>
             </div>
           </div>
@@ -125,7 +143,7 @@ export default function Settings() {
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Global tax applied to all items</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <input style={{...inputStyle, width: 60, textAlign: 'center', marginTop: 0}} type="number" defaultValue={11} />
+                  <input style={{ ...inputStyle, width: 60, textAlign: 'center', marginTop: 0 }} type="number" defaultValue={11} />
                   <span style={{ fontSize: 13, fontWeight: 600 }}>%</span>
                 </div>
               </div>
@@ -134,26 +152,27 @@ export default function Settings() {
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Invoice Prefix</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Starting characters for bills</div>
                 </div>
-                <input style={{...inputStyle, width: 80, marginTop: 0}} type="text" defaultValue="TRX-" />
+                <input style={{ ...inputStyle, width: 80, marginTop: 0 }} type="text" defaultValue="TRX-" />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Auto-print Receipt</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>After transaction success</div>
                 </div>
-                <Toggle active={false} />
+                <Toggle value={toggles.autoprint} onToggle={() => setToggle('autoprint')} />
               </div>
             </div>
           </div>
         </div>
 
+        {/* ── Member, Backup, Alerts ────────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
-          
+
           <div style={cardStyle}>
             <SectionTitle icon={Users} title="Member & Loyalty" />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <span style={{ fontSize: 13, fontWeight: 600 }}>Point System</span>
-              <Toggle active={true} />
+              <Toggle value={toggles.pointSystem} onToggle={() => setToggle('pointSystem')} />
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontSize: 11, color: COLOR.textSub }}>Point Conversion (per Rp.1000)</label>
@@ -162,16 +181,30 @@ export default function Settings() {
             <div>
               <label style={{ fontSize: 11, color: COLOR.textSub }}>Tiers Management</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
-                <div style={{ padding: '8px 12px', background: '#F9FAFB', borderRadius: 6, fontSize: 12, border: `1px solid ${COLOR.border}` }}>Common (Normal)</div>
-                <div style={{ padding: '8px 12px', background: '#FEF3C7', borderRadius: 6, fontSize: 12, border: '1px solid #FDE68A', color: '#92400E', fontWeight: 600 }}>Gold Member</div>
-                <div style={{ padding: '8px 12px', background: '#F3F4F6', borderRadius: 6, fontSize: 12, border: `1px solid ${COLOR.border}`, fontWeight: 600 }}>VIP Member</div>
+                <div style={{ padding: '8px 12px', background: '#F9FAFB', borderRadius: 6, fontSize: 12, border: `1px solid ${COLOR.border}` }}>
+                  Common (Normal)
+                </div>
+                <div style={{ padding: '8px 12px', background: '#FEF3C7', borderRadius: 6, fontSize: 12, border: '1px solid #FDE68A', color: '#92400E', fontWeight: 600 }}>
+                  Gold Member
+                </div>
+                <div style={{ padding: '8px 12px', background: '#F3F4F6', borderRadius: 6, fontSize: 12, border: `1px solid ${COLOR.border}`, fontWeight: 600 }}>
+                  VIP Member
+                </div>
               </div>
             </div>
           </div>
 
           <div style={cardStyle}>
             <SectionTitle icon={Shield} title="Backup & Security" />
-            <button style={{ width: '100%', padding: '10px', background: '#FFFBEB', color: '#B45309', border: '1px solid #FDE68A', borderRadius: 8, fontWeight: 600, fontSize: 13, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 16 }}>
+            <button style={{
+              width: '100%', padding: '10px',
+              background: COLOR.amberLight,
+              color: COLOR.amberDark,
+              border: `1px solid ${COLOR.amber}`,
+              borderRadius: 8, fontWeight: 600, fontSize: 13,
+              display: 'flex', justifyContent: 'center', alignItems: 'center',
+              gap: 8, cursor: 'pointer', marginBottom: 16, fontFamily: 'inherit',
+            }}>
               <Clock size={16} /> Manual Backup Now
             </button>
             <div style={{ marginBottom: 16 }}>
@@ -184,7 +217,7 @@ export default function Settings() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 13, fontWeight: 600 }}>Two-Factor Auth (2FA)</span>
-              <Toggle active={false} />
+              <Toggle value={toggles.twofa} onToggle={() => setToggle('twofa')} />
             </div>
           </div>
 
@@ -194,33 +227,37 @@ export default function Settings() {
               {['Low Stock Alerts', 'Daily Sales Summary', 'Stock Mismatch Audit', 'Failed Transaction'].map((alert, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 13 }}>{alert}</span>
-                  <input type="checkbox" defaultChecked={i < 3} style={{ accentColor: COLOR.amber || '#F59E0B', width: 16, height: 16 }} />
+                  <input
+                    type="checkbox"
+                    defaultChecked={i < 3}
+                    style={{ accentColor: COLOR.amber, width: 16, height: 16, cursor: 'pointer' }}
+                  />
                 </div>
               ))}
             </div>
           </div>
         </div>
 
+        {/* ── Activity Logs ─────────────────────── */}
         <div style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <SectionTitle icon={History} title="Activity Logs" />
-            <span style={{ fontSize: 12, color: COLOR.amber || '#F59E0B', cursor: 'pointer', fontWeight: 600 }}>
+            <span style={{ fontSize: 12, color: COLOR.amber, cursor: 'pointer', fontWeight: 600 }}>
               View Full History &gt;&gt;
             </span>
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {activityLogs.map((log, index) => (
-              <div key={log.id} style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                padding: '12px 0', 
-                borderBottom: index !== activityLogs.length - 1 ? `1px solid ${COLOR.border}` : 'none' 
+              <div key={log.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '12px 0',
+                borderBottom: index !== activityLogs.length - 1 ? `1px solid ${COLOR.border}` : 'none'
               }}>
-                <span style={{ width: '100px', fontSize: 13, fontWeight: 500, color: COLOR.textSub }}>{log.time}</span>
-                <span style={{ width: '120px', fontSize: 13, color: '#9CA3AF' }}>{log.category}</span>
+                <span style={{ width: 100, fontSize: 13, fontWeight: 500, color: COLOR.textSub }}>{log.time}</span>
+                <span style={{ width: 120, fontSize: 13, color: COLOR.textMuted }}>{log.category}</span>
                 <span style={{ flex: 1, fontSize: 13, color: COLOR.text }}>{log.desc}</span>
-                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLOR.amber || '#F59E0B' }}>
+                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLOR.amber }}>
                   <MoreVertical size={16} />
                 </button>
               </div>
