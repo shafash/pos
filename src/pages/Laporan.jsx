@@ -16,15 +16,6 @@ const laporanHarianData  = Array.from({ length: 6 }, (_, i) => ({
 export default function Laporan() {
     return (
         <div>
-            <h1 style = {{
-                fontSize: 22, 
-                fontWeight: 500,
-                color: COLOR.text,
-                marginBottom: 20,
-            }}>
-                Laporan
-            </h1>
-
             <div style = {{
                 display: 'flex',
                 gap: 16,

@@ -48,10 +48,6 @@ export default function Settings() {
 
   return (
     <div style={{ paddingBottom: 40 }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: COLOR.text, marginBottom: 24 }}>
-        Settings
-      </h1>
-
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         
         <div style={cardStyle}>

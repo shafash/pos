@@ -19,15 +19,6 @@ export default function DataMember() {
 
     return (
         <div>
-            <h1 style = {{
-                fontSize: 22, 
-                fontWeight: 500,
-                color: COLOR.text,
-                marginBottom: 20,
-            }}>
-                Data Member
-            </h1>
-
             <div style = {{
                 display: 'flex',
                 gap: 16,

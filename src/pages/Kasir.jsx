@@ -140,10 +140,6 @@ export default function Kasir() {
     <div style={{ display: 'flex', minHeight: '100vh' }}>
 
       <div style={{ flex: 1, overflowY: 'auto', paddingRight: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, color: COLOR.text, marginBottom: 20 }}>
-          Kasir
-        </h1>
-
         <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>
           Kategori Produk/Jasa
         </div>

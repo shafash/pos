@@ -14,10 +14,6 @@ import TableHeader  from '../components/ui/TableHeader'
 export default function Dashboard() {
   return (
     <div>
-      <h1 style={{ fontSize: 24, fontWeight: 500, color: COLOR.text, marginBottom: 24 }}>
-        Dashboard
-      </h1>
-
       <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
         <StatCard label="Omset"          value="2.000.000"  sub="Total semua cabang"      />
         <StatCard label="Total Transaksi" value="123"       sub="Struk tercetak hari ini" />

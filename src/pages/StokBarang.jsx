@@ -20,14 +20,6 @@ export default function StokBarang() {
 
   return (
     <div>
-        <h1 style={{ 
-            fontSize: 22,
-            fontWeight: 500, 
-            color: COLOR.text, 
-            marginBottom: 20 
-        }}>
-            Stok Barang
-        </h1>
 
         <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
             <StatCard label="Total Produk" value="1.240"              />
