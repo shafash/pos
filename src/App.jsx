@@ -10,7 +10,7 @@ import Laporan from './pages/Laporan'
 import Settings from './pages/Settings'
 
 const PAGE_TITLES = {
-  dashboard = 'Dashboard',
+  dashboard: 'Dashboard',
   kasir: 'kasir', 
   stok: 'Stok Barang',
   member: 'Data Member',
@@ -37,7 +37,7 @@ export default function App() {
       background: COLOR.bg,
       minHeight: '100vh',
     }}>
-      <Sidebar active = {page} onNav = {setpage} />
+      <Sidebar active = {page} onNav = {setPage} />
       <Topbar title = {PAGE_TITLES[page]} />
 
       <main style = {{
