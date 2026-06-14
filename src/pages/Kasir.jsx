@@ -137,9 +137,9 @@ export default function Kasir() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', height: 'calc(100vh - 56px)', overflow: 'hidden', scrollbarWidth: 'none', ms0verflowStyle: 'none', }}>
 
-      <div style={{ flex: 1, overflowY: 'auto', paddingRight: 24 }}>
+      <div class = "no-scrollbar" style={{ flex: 1, overflowY: 'auto', paddingRight: 24, height: '100%', scrollbarWidth: 'none', ms0verflowStyle: 'none', }}>
         <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>
           Kategori Produk/Jasa
         </div>
@@ -200,17 +200,17 @@ export default function Kasir() {
         </div>
       </div>
 
-      <div style={{
+      <div class = "no-scrollbar" style={{
         width:         300,
+        flexShrink: 0,
         background:    COLOR.card,
         borderLeft:    `1px solid ${COLOR.border}`,
         display:       'flex',
         flexDirection: 'column',
-        position:      'sticky',
-        top:           0,
-        height:        '100vh',
+        height:        '100%',
         overflowY:     'auto',
-        marginRight:   -32, 
+        scrollbarWidth: 'none', 
+        ms0verflowStyle: 'none',
       }}>
 
         <div style={{ padding: '20px 20px 12px', borderBottom: `1px solid ${COLOR.border}` }}>
@@ -262,7 +262,7 @@ export default function Kasir() {
               Clear
             </button>
           </div>
-          <div style={{ maxHeight: 260, overflowY: 'auto' }}>
+          <div class = "no-scrollbar" style={{ maxHeight: 260, overflowY: 'auto', scrollbarWidth: 'none', ms0verflowStyle: 'none', }}>
             {keranjang.map(item => (
               <KeranjangItem key={item.id} item={item} onUpdateQty={handleUpdateQty} />
             ))}

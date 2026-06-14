@@ -43,7 +43,7 @@ export default function App() {
       <main style = {{
         marginLeft: 220,
         paddingTop: 56,
-        padding: isKasir ? '56px 0 32px 32px' : '56px 32px 32px 32px',
+        padding: isKasir ? '56px 0 0 0' : '56px 32px 32px 32px',
         minHeight: '100vh',
       }}>
         {PAGES[page] ?? <Dashboard />}
