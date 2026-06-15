@@ -178,7 +178,7 @@ export default function AuditBarang() {
                       key={amount}
                       onClick={() => setActualCount(prev => prev + amount)}
                       style={{
-                        width:        71,
+                        flex: 1,
                         height:       71,
                         background:   '#fff',
                         border:       `1px solid ${COLOR.border}`,

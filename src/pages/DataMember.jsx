@@ -32,11 +32,11 @@ export default function DataMember() {
             <div style = {{
                 display: 'flex',
                 gap: 12,
-                marginBottom: 16,
+                justifyContent: 'space-between',
                 alignItems: 'center',
             }}>
                 <SearchBar placeholder = "Cari nama atau ID Member..." value = {search} onChange = {e => setSearch(e.target.value)} />
-                    <PrimaryBtn icon = {UserPlus}>Tambah Member</PrimaryBtn>
+                    <PrimaryBtn icon = {UserPlus} onClick = {() => onNav('tambahMember')}>Tambah Member</PrimaryBtn>
             </div>
 
             <div style = {{
@@ -99,7 +99,7 @@ export default function DataMember() {
                                         display: 'flex',
                                         gap: 4,
                                     }}>
-                                        <ActionBtn icon = {Pencil} />
+                                        <ActionBtn icon = {Pencil} onClick = {() => onNav('editMember')}/>
                                         <ActionBtn icon = {Trash2} color = {COLOR.red} />
                                     </div>
                                 </td>

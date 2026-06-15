@@ -50,7 +50,9 @@ export default function StokBarang({ onNav }) {
             }}>
               <Filter size={14} /> Filter
             </button>
-            <PrimaryBtn icon={Plus}>Tambah Barang</PrimaryBtn>
+            <div style = {{marginLeft: 'auto'}}>
+            <PrimaryBtn icon={Plus} onCLick={() => onNav('tambahBarang')}>Tambah Barang</PrimaryBtn>
+            </div>
           </div>
 
           <div style={{
@@ -81,7 +83,7 @@ export default function StokBarang({ onNav }) {
                     <td style={{ padding: '12px 16px', fontSize: 13 }}>{p.satuan}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <ActionBtn icon={Pencil} />
+                        <ActionBtn icon={Pencil} onClick = {() => onNav('editBarang')} />
                         <ActionBtn icon={Trash2} color={COLOR.red} />
                       </div>
                     </td>

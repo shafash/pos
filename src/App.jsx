@@ -9,6 +9,10 @@ import DataMember from './pages/DataMember'
 import Laporan from './pages/Laporan'
 import Settings from './pages/Settings'
 import AuditBarang from './pages/AuditBarang'  
+import TambahBarang from './pages/TambahBarang'
+import EditBarang from './pages/EditBarang'
+import TambahMember from './pages/TambahMember'
+import EditMember from './pages/EditMember'
 
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
@@ -18,6 +22,10 @@ const PAGE_TITLES = {
   laporan:   'Laporan',
   settings:  'Settings',
   audit:     'Audit Stok',
+  tambahBarang: 'Tambah Barang',
+  editBarang: 'Edit Barang',
+  tambahMember: 'Tambah Member',
+  editMember: 'Edit Member',
 }
 
 const PAGES = (onNav) => ({
@@ -25,9 +33,13 @@ const PAGES = (onNav) => ({
   kasir:     <Kasir />,
   stok:      <StokBarang onNav={onNav} />,
   audit:     <AuditBarang />,
-  member:    <DataMember />,
+  member:    <DataMember onNav={onNav} />,
   laporan:   <Laporan />,
   settings:  <Settings />,
+  tambahBarang: <TambahBarang onNav={onNav} />,
+  editBarang: <EditBarang onNav={onNav} />,
+  tambahMember: <TambahMember onNav={onNav} />,
+  editMember: <EditMember onNav={onNav} />,
 })
 
 export default function App() {
