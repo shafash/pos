@@ -28,7 +28,6 @@ export default function StokBarang({ onNav }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 20 }}>
 
-        {/* ── Tabel Produk ─────────────────────── */}
         <div>
           <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center' }}>
             <SearchBar
@@ -93,10 +92,8 @@ export default function StokBarang({ onNav }) {
           </div>
         </div>
 
-        {/* ── Sidebar Kanan ────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          {/* Audit Stok Card */}
           <div style={{
             background:   '#4A3500',
             borderRadius: 12,
@@ -130,7 +127,6 @@ export default function StokBarang({ onNav }) {
             </button>
           </div>
 
-          {/* Barang Baru Card */}
           <div style={{
             background:   COLOR.card,
             border:       `1px solid ${COLOR.border}`,

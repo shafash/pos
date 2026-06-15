@@ -38,7 +38,7 @@ export default function Sidebar({ active, onNav }) {
         alignItems: 'center',
         gap:        10,
       }}>
-        <span style={{ fontWeight: 800, fontSize: 13, color: COLOR.text, lineHeight: 1.2 }}>
+        <span style={{ fontWeight: 500, fontSize: 13, color: COLOR.text, lineHeight: 1.2 }}>
           POS ElangAnugerah
         </span>
         <Menu

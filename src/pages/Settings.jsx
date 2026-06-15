@@ -67,7 +67,6 @@ export default function Settings() {
     <div style={{ paddingBottom: 40 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-        {/* ── Store Information ─────────────────── */}
         <div style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <SectionTitle icon={Store} title="Store Information" />
@@ -97,7 +96,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ── Inventory & Transaction ───────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
 
           <div style={cardStyle}>
@@ -165,7 +163,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ── Member, Backup, Alerts ────────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
 
           <div style={cardStyle}>
@@ -238,7 +235,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ── Activity Logs ─────────────────────── */}
         <div style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <SectionTitle icon={History} title="Activity Logs" />
