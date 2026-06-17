@@ -18,89 +18,67 @@ export default function DataMember({ onNav }) {
     )
 
     return (
-        <div>
-            <div style = {{
+        <div style={{ paddingTop: 28 }}>
+            <div style={{
                 display: 'flex',
                 gap: 16,
                 marginBottom: 24,
             }}>
-                <StatCard label = "Total Member" value = "450" sub = "Seluruh Database" />
-                <StatCard label = "Member Aktif" value = "234" sub = "+6 Member bulan ini" />
-                <StatCard label = "Poin Terbanyak" value = "8.500 Poin" sub = "An. Keizuro Isaac" />
+                <StatCard label="Total Member" value="450" sub="Seluruh Database" />
+                <StatCard label="Member Aktif" value="234" sub="+6 Member bulan ini" />
+                <StatCard label="Poin Terbanyak" value="8.500 Poin" sub="An. Keizuro Isaac" />
             </div>
 
-            <div style = {{
+            <div style={{
                 display: 'flex',
                 gap: 12,
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                marginBottom: 20,
             }}>
-                <SearchBar placeholder = "Cari nama atau ID Member..." value = {search} onChange = {e => setSearch(e.target.value)} />
-                    <PrimaryBtn icon = {UserPlus} onClick = {() => onNav('tambahMember')}>Tambah Member</PrimaryBtn>
+                <SearchBar placeholder="Cari nama atau ID Member..." value={search} onChange={e => setSearch(e.target.value)} />
+                <PrimaryBtn icon={UserPlus} onClick={() => onNav('tambahMember')}>Tambah Member</PrimaryBtn>
             </div>
 
-            <div style = {{
+            <div style={{
                 background: COLOR.card,
-                border:`1px solid${COLOR.border}`,
+                border: `1px solid ${COLOR.border}`,
                 borderRadius: 12,
                 overflow: 'hidden',
             }}>
-                <table style = {{
+                <table style={{
                     width: '100%',
                     borderCollapse: 'collapse',
                 }}>
-                    <TableHeader cols = {[ 'No', 'ID Member', 'Nama', 'No.Telepon', 'Alamat', 'Poin', 'Aksi' ]} />
+                    <TableHeader
+                        cols={['No', 'ID Member', 'Nama', 'No.Telepon', 'Alamat', 'Poin', 'Aksi']}
+                        headerStyle={{ fontSize: 14, fontWeight: 500 }}
+                    />
                     <tbody>
                         {filtered.map((m, i) => (
-                            <tr key = {m.id} style = {{borderBottom: `1px solid ${COLOR.border}`}}>
-                                <td style = {{
-                                    padding: '14px 16px',
-                                    fontSize: 13,
-                                }}>
-                                    {i +1}
+                            <tr key={m.id} style={{ borderBottom: `1px solid ${COLOR.border}` }}>
+                                <td style={{ padding: '14px 16px', fontSize: 13 }}>
+                                    {i + 1}
                                 </td>
-                                <td style = {{
-                                    padding: '14px 16px',
-                                    fontSize: 13, 
-                                    color: COLOR.textSub
-                                }}>
+                                <td style={{ padding: '14px 16px', fontSize: 13, color: COLOR.textSub }}>
                                     {m.memberId}
                                 </td>
-                                <td style = {{
-                                    padding: '14px 16px',
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                }}>
+                                <td style={{ padding: '14px 16px', fontSize: 13, fontWeight: 600 }}>
                                     {m.nama}
                                 </td>
-                                <td style = {{
-                                    padding: '14px 16px',
-                                    fontSize: 13,
-                                }}>
+                                <td style={{ padding: '14px 16px', fontSize: 13 }}>
                                     {m.telp}
                                 </td>
-                                <td style = {{
-                                    padding: '14px 16px',
-                                    fontSize: 12,
-                                    color: COLOR.textSub,
-                                    maxWidth: 200,
-                                }}>
+                                <td style={{ padding: '14px 16px', fontSize: 12, color: COLOR.textSub, maxWidth: 200 }}>
                                     {m.alamat}
                                 </td>
-                                <td style = {{
-                                    padding: '14px 16px',
-                                    fontSize: 13,
-                                    fontWeight: 700,
-                                }}>
+                                <td style={{ padding: '14px 16px', fontSize: 13, fontWeight: 700 }}>
                                     {m.poin.toLocaleString('id-ID')}
                                 </td>
-                                <td style = {{padding: '14px 16px'}}>
-                                    <div style = {{
-                                        display: 'flex',
-                                        gap: 4,
-                                    }}>
-                                        <ActionBtn icon = {Pencil} onClick = {() => onNav('editMember')}/>
-                                        <ActionBtn icon = {Trash2} color = {COLOR.red} />
+                                <td style={{ padding: '14px 16px' }}>
+                                    <div style={{ display: 'flex', gap: 4 }}>
+                                        <ActionBtn icon={Pencil} onClick={() => onNav('editMember')} />
+                                        <ActionBtn icon={Trash2} color={COLOR.red} />
                                     </div>
                                 </td>
                             </tr>
@@ -108,41 +86,29 @@ export default function DataMember({ onNav }) {
                     </tbody>
                 </table>
 
-                <div style = {{
+                <div style={{
                     padding: '14px 16px',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     borderTop: `1px solid ${COLOR.border}`,
                 }}>
-                    <span style = {{
-                        fontSize: 12,
-                        color: COLOR.textMuted,
-                    }}>
+                    <span style={{ fontSize: 12, color: COLOR.textMuted }}>
                         Menampilkan {filtered.length} dari 400 member
                     </span>
-                    <div style = {{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                    }}>
-                        <button onClick = {() => setPage(p => Math.max(1, p -1))} style = {{
-                            width: 30,
-                            height: 30,
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <button onClick={() => setPage(p => Math.max(1, p - 1))} style={{
+                            width: 30, height: 30,
                             border: `1px solid ${COLOR.border}`,
-                            borderRadius: 6,
-                            background: '#fff',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            borderRadius: 6, background: '#fff',
+                            cursor: 'pointer', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center',
                         }}>
-                            <ChevronLeft size = {14} />
+                            <ChevronLeft size={14} />
                         </button>
                         {[1, 2, 3].map(n => (
-                            <button key = {n} onClick = {() => setPage(n)} style = {{
-                                width: 30,
-                                height: 30,
+                            <button key={n} onClick={() => setPage(n)} style={{
+                                width: 30, height: 30,
                                 border: `1px solid ${page === n ? COLOR.amber : COLOR.border}`,
                                 borderRadius: 6,
                                 background: page === n ? COLOR.amber : '#fff',
@@ -155,24 +121,15 @@ export default function DataMember({ onNav }) {
                                 {n}
                             </button>
                         ))}
-                        <span style = {{
-                            color: COLOR.textMuted,
-                            fontSize: 12,
-                        }}>
-                            —
-                        </span>
-                        <button onClick = {() => setPage(p => p + 1)} style = {{
-                            width: 30,
-                            height: 30,
+                        <span style={{ color: COLOR.textMuted, fontSize: 12 }}>—</span>
+                        <button onClick={() => setPage(p => p + 1)} style={{
+                            width: 30, height: 30,
                             border: `1px solid ${COLOR.border}`,
-                            borderRadius: 6,
-                            background: '#fff',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            borderRadius: 6, background: '#fff',
+                            cursor: 'pointer', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center',
                         }}>
-                            <ChevronRight size = {14} />
+                            <ChevronRight size={14} />
                         </button>
                     </div>
                 </div>
