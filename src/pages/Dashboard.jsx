@@ -7,20 +7,22 @@ import { COLOR } from '../constants/colors'
 import {
   omsetData, cabangData, stokMenipisData, transaksiTerakhirData,
 } from '../constants/mockData'
-import StatCard     from '../components/ui/StatCard'
-import Badge        from '../components/ui/Badge'
-import TableHeader  from '../components/ui/TableHeader'
+import StatCard from '../components/ui/StatCard'
+import Badge    from '../components/ui/Badge'
 
 export default function Dashboard() {
   return (
-    <div>
+    <div style={{ paddingTop: 24 }}>
+
+      {/* ── Stat Cards ───────────────────────── */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
-        <StatCard label="Omset"          value="2.000.000"  sub="Total semua cabang"      />
+        <StatCard label="Omset"           value="2.000.000" sub="Total semua cabang"      />
         <StatCard label="Total Transaksi" value="123"       sub="Struk tercetak hari ini" />
-        <StatCard label="Member Aktif"   value="234"        sub="+6 Member bulan ini"     />
-        <StatCard label="Stok Kritis"    value="3 Item"     sub="Perlu restock segera"    />
+        <StatCard label="Member Aktif"    value="234"       sub="+6 Member bulan ini"     />
+        <StatCard label="Stok Kritis"     value="3 Item"    sub="Perlu restock segera"    />
       </div>
 
+      {/* ── Chart Omset ──────────────────────── */}
       <div style={{
         background:   COLOR.card,
         border:       `1px solid ${COLOR.border}`,
@@ -36,15 +38,15 @@ export default function Dashboard() {
         }}>
           <span style={{ fontWeight: 700, fontSize: 15 }}>Omset</span>
           <div style={{
-            display:     'flex',
-            alignItems:  'center',
-            gap:         6,
-            fontSize:    13,
-            color:       COLOR.textSub,
-            cursor:      'pointer',
-            border:      `1px solid ${COLOR.border}`,
+            display:      'flex',
+            alignItems:   'center',
+            gap:          6,
+            fontSize:     13,
+            color:        COLOR.textSub,
+            cursor:       'pointer',
+            border:       `1px solid ${COLOR.border}`,
             borderRadius: 6,
-            padding:     '4px 10px',
+            padding:      '4px 10px',
           }}>
             Yearly <ChevronDown size={14} />
           </div>
@@ -82,6 +84,7 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
+      {/* ── Performa Cabang + Stok Menipis ───── */}
       <div style={{
         display:             'grid',
         gridTemplateColumns: '1fr 1fr',
@@ -89,6 +92,7 @@ export default function Dashboard() {
         marginBottom:        24,
       }}>
 
+        {/* Performa Cabang */}
         <div style={{
           background:   COLOR.card,
           border:       `1px solid ${COLOR.border}`,
@@ -104,22 +108,22 @@ export default function Dashboard() {
                 display:        'flex',
                 justifyContent: 'space-between',
                 fontSize:       13,
-                marginBottom:   4,
+                marginBottom:   6,
               }}>
                 <span style={{ fontWeight: 600 }}>{c.name}</span>
                 <span style={{ color: COLOR.textSub }}>{c.value} JT</span>
               </div>
               <div style={{
-                height:     24,
-                background: COLOR.amberLight,
+                height:       24,
+                background:   COLOR.amberLight,
                 borderRadius: 6,
-                overflow:   'hidden',
+                overflow:     'hidden',
               }}>
                 <div style={{
                   height:      '100%',
-                  background:  COLOR.amber,
                   borderRadius: 6,
                   width:       `${(c.value / 120) * 100}%`,
+                  background:  'linear-gradient(90deg, rgba(255,165,0,0.9) 0%, rgba(255,165,0,0.1) 100%)',
                   display:     'flex',
                   alignItems:  'center',
                   paddingLeft: 10,
@@ -134,6 +138,7 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Stok Menipis */}
         <div style={{
           background:   COLOR.card,
           border:       `1px solid ${COLOR.border}`,
@@ -147,16 +152,19 @@ export default function Dashboard() {
             <div
               key={i}
               style={{
-                display:        'flex',
-                justifyContent: 'space-between',
-                alignItems:     'center',
-                padding:        '9px 0',
-                borderBottom:   i < stokMenipisData.length - 1 ? `1px solid ${COLOR.border}` : 'none',
+                display:      'flex',
+                alignItems:   'center',
+                padding:      '9px 0',
+                borderBottom: i < stokMenipisData.length - 1 ? `1px solid ${COLOR.border}` : 'none',
               }}
             >
-              <span style={{ fontSize: 13 }}>{s.nama}</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ flex: 2 }}>
+                <span style={{ fontSize: 13 }}>{s.nama}</span>
+              </div>
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                 <Badge color={s.critical ? 'red' : 'amber'}>• {s.unit} unit</Badge>
+              </div>
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
                 <span style={{ fontSize: 12, color: COLOR.textMuted }}>{s.cabang}</span>
               </div>
             </div>
@@ -164,6 +172,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ── Transaksi Terakhir ────────────────── */}
       <div style={{
         background:   COLOR.card,
         border:       `1px solid ${COLOR.border}`,
@@ -174,7 +183,29 @@ export default function Dashboard() {
           Transaksi Terakhir
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <TableHeader cols={['No', 'Waktu', 'Jumlah', 'Harga', 'Total']} />
+          <thead>
+            <tr>
+              {['No', 'Waktu', 'Jumlah', 'Harga', 'Total'].map((col, i, arr) => (
+                <th
+                  key={i}
+                  style={{
+                    background:   COLOR.tableHeader,
+                    color:        COLOR.tableHeaderText,
+                    padding:      '13px 16px',
+                    textAlign:    'left',
+                    fontSize:     14,
+                    fontWeight:   600,
+                    whiteSpace:   'nowrap',
+                    borderRadius:
+                      i === 0             ? '8px 0 0 8px' :
+                      i === arr.length - 1 ? '0 8px 8px 0' : 0,
+                  }}
+                >
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
           <tbody>
             {transaksiTerakhirData.map((t, i) => (
               <tr key={i} style={{ borderBottom: `1px solid ${COLOR.border}` }}>

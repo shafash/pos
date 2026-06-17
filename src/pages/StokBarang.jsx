@@ -4,13 +4,12 @@ import { COLOR }        from '../constants/colors'
 import { produkListData, barangBaruData } from '../constants/mockData'
 import StatCard         from '../components/ui/StatCard'
 import Badge            from '../components/ui/Badge'
-import TableHeader      from '../components/ui/TableHeader'
 import SearchBar        from '../components/ui/SearchBar'
 import PrimaryBtn       from '../components/ui/PrimaryBtn'
 import ActionBtn        from '../components/ui/ActionBtn'
 import ProductImage     from '../components/shared/ProductImage'
 
-export default function StokBarang({ onNav }) { 
+export default function StokBarang({ onNav }) {
   const [produk] = useState(produkListData)
   const [search, setSearch] = useState('')
 
@@ -18,8 +17,12 @@ export default function StokBarang({ onNav }) {
     p.nama.toLowerCase().includes(search.toLowerCase())
   )
 
+  const TABLE_COLS = ['No', 'Nama Produk', 'Kategori', 'Harga Beli', 'Harga Jual', 'Satuan', 'Aksi']
+
   return (
-    <div>
+    <div style={{ paddingTop: 24 }}>
+
+      {/* ── Stat Cards ───────────────────────── */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
         <StatCard label="Total Produk" value="1.240"           />
         <StatCard label="Stok Tipis"   value="12 Items"        />
@@ -28,6 +31,7 @@ export default function StokBarang({ onNav }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 20 }}>
 
+        {/* ── Tabel Produk ─────────────────────── */}
         <div>
           <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center' }}>
             <SearchBar
@@ -50,8 +54,10 @@ export default function StokBarang({ onNav }) {
             }}>
               <Filter size={14} /> Filter
             </button>
-            <div style = {{marginLeft: 'auto'}}>
-            <PrimaryBtn icon={Plus} onClick={() => onNav('tambahBarang')}>Tambah Barang</PrimaryBtn>
+            <div style={{ marginLeft: 'auto' }}>
+              <PrimaryBtn icon={Plus} onClick={() => onNav('tambahBarang')}>
+                Tambah Barang
+              </PrimaryBtn>
             </div>
           </div>
 
@@ -62,7 +68,30 @@ export default function StokBarang({ onNav }) {
             overflow:     'hidden',
           }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <TableHeader cols={['No', 'Nama Produk', 'Kategori', 'Harga Beli', 'Harga Jual', 'Satuan', 'Aksi']} />
+              {/* ← fix 2: custom thead dengan font lebih besar & weight lebih ringan */}
+              <thead>
+                <tr>
+                  {TABLE_COLS.map((col, i) => (
+                    <th
+                      key={i}
+                      style={{
+                        background:   COLOR.tableHeader,
+                        color:        COLOR.tableHeaderText,
+                        padding:      '13px 16px',
+                        textAlign:    'left',
+                        fontSize:     14,
+                        fontWeight:   500,
+                        whiteSpace:   'nowrap',
+                        borderRadius:
+                          i === 0                    ? '8px 0 0 8px' :
+                          i === TABLE_COLS.length - 1 ? '0 8px 8px 0' : 0,
+                      }}
+                    >
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
               <tbody>
                 {filtered.map((p, i) => (
                   <tr key={p.id} style={{ borderBottom: `1px solid ${COLOR.border}` }}>
@@ -83,7 +112,7 @@ export default function StokBarang({ onNav }) {
                     <td style={{ padding: '12px 16px', fontSize: 13 }}>{p.satuan}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <ActionBtn icon={Pencil} onClick = {() => onNav('editBarang')} />
+                        <ActionBtn icon={Pencil} onClick={() => onNav('editBarang')} />
                         <ActionBtn icon={Trash2} color={COLOR.red} />
                       </div>
                     </td>
@@ -94,8 +123,10 @@ export default function StokBarang({ onNav }) {
           </div>
         </div>
 
+        {/* ── Sidebar Kanan ────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
+          {/* Audit Stok */}
           <div style={{
             background:   '#4A3500',
             borderRadius: 12,
@@ -129,6 +160,7 @@ export default function StokBarang({ onNav }) {
             </button>
           </div>
 
+          {/* Barang Baru */}
           <div style={{
             background:   COLOR.card,
             border:       `1px solid ${COLOR.border}`,

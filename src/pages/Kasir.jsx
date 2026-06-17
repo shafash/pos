@@ -1,10 +1,10 @@
-import { useState }      from 'react'
+import { useState } from 'react'
 import { Package, ClipboardList, Users, Minus, Plus, Banknote, QrCode } from 'lucide-react'
-import { COLOR }          from '../constants/colors'
+import { COLOR } from '../constants/colors'
 import { kasirProdukData, keranjangInitData } from '../constants/mockData'
-import { fmt }            from '../utils/format'
-import Badge              from '../components/ui/Badge'
-import ProductImage       from '../components/shared/ProductImage'
+import { fmt } from '../utils/format'
+import Badge from '../components/ui/Badge'
+import ProductImage from '../components/shared/ProductImage'
 
 function ProductCard({ produk, onAdd, isActive }) {
   return (
@@ -53,16 +53,16 @@ function ProductCard({ produk, onAdd, isActive }) {
 function KeranjangItem({ item, onUpdateQty }) {
   return (
     <div style={{
-      display:    'flex',
-      alignItems: 'center',
-      gap:        8,
-      padding:    '8px 0',
+      display:      'flex',
+      alignItems:   'center',
+      gap:          10,
+      padding:      '10px 0',
       borderBottom: `1px solid ${COLOR.border}`,
     }}>
       <ProductImage width={36} height={28} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontSize:     11,
+          fontSize:     12,
           fontWeight:   600,
           whiteSpace:   'nowrap',
           overflow:     'hidden',
@@ -70,14 +70,14 @@ function KeranjangItem({ item, onUpdateQty }) {
         }}>
           {item.nama}
         </div>
-        <div style={{ fontSize: 10, color: COLOR.textMuted }}>{item.tipe}</div>
+        <div style={{ fontSize: 11, color: COLOR.textMuted }}>{item.tipe}</div>
         <div style={{ fontSize: 11, color: COLOR.textSub }}>1 x {fmt(item.harga)}</div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <button
           onClick={() => onUpdateQty(item.id, -1)}
           style={{
-            width:          22, height: 22,
+            width:          24, height: 24,
             border:         `1px solid ${COLOR.border}`,
             borderRadius:   4,
             background:     '#fff',
@@ -89,13 +89,13 @@ function KeranjangItem({ item, onUpdateQty }) {
         >
           <Minus size={10} />
         </button>
-        <span style={{ fontSize: 13, fontWeight: 700, width: 18, textAlign: 'center' }}>
+        <span style={{ fontSize: 13, fontWeight: 700, width: 20, textAlign: 'center' }}>
           {item.qty}
         </span>
         <button
           onClick={() => onUpdateQty(item.id, 1)}
           style={{
-            width:          22, height: 22,
+            width:          24, height: 24,
             border:         'none',
             borderRadius:   4,
             background:     COLOR.amber,
@@ -137,57 +137,83 @@ export default function Kasir() {
   }
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 56px)', overflow: 'hidden', scrollbarWidth: 'none', ms0verflowStyle: 'none', }}>
+    <div style={{
+      display:    'flex',
+      height:     'calc(100vh - 56px)',
+      overflow:   'hidden',
+      paddingTop: 24,   // ← fix 1: spacing dari topbar
+    }}>
 
-      <div class = "no-scrollbar" style={{ flex: 1, overflowY: 'auto', paddingRight: 24, height: '100%', scrollbarWidth: 'none', ms0verflowStyle: 'none', }}>
-        <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>
+      {/* ── Kolom Kiri: Produk ───────────────── */}
+      <div
+        className="no-scrollbar"
+        style={{
+          flex:            1,
+          overflowY:       'auto',
+          paddingRight:    24,
+          height:          '100%',
+          scrollbarWidth:  'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        {/* Kategori Tabs */}
+        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 10 }}>
           Kategori Produk/Jasa
         </div>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
           {[
-            { key: 'produk', label: 'Produk', icon: Package        },
-            { key: 'jasa',   label: 'Jasa',   icon: ClipboardList  },
-          ].map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              style={{
-                display:        'flex',
-                flexDirection:  'column',
-                alignItems:     'center',
-                gap:            6,
-                padding:        '14px 24px',
-                borderRadius:   10,
-                border:         `2px solid ${tab === key ? COLOR.amber : COLOR.border}`,
-                background:     tab === key ? COLOR.amberLight : COLOR.card,
-                color:          tab === key ? COLOR.amberDark  : COLOR.textSub,
-                cursor:         'pointer',
-                fontWeight:     600,
-                fontSize:       13,
-                fontFamily:     'inherit',
-              }}
-            >
-              <Icon size={20} />
-              {label}
-            </button>
-          ))}
+            { key: 'produk', label: 'Produk', icon: Package       },
+            { key: 'jasa',   label: 'Jasa',   icon: ClipboardList },
+          ].map(({ key, label, icon: Icon }) => {
+            const isActive = tab === key   // ← fix 2: active state ikut tab
+            return (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                style={{
+                  display:       'flex',
+                  flexDirection: 'column',
+                  alignItems:    'center',
+                  gap:           6,
+                  padding:       '12px 22px',
+                  borderRadius:  10,
+                  // ← fix 3: background tetap putih, hanya border yang kuning
+                  border:        `2px solid ${isActive ? COLOR.amber : COLOR.border}`,
+                  background:    '#fff',
+                  color:         isActive ? COLOR.amber : COLOR.textSub,
+                  cursor:        'pointer',
+                  fontWeight:    600,
+                  fontSize:      13,
+                  fontFamily:    'inherit',
+                  transition:    'all 0.15s',
+                }}
+              >
+                <Icon size={18} />
+                {label}
+              </button>
+            )
+          })}
         </div>
 
+        {/* Pilih Produk */}
         <div style={{
           display:        'flex',
           justifyContent: 'space-between',
           alignItems:     'center',
-          marginBottom:   12,
+          marginBottom:   10,   // ← fix 5: kurangi margin
         }}>
-          <div style={{ fontWeight: 600, fontSize: 14 }}>Pilih Produk</div>
-          <span style={{ fontSize: 12, color: COLOR.textMuted }}>
+          <div style={{ fontWeight: 600, fontSize: 12, color: COLOR.textSub }}>
+            {/* ← fix 5: font lebih kecil dan warna lebih soft */}
+            Pilih Produk
+          </div>
+          <span style={{ fontSize: 11, color: COLOR.textMuted }}>
             Showing {kasirProdukData.length} Items
           </span>
         </div>
         <div style={{
           display:             'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gap:                 16,
+          gap:                 14,
         }}>
           {kasirProdukData.map((p, i) => (
             <ProductCard
@@ -200,34 +226,40 @@ export default function Kasir() {
         </div>
       </div>
 
-      <div class = "no-scrollbar" style={{
-        width:         300,
-        flexShrink: 0,
-        background:    COLOR.card,
-        borderLeft:    `1px solid ${COLOR.border}`,
-        display:       'flex',
-        flexDirection: 'column',
-        height:        '100%',
-        overflowY:     'auto',
-        scrollbarWidth: 'none', 
-        ms0verflowStyle: 'none',
-      }}>
+      {/* ── Kolom Kanan: Transaksi Detail ────── */}
+      {/* ← fix 4: perlebar panel dari 300 → 360 */}
+      <div
+        className="no-scrollbar"
+        style={{
+          width:           360,
+          flexShrink:      0,
+          background:      COLOR.card,
+          borderLeft:      `1px solid ${COLOR.border}`,
+          display:         'flex',
+          flexDirection:   'column',
+          height:          '100%',
+          overflowY:       'auto',
+          scrollbarWidth:  'none',
+          msOverflowStyle: 'none',
+        }}
+      >
 
-        <div style={{ padding: '20px 20px 12px', borderBottom: `1px solid ${COLOR.border}` }}>
+        {/* Header Transaksi */}
+        <div style={{ padding: '20px 24px 14px', borderBottom: `1px solid ${COLOR.border}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontWeight: 800, fontSize: 15 }}>Transaksi Detail</div>
+            <div style={{ fontWeight: 700, fontSize: 15 }}>Transaksi Detail</div>
             <span style={{ fontSize: 12, color: COLOR.textMuted }}>#TRX-001</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
             <div style={{
-              width:          32, height: 32,
+              width:          34, height: 34,
               background:     COLOR.amberLight,
               borderRadius:   '50%',
               display:        'flex',
               alignItems:     'center',
               justifyContent: 'center',
             }}>
-              <Users size={14} color={COLOR.amber} />
+              <Users size={15} color={COLOR.amber} />
             </div>
             <div>
               <div style={{ fontSize: 13, fontWeight: 600 }}>Pelanggan Umum</div>
@@ -236,12 +268,13 @@ export default function Kasir() {
           </div>
         </div>
 
-        <div style={{ padding: '12px 20px 8px', borderBottom: `1px solid ${COLOR.border}` }}>
+        {/* Keranjang */}
+        <div style={{ padding: '14px 24px 10px', borderBottom: `1px solid ${COLOR.border}` }}>
           <div style={{
             display:        'flex',
             justifyContent: 'space-between',
             alignItems:     'center',
-            marginBottom:   10,
+            marginBottom:   12,
           }}>
             <div>
               <div style={{ fontWeight: 700, fontSize: 14 }}>Keranjang</div>
@@ -262,15 +295,24 @@ export default function Kasir() {
               Clear
             </button>
           </div>
-          <div class = "no-scrollbar" style={{ maxHeight: 260, overflowY: 'auto', scrollbarWidth: 'none', ms0verflowStyle: 'none', }}>
+          <div
+            className="no-scrollbar"
+            style={{
+              maxHeight:       280,
+              overflowY:       'auto',
+              scrollbarWidth:  'none',
+              msOverflowStyle: 'none',
+            }}
+          >
             {keranjang.map(item => (
               <KeranjangItem key={item.id} item={item} onUpdateQty={handleUpdateQty} />
             ))}
           </div>
         </div>
 
-        <div style={{ padding: '12px 20px', borderBottom: `1px solid ${COLOR.border}` }}>
-          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 10 }}>Metode Pembayaran</div>
+        {/* Metode Pembayaran */}
+        <div style={{ padding: '14px 24px', borderBottom: `1px solid ${COLOR.border}` }}>
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 12 }}>Metode Pembayaran</div>
           <div style={{ display: 'flex', gap: 10 }}>
             {[
               { key: 'tunai', label: 'Uang Tunai', icon: Banknote },
@@ -280,34 +322,34 @@ export default function Kasir() {
                 key={key}
                 onClick={() => setMetode(key)}
                 style={{
-                  flex:           1,
-                  padding:        '10px 8px',
-                  borderRadius:   8,
-                  border:         `2px solid ${metode === key ? COLOR.amber : COLOR.border}`,
-                  background:     metode === key ? COLOR.amberLight : '#fff',
-                  color:          metode === key ? COLOR.amberDark  : COLOR.textSub,
-                  cursor:         'pointer',
-                  display:        'flex',
-                  flexDirection:  'column',
-                  alignItems:     'center',
-                  gap:            4,
-                  fontSize:       11,
-                  fontWeight:     600,
-                  fontFamily:     'inherit',
+                  flex:          1,
+                  padding:       '12px 8px',
+                  borderRadius:  8,
+                  border:        `2px solid ${metode === key ? COLOR.amber : COLOR.border}`,
+                  background:    metode === key ? COLOR.amberLight : '#fff',
+                  color:         metode === key ? COLOR.amberDark  : COLOR.textSub,
+                  cursor:        'pointer',
+                  display:       'flex',
+                  flexDirection: 'column',
+                  alignItems:    'center',
+                  gap:           6,
+                  fontSize:      12,
+                  fontWeight:    600,
+                  fontFamily:    'inherit',
                 }}
               >
-                <Icon size={18} />
+                <Icon size={20} />
                 {label}
               </button>
             ))}
           </div>
-          <div style={{ marginTop: 12 }}>
+          <div style={{ marginTop: 14 }}>
             <div style={{ fontSize: 12, color: COLOR.textSub, marginBottom: 6 }}>Total Dibayar</div>
             <div style={{
               background:   '#F7F7F5',
               borderRadius: 8,
-              padding:      '10px 14px',
-              fontSize:     14,
+              padding:      '12px 16px',
+              fontSize:     15,
               fontWeight:   700,
             }}>
               {fmt(total)}
@@ -315,7 +357,8 @@ export default function Kasir() {
           </div>
         </div>
 
-        <div style={{ padding: '12px 20px', flex: 1 }}>
+        {/* Summary */}
+        <div style={{ padding: '14px 24px', flex: 1 }}>
           {[
             ['Amount',   `${keranjang.reduce((s, i) => s + i.qty, 0)} (Items)`],
             ['Subtotal', fmt(subtotal)],
@@ -324,8 +367,8 @@ export default function Kasir() {
             <div key={label} style={{
               display:        'flex',
               justifyContent: 'space-between',
-              fontSize:       12,
-              marginBottom:   6,
+              fontSize:       13,
+              marginBottom:   8,
             }}>
               <span style={{ color: COLOR.textSub }}>{label}</span>
               <span>{val}</span>
@@ -334,31 +377,34 @@ export default function Kasir() {
           <div style={{
             display:        'flex',
             justifyContent: 'space-between',
-            fontSize:       14,
+            fontSize:       15,
             fontWeight:     800,
-            marginTop:      8,
+            marginTop:      10,
+            paddingTop:     10,
+            borderTop:      `1px solid ${COLOR.border}`,
           }}>
             <span>Total</span>
             <span style={{ color: COLOR.amber }}>{fmt(total)}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 8 }}>
             <span style={{ color: COLOR.textSub }}>Bayar</span>
             <span>{fmt(subtotal)}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 4 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 6 }}>
             <span style={{ color: COLOR.textSub }}>Kembali</span>
             <span>{fmt(Math.max(0, subtotal - total))}</span>
           </div>
         </div>
 
-        <div style={{ padding: '12px 20px 24px' }}>
+        {/* CTA */}
+        <div style={{ padding: '12px 24px 28px' }}>
           <button style={{
             width:        '100%',
             background:   COLOR.amber,
             color:        '#fff',
             border:       'none',
             borderRadius: 10,
-            padding:      14,
+            padding:      16,
             fontWeight:   800,
             fontSize:     14,
             cursor:       'pointer',
