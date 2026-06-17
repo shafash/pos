@@ -8,7 +8,7 @@ import SearchBar from '../components/ui/SearchBar'
 import PrimaryBtn from '../components/ui/PrimaryBtn'
 import ActionBtn from '../components/ui/ActionBtn'
 
-export default function DataMember() {
+export default function DataMember({ onNav }) {
     const [members] = useState(memberListData)
     const [search, setSearch] = useState('')
     const [page, setPage] = useState(1)

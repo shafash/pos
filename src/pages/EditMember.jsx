@@ -6,8 +6,8 @@ const font = "'Geist', sans-serif"
 
 const bannerStyle = {
   background:   '#FFCD71',
-  padding:      '16px 22px',
-  fontSize:     16,
+  padding:      '12px 16px',
+  fontSize:     14,
   fontWeight:   600,
   color:        '#000',
   fontFamily:   font,
@@ -23,12 +23,12 @@ const cardStyle = {
 
 const inputStyle = {
   width:        '100%',
-  height:       44,
+  height:       38,
   background:   '#FBFBFB',
   border:       `1px solid ${COLOR.border}`,
   outline:      'none',
   borderRadius: 8,
-  padding:      '0 16px',
+  padding:      '0 12px',
   fontSize:     13,
   color:        COLOR.textMuted,
   fontFamily:   font,
@@ -36,11 +36,11 @@ const inputStyle = {
 }
 
 const labelStyle = {
-  fontSize:     13,
+  fontSize:     12,
   fontWeight:   400,
   color:        '#000',
   fontFamily:   font,
-  marginBottom: 8,
+  marginBottom: 6,
   display:      'block',
 }
 
@@ -58,12 +58,12 @@ export default function EditMember({ onNav }) {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 20, fontFamily: font }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 16, fontFamily: font }}>
 
       {/* ── Kolom Kiri: Informasi Member ─────── */}
       <div style={cardStyle}>
         <div style={bannerStyle}>Informasi Member</div>
-        <div style={{ padding: '24px 22px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
 
           {/* Nama Lengkap */}
           <div>
@@ -77,7 +77,7 @@ export default function EditMember({ onNav }) {
           </div>
 
           {/* Member ID + Tanggal Bergabung */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label style={labelStyle}>Member ID</label>
               <input
@@ -123,37 +123,37 @@ export default function EditMember({ onNav }) {
       </div>
 
       {/* ── Kolom Kanan ──────────────────────── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
         {/* Loyalty & Tiering */}
         <div style={cardStyle}>
           <div style={bannerStyle}>Loyalty &amp; Tiering</div>
-          <div style={{ padding: '20px' }}>
+          <div style={{ padding: '14px' }}>
 
             {/* Saldo Poin */}
             <div style={{
               background:   COLOR.amberLight,
               borderRadius: 8,
-              padding:      '16px',
-              marginBottom: 16,
+              padding:      '12px',
+              marginBottom: 12,
             }}>
               <div style={{
-                fontSize:     12,
+                fontSize:     11,
                 fontWeight:   600,
                 color:        COLOR.amberDark,
                 fontFamily:   font,
-                marginBottom: 8,
+                marginBottom: 6,
               }}>
                 Saldo Poin Saat Ini
               </div>
               <div style={{
-                display:    'flex',
-                alignItems: 'baseline',
-                gap:        8,
-                marginBottom: 12,
+                display:      'flex',
+                alignItems:   'baseline',
+                gap:          6,
+                marginBottom: 8,
               }}>
                 <span style={{
-                  fontSize:   40,
+                  fontSize:   28,
                   fontWeight: 700,
                   color:      '#000',
                   fontFamily: font,
@@ -162,7 +162,7 @@ export default function EditMember({ onNav }) {
                   1,250
                 </span>
                 <span style={{
-                  fontSize:   14,
+                  fontSize:   12,
                   fontWeight: 600,
                   color:      COLOR.amber,
                   fontFamily: font,
@@ -176,10 +176,10 @@ export default function EditMember({ onNav }) {
                 alignItems:     'center',
               }}>
                 <span style={{
-                  fontSize:   10,
-                  fontWeight: 600,
-                  color:      COLOR.amberDark,
-                  fontFamily: font,
+                  fontSize:      10,
+                  fontWeight:    600,
+                  color:         COLOR.amberDark,
+                  fontFamily:    font,
                   letterSpacing: 1,
                 }}>
                   MEMBER SEJAK: 2076
@@ -187,7 +187,7 @@ export default function EditMember({ onNav }) {
                 <div style={{
                   background:   '#fff',
                   borderRadius: 4,
-                  padding:      '3px 8px',
+                  padding:      '2px 6px',
                   fontSize:     10,
                   fontWeight:   600,
                   color:        COLOR.amberDark,
@@ -200,14 +200,10 @@ export default function EditMember({ onNav }) {
             </div>
 
             {/* Status Member */}
-            <div style={{
-              display:    'flex',
-              alignItems: 'center',
-              gap:        12,
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
-                width:          40,
-                height:         40,
+                width:          36,
+                height:         36,
                 borderRadius:   '50%',
                 border:         `1.5px solid ${COLOR.border}`,
                 display:        'flex',
@@ -215,15 +211,15 @@ export default function EditMember({ onNav }) {
                 justifyContent: 'center',
                 flexShrink:     0,
               }}>
-                <CheckCircle size={20} color={COLOR.textMuted} strokeWidth={1.5} />
+                <CheckCircle size={18} color={COLOR.textMuted} strokeWidth={1.5} />
               </div>
               <div>
                 <div style={{
-                  fontSize:     13,
+                  fontSize:     12,
                   fontWeight:   600,
                   color:        '#000',
                   fontFamily:   font,
-                  marginBottom: 6,
+                  marginBottom: 4,
                 }}>
                   Status Member
                 </div>
@@ -231,8 +227,8 @@ export default function EditMember({ onNav }) {
                   background:   '#fff',
                   border:       `1px solid ${COLOR.border}`,
                   borderRadius: 6,
-                  padding:      '3px 12px',
-                  fontSize:     12,
+                  padding:      '2px 10px',
+                  fontSize:     11,
                   fontWeight:   500,
                   color:        '#000',
                   fontFamily:   font,
@@ -248,7 +244,7 @@ export default function EditMember({ onNav }) {
         {/* Alamat */}
         <div style={cardStyle}>
           <div style={bannerStyle}>Alamat</div>
-          <div style={{ padding: '20px' }}>
+          <div style={{ padding: '14px' }}>
             <div style={{
               fontSize:   13,
               color:      COLOR.textMuted,
@@ -264,18 +260,18 @@ export default function EditMember({ onNav }) {
         <div style={{
           display:        'flex',
           justifyContent: 'flex-end',
-          gap:            12,
-          marginTop:      8,
+          gap:            10,
+          marginTop:      4,
         }}>
           <button
             onClick={() => onNav('member')}
             style={{
-              width:        152,
-              height:       56,
+              width:        110,
+              height:       40,
               background:   '#F4F5F7',
               border:       'none',
               borderRadius: 8,
-              fontSize:     16,
+              fontSize:     13,
               fontWeight:   600,
               color:        COLOR.textMuted,
               cursor:       'pointer',
@@ -286,12 +282,12 @@ export default function EditMember({ onNav }) {
           </button>
           <button
             style={{
-              width:          220,
-              height:         56,
+              width:          160,
+              height:         40,
               background:     COLOR.amber,
               border:         'none',
               borderRadius:   8,
-              fontSize:       16,
+              fontSize:       13,
               fontWeight:     600,
               color:          '#fff',
               cursor:         'pointer',
@@ -299,10 +295,10 @@ export default function EditMember({ onNav }) {
               display:        'flex',
               alignItems:     'center',
               justifyContent: 'center',
-              gap:            10,
+              gap:            8,
             }}
           >
-            <Save size={18} />
+            <Save size={16} />
             Simpan Perubahan
           </button>
         </div>

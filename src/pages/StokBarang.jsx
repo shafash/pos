@@ -51,7 +51,7 @@ export default function StokBarang({ onNav }) {
               <Filter size={14} /> Filter
             </button>
             <div style = {{marginLeft: 'auto'}}>
-            <PrimaryBtn icon={Plus} onCLick={() => onNav('tambahBarang')}>Tambah Barang</PrimaryBtn>
+            <PrimaryBtn icon={Plus} onClick={() => onNav('tambahBarang')}>Tambah Barang</PrimaryBtn>
             </div>
           </div>
 

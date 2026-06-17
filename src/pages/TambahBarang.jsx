@@ -18,12 +18,12 @@ const initialFormState = {
 
 const inputStyle = {
   width:        '100%',
-  height:       56,
+  height:       40,
   background:   '#FBFBFB',
   border:       'none',
   outline:      'none',
-  borderRadius: 10,
-  padding:      '0 13px',
+  borderRadius: 8,
+  padding:      '0 10px',
   fontSize:     13,
   color:        '#000',
   fontFamily:   font,
@@ -31,28 +31,28 @@ const inputStyle = {
 }
 
 const labelStyle = {
-  fontSize:     15,
+  fontSize:     13,
   fontWeight:   400,
   color:        '#000',
   fontFamily:   font,
-  marginBottom: 8,
+  marginBottom: 6,
   display:      'block',
 }
 
 const sectionTitleStyle = {
-  fontSize:     17,
+  fontSize:     15,
   fontWeight:   500,
   color:        '#000',
   fontFamily:   font,
-  marginBottom: 4,
+  marginBottom: 6,
 }
 
 export default function TambahBarang({ onNav }) {
-  const [formState, setFormState]           = useState(initialFormState)
-  const [uploadedImage, setUploadedImage]   = useState(null)
-  const [uploadedName, setUploadedName]     = useState('')
-  const [isDragging, setIsDragging]         = useState(false)
-  const fileInputRef                        = useRef(null)
+  const [formState, setFormState]         = useState(initialFormState)
+  const [uploadedImage, setUploadedImage] = useState(null)
+  const [uploadedName, setUploadedName]   = useState('')
+  const [isDragging, setIsDragging]       = useState(false)
+  const fileInputRef                      = useRef(null)
 
   const handleChange = (field) => (e) => {
     setFormState(prev => ({ ...prev, [field]: e.target.value }))
@@ -90,8 +90,8 @@ export default function TambahBarang({ onNav }) {
       {/* ── Banner ───────────────────────────── */}
       <div style={{
         background: '#FFCD71',
-        padding:    '18px 30px',
-        fontSize:   16,
+        padding:    '12px 18px',
+        fontSize:   15,
         fontWeight: 500,
         color:      '#000',
         fontFamily: font,
@@ -100,24 +100,22 @@ export default function TambahBarang({ onNav }) {
       </div>
 
       {/* ── Form Body ────────────────────────── */}
-      <div style={{ padding: '24px 32px 40px' }}>
+      <div style={{ padding: '16px 20px 24px' }}>
 
         {/* ── Informasi Dasar ──────────────────── */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 20 }}>
-            <div>
-              <div style={sectionTitleStyle}>Informasi Dasar</div>
-              <div style={{ height: 2, background: COLOR.amber, width: 136, borderRadius: 2 }} />
-            </div>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 12 }}>
+            <div style={sectionTitleStyle}>Informasi Dasar</div>
+            <div style={{ height: 2, background: COLOR.amber, width: 136, borderRadius: 2 }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
 
-            {/* Kolom kiri + tengah: form fields */}
-            <div style={{ gridColumn: '1 / 3', display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Kolom kiri + tengah */}
+            <div style={{ gridColumn: '1 / 3', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
               {/* Nama Barang + Kode SKU */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Nama Barang</label>
                   <input
@@ -141,7 +139,7 @@ export default function TambahBarang({ onNav }) {
               </div>
 
               {/* Kategori + Merek + Satuan */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Kategori</label>
                   <select
@@ -189,13 +187,13 @@ export default function TambahBarang({ onNav }) {
                   flexDirection:  'column',
                   alignItems:     'center',
                   justifyContent: 'center',
-                  height:         296,
+                  height:         160,
                   background:     '#FBFBFB',
                   borderRadius:   10,
                   cursor:         'pointer',
-                  border:         isDragging ? `2px dashed #FFCD71` : '2px dashed transparent',
+                  border:         isDragging ? '2px dashed #FFCD71' : '2px dashed transparent',
                   transition:     'border 0.2s',
-                  gap:            8,
+                  gap:            6,
                 }}
               >
                 <input
@@ -213,16 +211,16 @@ export default function TambahBarang({ onNav }) {
                   />
                 ) : (
                   <>
-                    <Upload size={48} color={COLOR.textMuted} strokeWidth={1} />
+                    <Upload size={36} color={COLOR.textMuted} strokeWidth={1} />
                     <div style={{ textAlign: 'center', lineHeight: 1.6 }}>
-                      <span style={{ fontSize: 13, fontWeight: 500, color: '#000', fontFamily: font }}>
+                      <span style={{ fontSize: 12, fontWeight: 500, color: '#000', fontFamily: font }}>
                         Tarik gambar ke sini{' '}
                       </span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#FFCD71', fontFamily: font }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: '#FFCD71', fontFamily: font }}>
                         atau klik untuk pilih
                       </span>
                     </div>
-                    <div style={{ fontSize: 12, color: COLOR.textMuted, fontFamily: font }}>
+                    <div style={{ fontSize: 11, color: COLOR.textMuted, fontFamily: font }}>
                       Format: JPG, PNG (Maks. 2MB)
                     </div>
                     {uploadedName && (
@@ -238,13 +236,13 @@ export default function TambahBarang({ onNav }) {
         </div>
 
         {/* ── Harga & Stok ─────────────────────── */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 12 }}>
             <div style={sectionTitleStyle}>Harga &amp; Stok</div>
             <div style={{ height: 2, background: COLOR.amber, width: 110, borderRadius: 2 }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
             <div>
               <label style={labelStyle}>Harga Beli (Modal)</label>
               <input
@@ -293,16 +291,16 @@ export default function TambahBarang({ onNav }) {
         </div>
 
         {/* ── Action Buttons ───────────────────── */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
           <button
             onClick={handleCancel}
             style={{
-              width:        152,
-              height:       56,
+              width:        110,
+              height:       40,
               background:   '#F4F5F7',
               border:       'none',
               borderRadius: 8,
-              fontSize:     17,
+              fontSize:     13,
               fontWeight:   600,
               color:        COLOR.textMuted,
               cursor:       'pointer',
@@ -313,12 +311,12 @@ export default function TambahBarang({ onNav }) {
           </button>
           <button
             style={{
-              width:          222,
-              height:         56,
+              width:          160,
+              height:         40,
               background:     '#FFA500',
               border:         'none',
               borderRadius:   8,
-              fontSize:       17,
+              fontSize:       13,
               fontWeight:     600,
               color:          '#fff',
               cursor:         'pointer',
@@ -326,13 +324,14 @@ export default function TambahBarang({ onNav }) {
               display:        'flex',
               alignItems:     'center',
               justifyContent: 'center',
-              gap:            10,
+              gap:            8,
             }}
           >
-            <Save size={18} />
+            <Save size={16} />
             Simpan Barang
           </button>
         </div>
+
       </div>
     </div>
   )
