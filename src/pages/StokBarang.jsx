@@ -4,6 +4,7 @@ import { COLOR }        from '../constants/colors'
 import { produkListData, barangBaruData } from '../constants/mockData'
 import StatCard         from '../components/ui/StatCard'
 import Badge            from '../components/ui/Badge'
+import TableHeader      from '../components/ui/TableHeader'
 import SearchBar        from '../components/ui/SearchBar'
 import PrimaryBtn       from '../components/ui/PrimaryBtn'
 import ActionBtn        from '../components/ui/ActionBtn'
@@ -16,8 +17,6 @@ export default function StokBarang({ onNav }) {
   const filtered = produk.filter(p =>
     p.nama.toLowerCase().includes(search.toLowerCase())
   )
-
-  const TABLE_COLS = ['No', 'Nama Produk', 'Kategori', 'Harga Beli', 'Harga Jual', 'Satuan', 'Aksi']
 
   return (
     <div style={{ paddingTop: 24 }}>
@@ -68,30 +67,7 @@ export default function StokBarang({ onNav }) {
             overflow:     'hidden',
           }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              {/* ← fix 2: custom thead dengan font lebih besar & weight lebih ringan */}
-              <thead>
-                <tr>
-                  {TABLE_COLS.map((col, i) => (
-                    <th
-                      key={i}
-                      style={{
-                        background:   COLOR.tableHeader,
-                        color:        COLOR.tableHeaderText,
-                        padding:      '13px 16px',
-                        textAlign:    'left',
-                        fontSize:     14,
-                        fontWeight:   500,
-                        whiteSpace:   'nowrap',
-                        borderRadius:
-                          i === 0                    ? '8px 0 0 8px' :
-                          i === TABLE_COLS.length - 1 ? '0 8px 8px 0' : 0,
-                      }}
-                    >
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+              <TableHeader cols={['No', 'Nama Produk', 'Kategori', 'Harga Beli', 'Harga Jual', 'Satuan', 'Aksi']} />
               <tbody>
                 {filtered.map((p, i) => (
                   <tr key={p.id} style={{ borderBottom: `1px solid ${COLOR.border}` }}>

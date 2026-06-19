@@ -1,11 +1,11 @@
 import { COLOR, FONT } from '../../constants/colors'
 
-export default function Topbae({ title }) {
+export default function Topbae({ title, sidebarWidth }) {
     return (
         <div style = {{
             position: 'fixed',
             top: 0,
-            left: 220,
+            left: sidebarWidth,
             right: 0,
             height: 56,
             background:'#FFFFFF',

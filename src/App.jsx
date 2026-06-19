@@ -44,6 +44,8 @@ const PAGES = (onNav) => ({
 
 export default function App() {
   const [page, setPage] = useState('dashboard')
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false) 
+  const sidebarWidth = sidebarCollapsed ? 72 : 220
   const isKasir = page === 'kasir'
 
   return (
@@ -52,11 +54,11 @@ export default function App() {
       background: COLOR.bg,
       minHeight:  '100vh',
     }}>
-      <Sidebar active={page} onNav={setPage} />
-      <Topbar title={PAGE_TITLES[page]} />
+      <Sidebar active={page} onNav={setPage} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(c => !c)}/>
+      <Topbar title={PAGE_TITLES[page]} sidebarWidth={sidebarWidth} />
 
       <main style={{
-        marginLeft: 220,
+        marginLeft: sidebarWidth,
         padding: isKasir ? '56px 0 0 0' : '56px 32px 32px 32px',
         minHeight: '100vh',
       }}>

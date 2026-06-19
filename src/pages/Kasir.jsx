@@ -113,15 +113,17 @@ function KeranjangItem({ item, onUpdateQty }) {
 }
 
 export default function Kasir() {
-  const [tab,      setTab]      = useState('produk')
-  const [keranjang, setKeranjang] = useState(keranjangInitData)
-  const [metode,   setMetode]   = useState('tunai')
+  const [tab,        setTab]        = useState('produk')
+  const [keranjang,  setKeranjang]  = useState(keranjangInitData)
+  const [metode,     setMetode]     = useState('tunai')
+  const [selectedId, setSelectedId] = useState(null)   // ← state produk yang dipilih
 
   const subtotal = keranjang.reduce((s, i) => s + i.harga * i.qty, 0)
   const tax      = Math.round(subtotal * 0.03)
   const total    = subtotal + tax
 
   const handleAddToCart = (produk) => {
+    setSelectedId(produk.id)   // ← set produk yang baru diklik jadi aktif
     setKeranjang(prev => {
       const exist = prev.find(x => x.id === produk.id)
       if (exist) return prev.map(x => x.id === produk.id ? { ...x, qty: x.qty + 1 } : x)
@@ -141,7 +143,7 @@ export default function Kasir() {
       display:    'flex',
       height:     'calc(100vh - 56px)',
       overflow:   'hidden',
-      paddingTop: 24,   // ← fix 1: spacing dari topbar
+      paddingTop: 24,
     }}>
 
       {/* ── Kolom Kiri: Produk ───────────────── */}
@@ -165,7 +167,7 @@ export default function Kasir() {
             { key: 'produk', label: 'Produk', icon: Package       },
             { key: 'jasa',   label: 'Jasa',   icon: ClipboardList },
           ].map(({ key, label, icon: Icon }) => {
-            const isActive = tab === key   // ← fix 2: active state ikut tab
+            const isActive = tab === key
             return (
               <button
                 key={key}
@@ -177,7 +179,6 @@ export default function Kasir() {
                   gap:           6,
                   padding:       '12px 22px',
                   borderRadius:  10,
-                  // ← fix 3: background tetap putih, hanya border yang kuning
                   border:        `2px solid ${isActive ? COLOR.amber : COLOR.border}`,
                   background:    '#fff',
                   color:         isActive ? COLOR.amber : COLOR.textSub,
@@ -200,10 +201,9 @@ export default function Kasir() {
           display:        'flex',
           justifyContent: 'space-between',
           alignItems:     'center',
-          marginBottom:   10,   // ← fix 5: kurangi margin
+          marginBottom:   10,
         }}>
           <div style={{ fontWeight: 600, fontSize: 12, color: COLOR.textSub }}>
-            {/* ← fix 5: font lebih kecil dan warna lebih soft */}
             Pilih Produk
           </div>
           <span style={{ fontSize: 11, color: COLOR.textMuted }}>
@@ -215,19 +215,18 @@ export default function Kasir() {
           gridTemplateColumns: 'repeat(3, 1fr)',
           gap:                 14,
         }}>
-          {kasirProdukData.map((p, i) => (
+          {kasirProdukData.map((p) => (
             <ProductCard
               key={p.id}
               produk={p}
               onAdd={handleAddToCart}
-              isActive={i === 0}
+              isActive={selectedId === p.id}
             />
           ))}
         </div>
       </div>
 
       {/* ── Kolom Kanan: Transaksi Detail ────── */}
-      {/* ← fix 4: perlebar panel dari 300 → 360 */}
       <div
         className="no-scrollbar"
         style={{

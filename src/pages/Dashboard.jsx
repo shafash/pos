@@ -7,8 +7,9 @@ import { COLOR } from '../constants/colors'
 import {
   omsetData, cabangData, stokMenipisData, transaksiTerakhirData,
 } from '../constants/mockData'
-import StatCard from '../components/ui/StatCard'
-import Badge    from '../components/ui/Badge'
+import StatCard    from '../components/ui/StatCard'
+import Badge       from '../components/ui/Badge'
+import TableHeader from '../components/ui/TableHeader'
 
 export default function Dashboard() {
   return (
@@ -183,29 +184,7 @@ export default function Dashboard() {
           Transaksi Terakhir
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              {['No', 'Waktu', 'Jumlah', 'Harga', 'Total'].map((col, i, arr) => (
-                <th
-                  key={i}
-                  style={{
-                    background:   COLOR.tableHeader,
-                    color:        COLOR.tableHeaderText,
-                    padding:      '13px 16px',
-                    textAlign:    'left',
-                    fontSize:     14,
-                    fontWeight:   600,
-                    whiteSpace:   'nowrap',
-                    borderRadius:
-                      i === 0             ? '8px 0 0 8px' :
-                      i === arr.length - 1 ? '0 8px 8px 0' : 0,
-                  }}
-                >
-                  {col}
-                </th>
-              ))}
-            </tr>
-          </thead>
+          <TableHeader cols={['No', 'Waktu', 'Jumlah', 'Harga', 'Total']} />
           <tbody>
             {transaksiTerakhirData.map((t, i) => (
               <tr key={i} style={{ borderBottom: `1px solid ${COLOR.border}` }}>
