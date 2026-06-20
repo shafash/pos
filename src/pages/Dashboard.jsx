@@ -10,13 +10,22 @@ import {
 import StatCard    from '../components/ui/StatCard'
 import Badge       from '../components/ui/Badge'
 import TableHeader from '../components/ui/TableHeader'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 export default function Dashboard() {
+  const isMobile = useIsMobile()
+
   return (
-    <div style={{ paddingTop: 24 }}>
+    <div style={{ paddingTop: isMobile ? 16 : 24 }}>
 
       {/* ── Stat Cards ───────────────────────── */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+      <div style={{
+        display:             isMobile ? 'grid' : 'flex',
+        gridTemplateColumns: isMobile ? '1fr 1fr' : undefined,
+        gap:                 isMobile ? 12 : 16,
+        marginBottom:        isMobile ? 16 : 24,
+        flexWrap:            'wrap',
+      }}>
         <StatCard label="Omset"           value="2.000.000" sub="Total semua cabang"      />
         <StatCard label="Total Transaksi" value="123"       sub="Struk tercetak hari ini" />
         <StatCard label="Member Aktif"    value="234"       sub="+6 Member bulan ini"     />
@@ -28,14 +37,16 @@ export default function Dashboard() {
         background:   COLOR.card,
         border:       `1px solid ${COLOR.border}`,
         borderRadius: 12,
-        padding:      24,
-        marginBottom: 24,
+        padding:      isMobile ? 16 : 24,
+        marginBottom: isMobile ? 16 : 24,
       }}>
         <div style={{
           display:        'flex',
           justifyContent: 'space-between',
           alignItems:     'center',
-          marginBottom:   20,
+          marginBottom:   isMobile ? 14 : 20,
+          flexWrap:       'wrap',
+          gap:            8,
         }}>
           <span style={{ fontWeight: 700, fontSize: 15 }}>Omset</span>
           <div style={{
@@ -52,7 +63,7 @@ export default function Dashboard() {
             Yearly <ChevronDown size={14} />
           </div>
         </div>
-        <ResponsiveContainer width="100%" height={200}>
+        <ResponsiveContainer width="100%" height={isMobile ? 160 : 200}>
           <AreaChart data={omsetData}>
             <defs>
               <linearGradient id="omsetGrad" x1="0" y1="0" x2="0" y2="1">
@@ -63,14 +74,16 @@ export default function Dashboard() {
             <CartesianGrid strokeDasharray="3 3" stroke={COLOR.border} />
             <XAxis
               dataKey="year"
-              tick={{ fontSize: 11, fill: COLOR.textMuted }}
+              tick={{ fontSize: isMobile ? 9 : 11, fill: COLOR.textMuted }}
               axisLine={false}
               tickLine={false}
+              interval={isMobile ? 1 : 0}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: COLOR.textMuted }}
+              tick={{ fontSize: isMobile ? 9 : 11, fill: COLOR.textMuted }}
               axisLine={false}
               tickLine={false}
+              width={isMobile ? 32 : 40}
             />
             <Tooltip />
             <Area
@@ -88,9 +101,9 @@ export default function Dashboard() {
       {/* ── Performa Cabang + Stok Menipis ───── */}
       <div style={{
         display:             'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap:                 16,
-        marginBottom:        24,
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        gap:                 isMobile ? 16 : 16,
+        marginBottom:        isMobile ? 16 : 24,
       }}>
 
         {/* Performa Cabang */}
@@ -98,7 +111,7 @@ export default function Dashboard() {
           background:   COLOR.card,
           border:       `1px solid ${COLOR.border}`,
           borderRadius: 12,
-          padding:      24,
+          padding:      isMobile ? 16 : 24,
         }}>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 16 }}>
             Performa Cabang
@@ -130,7 +143,14 @@ export default function Dashboard() {
                   paddingLeft: 10,
                   transition:  'width 0.4s',
                 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#7A4500' }}>
+                  <span style={{
+                    fontSize:   11,
+                    fontWeight: 700,
+                    color:      '#7A4500',
+                    whiteSpace: 'nowrap',
+                    overflow:   'hidden',
+                    textOverflow: 'ellipsis',
+                  }}>
                     {c.name}
                   </span>
                 </div>
@@ -144,7 +164,7 @@ export default function Dashboard() {
           background:   COLOR.card,
           border:       `1px solid ${COLOR.border}`,
           borderRadius: 12,
-          padding:      24,
+          padding:      isMobile ? 16 : 24,
         }}>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 16 }}>
             Stok Menipis
@@ -154,20 +174,32 @@ export default function Dashboard() {
               key={i}
               style={{
                 display:      'flex',
-                alignItems:   'center',
+                alignItems:   isMobile ? 'flex-start' : 'center',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap:          isMobile ? 6 : 0,
                 padding:      '9px 0',
                 borderBottom: i < stokMenipisData.length - 1 ? `1px solid ${COLOR.border}` : 'none',
               }}
             >
-              <div style={{ flex: 2 }}>
+              <div style={{ flex: isMobile ? 'none' : 2, width: isMobile ? '100%' : 'auto' }}>
                 <span style={{ fontSize: 13 }}>{s.nama}</span>
               </div>
-              <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+              <div style={{
+                flex:           isMobile ? 'none' : 1,
+                display:        'flex',
+                justifyContent: isMobile ? 'space-between' : 'center',
+                width:          isMobile ? '100%' : 'auto',
+              }}>
                 <Badge color={s.critical ? 'red' : 'amber'}>• {s.unit} unit</Badge>
+                {isMobile && (
+                  <span style={{ fontSize: 12, color: COLOR.textMuted }}>{s.cabang}</span>
+                )}
               </div>
-              <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                <span style={{ fontSize: 12, color: COLOR.textMuted }}>{s.cabang}</span>
-              </div>
+              {!isMobile && (
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                  <span style={{ fontSize: 12, color: COLOR.textMuted }}>{s.cabang}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -178,25 +210,27 @@ export default function Dashboard() {
         background:   COLOR.card,
         border:       `1px solid ${COLOR.border}`,
         borderRadius: 12,
-        padding:      24,
+        padding:      isMobile ? 16 : 24,
       }}>
         <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 16 }}>
           Transaksi Terakhir
         </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <TableHeader cols={['No', 'Waktu', 'Jumlah', 'Harga', 'Total']} />
-          <tbody>
-            {transaksiTerakhirData.map((t, i) => (
-              <tr key={i} style={{ borderBottom: `1px solid ${COLOR.border}` }}>
-                {[t.id, t.waktu, t.jumlah, t.harga, t.total].map((val, j) => (
-                  <td key={j} style={{ padding: '12px 16px', fontSize: 13, color: COLOR.text }}>
-                    {val}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isMobile ? 480 : 'auto' }}>
+            <TableHeader cols={['No', 'Waktu', 'Jumlah', 'Harga', 'Total']} />
+            <tbody>
+              {transaksiTerakhirData.map((t, i) => (
+                <tr key={i} style={{ borderBottom: `1px solid ${COLOR.border}` }}>
+                  {[t.id, t.waktu, t.jumlah, t.harga, t.total].map((val, j) => (
+                    <td key={j} style={{ padding: '12px 16px', fontSize: 13, color: COLOR.text, whiteSpace: 'nowrap' }}>
+                      {val}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

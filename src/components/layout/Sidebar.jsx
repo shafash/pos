@@ -1,9 +1,10 @@
 import {
   LayoutDashboard, ShoppingCart, Package,
-  Users, FileText, Settings, LogOut, PanelLeft, ChevronRight,
+  Users, FileText, Settings, LogOut, PanelLeft, ChevronRight, X,
 } from 'lucide-react'
 import { COLOR } from '../../constants/colors'
 import Badge from '../ui/Badge'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard',   icon: LayoutDashboard },
@@ -14,210 +15,248 @@ const NAV_ITEMS = [
 ]
 
 /**
- * @param {{ active: string, onNav: (key: string) => void, collapsed: boolean, onToggleCollapse: () => void }} props
+ * @param {{
+ *   active: string,
+ *   onNav: (key: string) => void,
+ *   collapsed: boolean,
+ *   onToggleCollapse: () => void,
+ *   mobileOpen: boolean,
+ *   onCloseMobile: () => void,
+ * }} props
  */
-export default function Sidebar({ active, onNav, collapsed, onToggleCollapse }) {
-  const width = collapsed ? 72 : 220
+export default function Sidebar({
+  active, onNav, collapsed, onToggleCollapse, mobileOpen, onCloseMobile,
+}) {
+  const isMobile = useIsMobile()
+
+  // Di mobile: lebar selalu 220px, posisinya slide in/out via `left`
+  // Di desktop: lebar 72px/220px sesuai collapsed
+  const width = isMobile ? 220 : (collapsed ? 72 : 220)
+  const showLabel = isMobile || !collapsed
+
+  const handleNav = (key) => {
+    onNav(key)
+    if (isMobile) onCloseMobile()
+  }
 
   return (
-    <aside
-      style={{
-        width,
-        minHeight:     '100vh',
-        background:    COLOR.sidebar,
-        borderRight:   `1px solid ${COLOR.border}`,
-        display:       'flex',
-        flexDirection: 'column',
-        position:      'fixed',
-        top:           0,
-        left:          0,
-        zIndex:        10,
-        transition:    'width 0.2s',
-        overflow:      'hidden',
-      }}
-    >
-      {/* ── Logo ─────────────────────────────── */}
-      <div style={{
-        padding:        '20px 20px 10px',
-        display:        'flex',
-        alignItems:     'center',
-        gap:            10,
-        justifyContent: collapsed ? 'center' : 'flex-start',
-      }}>
-        {!collapsed && (
-          <span style={{ fontWeight: 500, fontSize: 13, color: COLOR.text, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-            POS ElangAnugerah
-          </span>
-        )}
-        <PanelLeft
-          size={18}
-          color={COLOR.textMuted}
-          onClick={onToggleCollapse}
-          style={{ marginLeft: collapsed ? 0 : 'auto', cursor: 'pointer', flexShrink: 0 }}
+    <>
+      {/* Overlay gelap di belakang drawer mobile */}
+      {isMobile && mobileOpen && (
+        <div
+          onClick={onCloseMobile}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 19 }}
         />
-      </div>
-
-      {/* Label Menu */}
-      {!collapsed && (
-        <div style={{
-          padding:       '8px 16px 4px',
-          fontSize:      11,
-          color:         COLOR.textMuted,
-          fontWeight:    600,
-          letterSpacing: 1,
-          whiteSpace:    'nowrap',
-        }}>
-          Menu
-        </div>
       )}
 
-      {/* Nav Items */}
-      <nav style={{ flex: 1, padding: '0 10px' }}>
-        {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
-          const isActive = active === key
-          return (
-            <button
-              key={key}
-              onClick={() => onNav(key)}
-              title={collapsed ? label : undefined}
-              style={{
-                display:        'flex',
-                alignItems:     'center',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                gap:            10,
-                width:          '100%',
-                padding:        collapsed ? '10px 0' : '10px 12px',
-                borderRadius:   8,
-                border:         'none',
-                cursor:         'pointer',
-                background:     isActive ? COLOR.amberLight : 'transparent',
-                color:          isActive ? COLOR.amberDark  : COLOR.textSub,
-                fontWeight:     isActive ? 700 : 400,
-                fontSize:       13,
-                marginBottom:   2,
-                fontFamily:     'inherit',
-                transition:     'all 0.15s',
-                textAlign:      'left',
-                whiteSpace:     'nowrap',
-              }}
-            >
-              <Icon size={16} style={{ flexShrink: 0 }} />
-              {!collapsed && label}
-            </button>
-          )
-        })}
-      </nav>
-
-      {/* ── User + Bottom ─────────────────────── */}
-      <div style={{
-        padding:    collapsed ? '16px 0 8px' : '16px 16px 8px',
-        borderTop:  `1px solid ${COLOR.border}`,
-      }}>
-
-        {/* Tombol expand saat collapsed */}
-        {collapsed && (
-          <button
-            onClick={onToggleCollapse}
-            style={{
-              width:          32,
-              height:         32,
-              borderRadius:   '50%',
-              border:         `1px solid ${COLOR.border}`,
-              background:     '#fff',
-              cursor:         'pointer',
-              display:        'flex',
-              alignItems:     'center',
-              justifyContent: 'center',
-              margin:         '0 auto 16px',
-            }}
-          >
-            <ChevronRight size={14} color={COLOR.textMuted} />
-          </button>
-        )}
-
-        {/* Avatar */}
+      <aside
+        style={{
+          width,
+          minHeight:     '100vh',
+          background:    COLOR.sidebar,
+          borderRight:   `1px solid ${COLOR.border}`,
+          display:       'flex',
+          flexDirection: 'column',
+          position:      'fixed',
+          top:           0,
+          left:          isMobile ? (mobileOpen ? 0 : -220) : 0,
+          zIndex:        20,
+          transition:    'left 0.25s ease, width 0.2s',
+          overflow:      'hidden',
+        }}
+      >
+        {/* ── Logo ─────────────────────────────── */}
         <div style={{
+          padding:        '20px 20px 10px',
           display:        'flex',
           alignItems:     'center',
-          justifyContent: collapsed ? 'center' : 'flex-start',
           gap:            10,
-          marginBottom:   16,
+          justifyContent: showLabel ? 'flex-start' : 'center',
         }}>
-          <div style={{
-            width:          36,
-            height:         36,
-            borderRadius:   '50%',
-            background:     COLOR.amberLight,
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: 'center',
-            fontWeight:     800,
-            color:          COLOR.amber,
-            fontSize:       14,
-            flexShrink:     0,
-          }}>
-            A
-          </div>
-          {!collapsed && (
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: COLOR.text, whiteSpace: 'nowrap' }}>
-                Alex Bizher
-              </div>
-              <Badge color="amber">Admin</Badge>
-            </div>
+          {showLabel && (
+            <span style={{ fontWeight: 500, fontSize: 13, color: COLOR.text, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+              POS ElangAnugerah
+            </span>
+          )}
+          {isMobile ? (
+            <X
+              size={18}
+              color={COLOR.textMuted}
+              onClick={onCloseMobile}
+              style={{ marginLeft: 'auto', cursor: 'pointer', flexShrink: 0 }}
+            />
+          ) : (
+            <PanelLeft
+              size={18}
+              color={COLOR.textMuted}
+              onClick={onToggleCollapse}
+              style={{ marginLeft: collapsed ? 0 : 'auto', cursor: 'pointer', flexShrink: 0 }}
+            />
           )}
         </div>
 
-        {/* Settings */}
-        <button
-          onClick={() => onNav('settings')}
-          title={collapsed ? 'Settings' : undefined}
-          style={{
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            gap:            8,
-            width:          '100%',
-            padding:        collapsed ? '8px 0' : '8px 10px',
-            borderRadius:   6,
-            border:         'none',
-            cursor:         'pointer',
-            background:     active === 'settings' ? COLOR.amberLight : 'transparent',
-            color:          active === 'settings' ? COLOR.amberDark  : COLOR.textSub,
-            fontSize:       13,
-            fontWeight:     active === 'settings' ? 700 : 400,
-            marginBottom:   4,
-            fontFamily:     'inherit',
-          }}
-        >
-          <Settings size={15} style={{ flexShrink: 0 }} />
-          {!collapsed && 'Settings'}
-        </button>
+        {/* Label Menu */}
+        {showLabel && (
+          <div style={{
+            padding:       '8px 16px 4px',
+            fontSize:      11,
+            color:         COLOR.textMuted,
+            fontWeight:    600,
+            letterSpacing: 1,
+            whiteSpace:    'nowrap',
+          }}>
+            Menu
+          </div>
+        )}
 
-        {/* Logout */}
-        <button
-          title={collapsed ? 'Log out' : undefined}
-          style={{
+        {/* Nav Items */}
+        <nav style={{ flex: 1, padding: '0 10px' }}>
+          {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
+            const isActive = active === key
+            return (
+              <button
+                key={key}
+                onClick={() => handleNav(key)}
+                title={!showLabel ? label : undefined}
+                style={{
+                  display:        'flex',
+                  alignItems:     'center',
+                  justifyContent: showLabel ? 'flex-start' : 'center',
+                  gap:            10,
+                  width:          '100%',
+                  padding:        showLabel ? '10px 12px' : '10px 0',
+                  borderRadius:   8,
+                  border:         'none',
+                  cursor:         'pointer',
+                  background:     isActive ? COLOR.amberLight : 'transparent',
+                  color:          isActive ? COLOR.amberDark  : COLOR.textSub,
+                  fontWeight:     isActive ? 700 : 400,
+                  fontSize:       13,
+                  marginBottom:   2,
+                  fontFamily:     'inherit',
+                  transition:     'all 0.15s',
+                  textAlign:      'left',
+                  whiteSpace:     'nowrap',
+                }}
+              >
+                <Icon size={16} style={{ flexShrink: 0 }} />
+                {showLabel && label}
+              </button>
+            )
+          })}
+        </nav>
+
+        {/* ── User + Bottom ─────────────────────── */}
+        <div style={{
+          padding:    showLabel ? '16px 16px 8px' : '16px 0 8px',
+          borderTop:  `1px solid ${COLOR.border}`,
+        }}>
+
+          {/* Tombol expand saat collapsed (desktop only) */}
+          {!isMobile && collapsed && (
+            <button
+              onClick={onToggleCollapse}
+              style={{
+                width:          32,
+                height:         32,
+                borderRadius:   '50%',
+                border:         `1px solid ${COLOR.border}`,
+                background:     '#fff',
+                cursor:         'pointer',
+                display:        'flex',
+                alignItems:     'center',
+                justifyContent: 'center',
+                margin:         '0 auto 16px',
+              }}
+            >
+              <ChevronRight size={14} color={COLOR.textMuted} />
+            </button>
+          )}
+
+          {/* Avatar */}
+          <div style={{
             display:        'flex',
             alignItems:     'center',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            gap:            8,
-            width:          '100%',
-            padding:        collapsed ? '8px 0' : '8px 10px',
-            borderRadius:   6,
-            border:         'none',
-            cursor:         'pointer',
-            background:     'transparent',
-            color:          COLOR.red,
-            fontSize:       13,
-            fontWeight:     600,
-            fontFamily:     'inherit',
-          }}
-        >
-          <LogOut size={15} style={{ flexShrink: 0 }} />
-          {!collapsed && 'Log out'}
-        </button>
-      </div>
-    </aside>
+            justifyContent: showLabel ? 'flex-start' : 'center',
+            gap:            10,
+            marginBottom:   16,
+          }}>
+            <div style={{
+              width:          36,
+              height:         36,
+              borderRadius:   '50%',
+              background:     COLOR.amberLight,
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: 'center',
+              fontWeight:     800,
+              color:          COLOR.amber,
+              fontSize:       14,
+              flexShrink:     0,
+            }}>
+              A
+            </div>
+            {showLabel && (
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: COLOR.text, whiteSpace: 'nowrap' }}>
+                  Alex Bizher
+                </div>
+                <Badge color="amber">Admin</Badge>
+              </div>
+            )}
+          </div>
+
+          {/* Settings */}
+          <button
+            onClick={() => handleNav('settings')}
+            title={!showLabel ? 'Settings' : undefined}
+            style={{
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: showLabel ? 'flex-start' : 'center',
+              gap:            8,
+              width:          '100%',
+              padding:        showLabel ? '8px 10px' : '8px 0',
+              borderRadius:   6,
+              border:         'none',
+              cursor:         'pointer',
+              background:     active === 'settings' ? COLOR.amberLight : 'transparent',
+              color:          active === 'settings' ? COLOR.amberDark  : COLOR.textSub,
+              fontSize:       13,
+              fontWeight:     active === 'settings' ? 700 : 400,
+              marginBottom:   4,
+              fontFamily:     'inherit',
+            }}
+          >
+            <Settings size={15} style={{ flexShrink: 0 }} />
+            {showLabel && 'Settings'}
+          </button>
+
+          {/* Logout */}
+          <button
+            title={!showLabel ? 'Log out' : undefined}
+            style={{
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: showLabel ? 'flex-start' : 'center',
+              gap:            8,
+              width:          '100%',
+              padding:        showLabel ? '8px 10px' : '8px 0',
+              borderRadius:   6,
+              border:         'none',
+              cursor:         'pointer',
+              background:     'transparent',
+              color:          COLOR.red,
+              fontSize:       13,
+              fontWeight:     600,
+              fontFamily:     'inherit',
+            }}
+          >
+            <LogOut size={15} style={{ flexShrink: 0 }} />
+            {showLabel && 'Log out'}
+          </button>
+        </div>
+      </aside>
+    </>
   )
 }

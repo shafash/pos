@@ -64,7 +64,7 @@ export default function Settings() {
   }
 
   return (
-    <div style={{ paddingBottom: 40 }}>
+    <div style={{ paddingTop: 24 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         <div style={cardStyle}>
