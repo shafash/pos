@@ -11,16 +11,6 @@ import ActionBtn        from '../components/ui/ActionBtn'
 import ProductImage     from '../components/shared/ProductImage'
 import { useIsMobile }  from '../hooks/useIsMobile'
 
-// Singkat angka rupiah jadi format compact, contoh: 540000000 -> "540Jt"
-function formatRupiahSingkat(value) {
-  const num = Number(String(value).replace(/[^\d]/g, ''))
-  if (isNaN(num)) return value
-  if (num >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(num % 1_000_000_000 === 0 ? 0 : 1)}M`
-  if (num >= 1_000_000)     return `${(num / 1_000_000).toFixed(num % 1_000_000 === 0 ? 0 : 1)}Jt`
-  if (num >= 1_000)         return `${(num / 1_000).toFixed(num % 1_000 === 0 ? 0 : 1)}Rb`
-  return String(num)
-}
-
 export default function StokBarang({ onNav }) {
   const [produk] = useState(produkListData)
   const [search, setSearch] = useState('')
@@ -34,40 +24,25 @@ export default function StokBarang({ onNav }) {
     p.nama.toLowerCase().includes(search.toLowerCase())
   )
 
-  const totalAsetRaw = 540000000
-  const totalAsetLabel = isStacked
-    ? `Rp ${formatRupiahSingkat(totalAsetRaw)}`
-    : 'Rp. 540.000.000'
-
   // ── Blok-blok konten, disusun ulang urutannya tergantung breakpoint ──
 
   const statCardsBlock = (
-    <div style={{
-      display: 'flex',
-      gap:     isStacked ? 8 : 16,
-      marginBottom: isMobile ? 16 : 24,
-    }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <StatCard
-          label={isStacked ? 'Total Produk' : 'Total Produk'}
-          value="1.240"
-          compact={isStacked}
-        />
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <StatCard
-          label="Stok Tipis"
-          value="12 Items"
-          compact={isStacked}
-        />
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <StatCard
-          label="Total Aset"
-          value={totalAsetLabel}
-          compact={isStacked}
-        />
-      </div>
+    <div style={{ marginBottom: isMobile ? 16 : 24 }}>
+      {isStacked ? (
+        <>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+            <StatCard label="Total Produk" value="1.240" compact />
+            <StatCard label="Stok Tipis" value="12 Items" compact />
+          </div>
+          <StatCard label="Total Aset" value="Rp. 540.000.000" compact />
+        </>
+      ) : (
+        <div style={{ display: 'flex', gap: 16 }}>
+          <StatCard label="Total Produk" value="1.240" />
+          <StatCard label="Stok Tipis" value="12 Items" />
+          <StatCard label="Total Aset" value="Rp. 540.000.000" />
+        </div>
+      )}
     </div>
   )
 
@@ -121,7 +96,7 @@ export default function StokBarang({ onNav }) {
           <PrimaryBtn
             icon={Plus}
             onClick={() => onNav('tambahBarang')}
-            style={{ width: '100%', justifyContent: 'center' }}
+            style={{ width: '100%' }}
           >
             Tambah Barang
           </PrimaryBtn>

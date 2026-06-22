@@ -1,10 +1,10 @@
 import { COLOR } from '../../constants/colors'
 
 /**
- * @param {{ children, onCLick?, icon?: LucideIcon, small?: boolean }} props
+ * @param {{ children, onCLick?, icon?: LucideIcon, small?: boolean, style?: object }} props
 */
 
-export default function PrimaryBtn({ children, onClick, icon: Icon, small = false }) {
+export default function PrimaryBtn({ children, onClick, icon: Icon, small = false, style = {} }) {
     return (
         <button onClick = {onClick} style = {{
             background: COLOR.amber,
@@ -17,9 +17,12 @@ export default function PrimaryBtn({ children, onClick, icon: Icon, small = fals
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: 6,
             whiteSpace: 'nowrap',
             fontFamily: 'Geist',
+            boxSizing: 'border-box',
+            ...style,
         }}>
             {Icon && <Icon size = {14} />}
             {children}

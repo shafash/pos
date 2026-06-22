@@ -1,28 +1,30 @@
 import { COLOR } from '../../constants/colors'
 
 /**
- * @param {{label: string, value: string, sub?: string }} props
+ * @param {{label: string, value: string, sub?: string, compact?: boolean }} props
 */
 
-export default function StatCard({ label, value, sub }) {
+export default function StatCard({ label, value, sub, compact = false }) {
     return (
         <div style = {{
             background: COLOR.card,
             border: `1px solid ${COLOR.border}`,
             borderRadius: 12,
-            padding: '20px 24px',
+            padding: compact ? '14px 16px' : '20px 24px',
             flex: 1,
-            minWidth: 160,
+            minWidth: 0,
+            boxSizing: 'border-box',
         }}>
             <div style = {{
-                fontSize: 13,
+                fontSize: compact ? 12 : 13,
                 color: COLOR.textSub,
-                marginBottom: 6,
+                marginBottom: compact ? 4 : 6,
+                whiteSpace: 'nowrap',
             }}>
                 {label}
             </div>
             <div style = {{
-                fontSize: 28,
+                fontSize: compact ? 20 : 28,
                 fontWeight: 800,
                 color: COLOR.text,
                 letterSpacing: -1,

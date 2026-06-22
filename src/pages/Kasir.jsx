@@ -293,7 +293,6 @@ export default function Kasir() {
       if (exist) return prev.map(x => x.id === produk.id ? { ...x, qty: x.qty + 1 } : x)
       return [...prev, { id: produk.id, nama: produk.nama, tipe: produk.tipe, harga: produk.hargaEceran, qty: 1 }]
     })
-    if (isMobile) setShowMobileCart(true)   // ← otomatis buka panel pas nambah produk pertama (opsional)
   }
 
   const handleUpdateQty = (id, delta) => {
