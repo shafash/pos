@@ -18,7 +18,6 @@ export default function Dashboard() {
   return (
     <div style={{ paddingTop: isMobile ? 16 : 24 }}>
 
-      {/* ── Stat Cards ───────────────────────── */}
       <div style={{
         display:             isMobile ? 'grid' : 'flex',
         gridTemplateColumns: isMobile ? '1fr 1fr' : undefined,
@@ -32,7 +31,6 @@ export default function Dashboard() {
         <StatCard label="Stok Kritis"     value="3 Item"    sub="Perlu restock segera"    />
       </div>
 
-      {/* ── Chart Omset ──────────────────────── */}
       <div style={{
         background:   COLOR.card,
         border:       `1px solid ${COLOR.border}`,
@@ -98,7 +96,6 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* ── Performa Cabang + Stok Menipis ───── */}
       <div style={{
         display:             'grid',
         gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
@@ -106,7 +103,6 @@ export default function Dashboard() {
         marginBottom:        isMobile ? 16 : 24,
       }}>
 
-        {/* Performa Cabang */}
         <div style={{
           background:   COLOR.card,
           border:       `1px solid ${COLOR.border}`,
@@ -159,7 +155,6 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Stok Menipis */}
         <div style={{
           background:   COLOR.card,
           border:       `1px solid ${COLOR.border}`,
@@ -205,7 +200,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Transaksi Terakhir ────────────────── */}
       <div style={{
         background:   COLOR.card,
         border:       `1px solid ${COLOR.border}`,

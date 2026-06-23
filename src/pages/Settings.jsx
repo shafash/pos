@@ -1,9 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Store, Package, CreditCard, Users, Shield, Bell, Clock, Save, History, MoreVertical } from 'lucide-react'
 import { COLOR } from '../constants/colors'
 import PrimaryBtn from '../components/ui/PrimaryBtn'
 
+function useBreakpoint() {
+  const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
+  useEffect(() => {
+    const handle = () => setWidth(window.innerWidth)
+    window.addEventListener('resize', handle)
+    return () => window.removeEventListener('resize', handle)
+  }, [])
+  return { isMobile: width < 640, isTablet: width < 1024 }
+}
+
 export default function Settings() {
+  const { isMobile, isTablet } = useBreakpoint()
+
   const [storeInfo, setStoreInfo] = useState({ name: '', phone: '', address: '', branch: '', npwp: '' })
 
   const [toggles, setToggles] = useState({
@@ -60,7 +72,7 @@ export default function Settings() {
   const cardStyle = {
     background: COLOR.card,
     border: `1px solid ${COLOR.border}`,
-    borderRadius: 12, padding: 24,
+    borderRadius: 12, padding: isMobile ? 16 : 24,
   }
 
   return (
@@ -68,11 +80,22 @@ export default function Settings() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         <div style={cardStyle}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: 'space-between',
+            alignItems: isMobile ? 'flex-start' : 'center',
+            gap: isMobile ? 12 : 0,
+            marginBottom: 16,
+          }}>
             <SectionTitle icon={Store} title="Store Information" />
             <PrimaryBtn icon={Save}>Save Changes</PrimaryBtn>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+            gap: 20,
+          }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Store Name</label>
               <input style={inputStyle} type="text" placeholder="Masukkan nama toko" />
@@ -89,40 +112,43 @@ export default function Settings() {
               <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Tax ID (NPWP)</label>
               <input style={inputStyle} type="text" placeholder="Nomor NPWP" />
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
+            <div style={{ gridColumn: isMobile ? '1' : '1 / -1' }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Store Address</label>
               <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 80 }} placeholder="Alamat lengkap toko" />
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isTablet ? '1fr' : '1fr 1fr',
+          gap: 24,
+        }}>
           <div style={cardStyle}>
             <SectionTitle icon={Package} title="Inventory & Stock" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Low Stock Threshold</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Alert when stock hits below units</div>
                 </div>
-                <input style={{ ...inputStyle, width: 60, textAlign: 'center', marginTop: 0 }} type="number" defaultValue={5} />
+                <input style={{ ...inputStyle, width: 60, textAlign: 'center', marginTop: 0, flexShrink: 0 }} type="number" defaultValue={5} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Negative Stock Protection</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Prevent sales of out-of-stock items</div>
                 </div>
                 <Toggle value={toggles.negativeStock} onToggle={() => setToggle('negativeStock')} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>SKU Auto-generation</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Automatic unique ID creation</div>
                 </div>
                 <Toggle value={toggles.skuAuto} onToggle={() => setToggle('skuAuto')} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Barcode Scanner Integration</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Enable HID/USB scanner support</div>
@@ -135,24 +161,24 @@ export default function Settings() {
           <div style={cardStyle}>
             <SectionTitle icon={CreditCard} title="Transaction Settings" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Tax Percentage (PPN)</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Global tax applied to all items</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                   <input style={{ ...inputStyle, width: 60, textAlign: 'center', marginTop: 0 }} type="number" defaultValue={11} />
                   <span style={{ fontSize: 13, fontWeight: 600 }}>%</span>
                 </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Invoice Prefix</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Starting characters for bills</div>
                 </div>
-                <input style={{ ...inputStyle, width: 80, marginTop: 0 }} type="text" defaultValue="TRX-" />
+                <input style={{ ...inputStyle, width: 80, marginTop: 0, flexShrink: 0 }} type="text" defaultValue="TRX-" />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Auto-print Receipt</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>After transaction success</div>
@@ -163,8 +189,11 @@ export default function Settings() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
-
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : '1fr 1fr 1fr',
+          gap: 24,
+        }}>
           <div style={cardStyle}>
             <SectionTitle icon={Users} title="Member & Loyalty" />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -218,9 +247,13 @@ export default function Settings() {
             </div>
           </div>
 
-          <div style={cardStyle}>
+          <div style={{ ...cardStyle, gridColumn: (!isMobile && isTablet) ? '1 / -1' : 'auto' }}>
             <SectionTitle icon={Bell} title="Alerts" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: (!isMobile && isTablet) ? '1fr 1fr' : '1fr',
+              gap: 12,
+            }}>
               {['Low Stock Alerts', 'Daily Sales Summary', 'Stock Mismatch Audit', 'Failed Transaction'].map((alert, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 13 }}>{alert}</span>
@@ -236,7 +269,14 @@ export default function Settings() {
         </div>
 
         <div style={cardStyle}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: 'space-between',
+            alignItems: isMobile ? 'flex-start' : 'center',
+            gap: isMobile ? 8 : 0,
+            marginBottom: 16,
+          }}>
             <SectionTitle icon={History} title="Activity Logs" />
             <span style={{ fontSize: 12, color: COLOR.amber, cursor: 'pointer', fontWeight: 600 }}>
               View Full History &gt;&gt;
@@ -246,16 +286,35 @@ export default function Settings() {
             {activityLogs.map((log, index) => (
               <div key={log.id} style={{
                 display: 'flex',
-                alignItems: 'center',
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: isMobile ? 'flex-start' : 'center',
+                gap: isMobile ? 4 : 0,
                 padding: '12px 0',
-                borderBottom: index !== activityLogs.length - 1 ? `1px solid ${COLOR.border}` : 'none'
+                borderBottom: index !== activityLogs.length - 1 ? `1px solid ${COLOR.border}` : 'none',
               }}>
-                <span style={{ width: 100, fontSize: 13, fontWeight: 500, color: COLOR.textSub }}>{log.time}</span>
-                <span style={{ width: 120, fontSize: 13, color: COLOR.textMuted }}>{log.category}</span>
-                <span style={{ flex: 1, fontSize: 13, color: COLOR.text }}>{log.desc}</span>
-                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLOR.amber }}>
-                  <MoreVertical size={16} />
-                </button>
+                {isMobile ? (
+                  <>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, fontWeight: 500, color: COLOR.textSub }}>{log.time}</span>
+                      <span style={{ fontSize: 11, color: COLOR.textMuted, background: '#F3F4F6', padding: '2px 6px', borderRadius: 4 }}>{log.category}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <span style={{ fontSize: 13, color: COLOR.text, flex: 1 }}>{log.desc}</span>
+                      <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLOR.amber, flexShrink: 0 }}>
+                        <MoreVertical size={16} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ width: 100, fontSize: 13, fontWeight: 500, color: COLOR.textSub }}>{log.time}</span>
+                    <span style={{ width: 120, fontSize: 13, color: COLOR.textMuted }}>{log.category}</span>
+                    <span style={{ flex: 1, fontSize: 13, color: COLOR.text }}>{log.desc}</span>
+                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLOR.amber }}>
+                      <MoreVertical size={16} />
+                    </button>
+                  </>
+                )}
               </div>
             ))}
           </div>

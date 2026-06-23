@@ -15,16 +15,14 @@ export default function StokBarang({ onNav }) {
   const [produk] = useState(produkListData)
   const [search, setSearch] = useState('')
 
-  const isMobile     = useIsMobile()       // < 768
-  const isBelow1024  = useIsMobile(1024)   // < 1024
-  const isTablet     = isBelow1024 && !isMobile // 768–1024
-  const isStacked    = isMobile || isTablet     // mobile & tablet
+  const isMobile     = useIsMobile()
+  const isBelow1024  = useIsMobile(1024)
+  const isTablet     = isBelow1024 && !isMobile 
+  const isStacked    = isMobile || isTablet     
 
   const filtered = produk.filter(p =>
     p.nama.toLowerCase().includes(search.toLowerCase())
   )
-
-  // ── Blok-blok konten, disusun ulang urutannya tergantung breakpoint ──
 
   const statCardsBlock = (
     <div style={{ marginBottom: isMobile ? 16 : 24 }}>
@@ -80,7 +78,6 @@ export default function StokBarang({ onNav }) {
           <Filter size={14} /> Filter
         </button>
 
-        {/* Desktop: tombol tambah nempel di ujung kanan baris yang sama */}
         {!isStacked && (
           <div style={{ marginLeft: 'auto' }}>
             <PrimaryBtn icon={Plus} onClick={() => onNav('tambahBarang')}>
@@ -90,7 +87,6 @@ export default function StokBarang({ onNav }) {
         )}
       </div>
 
-      {/* Mobile & Tablet: tombol tambah baris baru, full width */}
       {isStacked && (
         <div style={{ width: '100%' }}>
           <PrimaryBtn
@@ -233,8 +229,6 @@ export default function StokBarang({ onNav }) {
       </div>
     </div>
   )
-
-  // ── Render: urutan beda untuk stacked (mobile/tablet) vs desktop ──
 
   if (isStacked) {
     return (

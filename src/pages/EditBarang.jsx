@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Save } from 'lucide-react'
 import { COLOR } from '../constants/colors'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const font = "'Geist', sans-serif"
 
@@ -56,23 +57,29 @@ export default function EditBarang({ onNav }) {
     minimumStok: '5',
   })
 
+  const isMobile    = useIsMobile()
+  const isBelow1024 = useIsMobile(1024)
+  const isTablet    = isBelow1024 && !isMobile
+  const isStacked   = isMobile || isTablet
+
   const handleChange = (field) => (e) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }))
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, fontFamily: font }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 16 : 20, fontFamily: font }}>
 
-      {/* ── Baris atas: Foto + Info Dasar ────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '386px 1fr', gap: 20 }}>
+      <div style={{
+        display:             'grid',
+        gridTemplateColumns: isStacked ? '1fr' : '386px 1fr',
+        gap:                 isMobile ? 16 : 20,
+      }}>
 
-        {/* Foto Produk */}
         <div style={cardStyle}>
-          <div style={{ padding: '28px 24px' }}>
+          <div style={{ padding: isMobile ? '20px 18px' : '28px 24px' }}>
             <div style={{ fontSize: 16, fontWeight: 500, color: '#000', fontFamily: font, marginBottom: 20 }}>
               Foto Produk
             </div>
-            {/* Gambar placeholder */}
             <div style={{
               width:          203,
               height:         203,
@@ -96,12 +103,10 @@ export default function EditBarang({ onNav }) {
           </div>
         </div>
 
-        {/* Informasi Dasar */}
         <div style={cardStyle}>
           <div style={bannerStyle}>Informasi Dasar</div>
-          <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ padding: isMobile ? '16px 18px' : '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            {/* Nama Barang */}
             <div>
               <label style={labelStyle}>Nama Barang</label>
               <input
@@ -112,8 +117,11 @@ export default function EditBarang({ onNav }) {
               />
             </div>
 
-            {/* Kode SKU + Kategori */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div style={{
+              display:             'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+              gap:                 16,
+            }}>
               <div>
                 <label style={labelStyle}>Kode SKU</label>
                 <input
@@ -137,8 +145,11 @@ export default function EditBarang({ onNav }) {
               </div>
             </div>
 
-            {/* Merek + Satuan */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div style={{
+              display:             'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+              gap:                 16,
+            }}>
               <div>
                 <label style={labelStyle}>Merek</label>
                 <input
@@ -162,17 +173,18 @@ export default function EditBarang({ onNav }) {
         </div>
       </div>
 
-      {/* ── Baris bawah: Status Inventaris + Harga & Stok ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '386px 1fr', gap: 20 }}>
+      <div style={{
+        display:             'grid',
+        gridTemplateColumns: isStacked ? '1fr' : '386px 1fr',
+        gap:                 isMobile ? 16 : 20,
+      }}>
 
-        {/* Status Inventaris */}
         <div style={cardStyle}>
-          <div style={{ padding: '18px 24px' }}>
+          <div style={{ padding: isMobile ? '16px 18px' : '18px 24px' }}>
             <div style={{ fontSize: 16, fontWeight: 500, color: '#000', fontFamily: font, marginBottom: 20 }}>
               Status Inventaris
             </div>
 
-            {/* Tersedia */}
             <div style={{
               display:        'flex',
               justifyContent: 'space-between',
@@ -184,7 +196,6 @@ export default function EditBarang({ onNav }) {
               <span style={{ fontSize: 13, fontWeight: 600, color: '#000', fontFamily: font }}>42 Unit</span>
             </div>
 
-            {/* Terjual */}
             <div style={{
               display:        'flex',
               justifyContent: 'space-between',
@@ -196,7 +207,6 @@ export default function EditBarang({ onNav }) {
               <span style={{ fontSize: 13, fontWeight: 600, color: '#000', fontFamily: font }}>15 Unit</span>
             </div>
 
-            {/* Status Stok */}
             <div style={{
               display:        'flex',
               justifyContent: 'space-between',
@@ -219,13 +229,15 @@ export default function EditBarang({ onNav }) {
           </div>
         </div>
 
-        {/* Harga & Stok */}
         <div style={cardStyle}>
           <div style={bannerStyle}>Harga &amp; Stok</div>
-          <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ padding: isMobile ? '16px 18px' : '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            {/* Harga Beli + Harga Jual */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div style={{
+              display:             'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+              gap:                 16,
+            }}>
               <div>
                 <label style={labelStyle}>Harga Beli (Modal)</label>
                 <input
@@ -246,8 +258,11 @@ export default function EditBarang({ onNav }) {
               </div>
             </div>
 
-            {/* Stok Saat Ini + Minimum Stok */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div style={{
+              display:             'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+              gap:                 16,
+            }}>
               <div>
                 <label style={labelStyle}>Stok Saat Ini</label>
                 <input
@@ -273,17 +288,17 @@ export default function EditBarang({ onNav }) {
         </div>
       </div>
 
-      {/* ── Action Buttons ───────────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: isStacked ? undefined : 'flex-end', gap: isMobile ? 12 : 16 }}>
         <button
           onClick={() => onNav('stok')}
           style={{
-            width:        152,
-            height:       56,
+            width:        isStacked ? undefined : 152,
+            flex:         isStacked ? 1 : undefined,
+            height:       isMobile ? 48 : 56,
             background:   '#F4F5F7',
             border:       'none',
             borderRadius: 8,
-            fontSize:     17,
+            fontSize:     isMobile ? 14 : 17,
             fontWeight:   600,
             color:        COLOR.textMuted,
             cursor:       'pointer',
@@ -294,12 +309,13 @@ export default function EditBarang({ onNav }) {
         </button>
         <button
           style={{
-            width:          253,
-            height:         56,
+            width:          isStacked ? undefined : 253,
+            flex:           isStacked ? 1 : undefined,
+            height:         isMobile ? 48 : 56,
             background:     '#FFA500',
             border:         'none',
             borderRadius:   8,
-            fontSize:       17,
+            fontSize:       isMobile ? 14 : 17,
             fontWeight:     600,
             color:          '#fff',
             cursor:         'pointer',
@@ -307,10 +323,10 @@ export default function EditBarang({ onNav }) {
             display:        'flex',
             alignItems:     'center',
             justifyContent: 'center',
-            gap:            10,
+            gap:            isMobile ? 6 : 10,
           }}
         >
-          <Save size={18} />
+          <Save size={isMobile ? 16 : 18} />
           Simpan Perubahan
         </button>
       </div>

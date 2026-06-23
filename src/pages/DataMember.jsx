@@ -14,10 +14,10 @@ export default function DataMember({ onNav }) {
   const [search, setSearch] = useState('')
   const [page, setPage]     = useState(1)
 
-  const isMobile    = useIsMobile()       // < 768
-  const isBelow1024 = useIsMobile(1024)   // < 1024
-  const isTablet    = isBelow1024 && !isMobile // 768–1024
-  const isStacked   = isMobile || isTablet     // mobile & tablet
+  const isMobile    = useIsMobile()
+  const isBelow1024 = useIsMobile(1024)   
+  const isTablet    = isBelow1024 && !isMobile 
+  const isStacked   = isMobile || isTablet     
 
   const filtered = members.filter(m =>
     m.nama.toLowerCase().includes(search.toLowerCase()) ||
@@ -27,7 +27,6 @@ export default function DataMember({ onNav }) {
   return (
     <div style={{ paddingTop: isMobile ? 16 : 24 }}>
 
-      {/* ── Stat Cards ───────────────────────── */}
       <div style={{ marginBottom: isMobile ? 16 : 24 }}>
         {isStacked ? (
           <>
@@ -46,7 +45,6 @@ export default function DataMember({ onNav }) {
         )}
       </div>
 
-      {/* ── Toolbar ──────────────────────────── */}
       <div style={{
         display:        'flex',
         flexDirection:  isStacked ? 'column' : 'row',
@@ -73,7 +71,6 @@ export default function DataMember({ onNav }) {
         </div>
       </div>
 
-      {/* ── Table ────────────────────────────── */}
       <div style={{
         background:   COLOR.card,
         border:       `1px solid ${COLOR.border}`,
@@ -112,7 +109,6 @@ export default function DataMember({ onNav }) {
           </table>
         </div>
 
-        {/* ── Pagination ───────────────────────── */}
         <div style={{
           padding:        '14px 16px',
           display:        'flex',

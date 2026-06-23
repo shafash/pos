@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Save, Upload } from 'lucide-react'
 import { COLOR } from '../constants/colors'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const font = "'Geist', sans-serif"
 
@@ -54,6 +55,11 @@ export default function TambahBarang({ onNav }) {
   const [isDragging, setIsDragging]       = useState(false)
   const fileInputRef                      = useRef(null)
 
+  const isMobile    = useIsMobile()
+  const isBelow1024 = useIsMobile(1024)  
+  const isTablet    = isBelow1024 && !isMobile 
+  const isStacked   = isMobile || isTablet     
+
   const handleChange = (field) => (e) => {
     setFormState(prev => ({ ...prev, [field]: e.target.value }))
   }
@@ -78,6 +84,62 @@ export default function TambahBarang({ onNav }) {
     onNav('stok')
   }
 
+  const uploadBoxJsx = (
+    <label
+      onDrop={handleDrop}
+      onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
+      onDragLeave={() => setIsDragging(false)}
+      style={{
+        display:        'flex',
+        flexDirection:  'column',
+        alignItems:     'center',
+        justifyContent: 'center',
+        height:         160,
+        background:     '#FBFBFB',
+        borderRadius:   10,
+        cursor:         'pointer',
+        border:         isDragging ? '2px dashed #FFCD71' : '2px dashed transparent',
+        transition:     'border 0.2s',
+        gap:            6,
+      }}
+    >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".jpg,.jpeg,.png"
+        onChange={e => handleImageSelect(e.target.files?.[0])}
+        style={{ display: 'none' }}
+      />
+      {uploadedImage ? (
+        <img
+          src={uploadedImage}
+          alt="preview"
+          style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 10 }}
+        />
+      ) : (
+        <>
+          <Upload size={36} color={COLOR.textMuted} strokeWidth={1} />
+          <div style={{ textAlign: 'center', lineHeight: 1.6 }}>
+            <span style={{ fontSize: 12, fontWeight: 500, color: '#000', fontFamily: font }}>
+              Tarik gambar ke sini{' '}
+            </span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#FFCD71', fontFamily: font }}>
+              atau klik untuk pilih
+            </span>
+          </div>
+          <div style={{ fontSize: 11, color: COLOR.textMuted, fontFamily: font }}>
+            Format: JPG, PNG (Maks. 2MB)
+          </div>
+          {uploadedName && (
+            <div style={{ fontSize: 11, color: COLOR.textMuted, fontFamily: font }}>
+              {uploadedName}
+            </div>
+          )}
+        </>
+      )}
+    </label>
+  )
+
   return (
     <div style={{
       background:   '#fff',
@@ -87,7 +149,6 @@ export default function TambahBarang({ onNav }) {
       fontFamily:   font,
     }}>
 
-      {/* ── Banner ───────────────────────────── */}
       <div style={{
         background: '#FFCD71',
         padding:    '12px 18px',
@@ -99,23 +160,40 @@ export default function TambahBarang({ onNav }) {
         Tambah Barang Baru
       </div>
 
-      {/* ── Form Body ────────────────────────── */}
-      <div style={{ padding: '16px 20px 24px' }}>
+      <div style={{ padding: isMobile ? '14px 16px 20px' : '16px 20px 24px' }}>
 
-        {/* ── Informasi Dasar ──────────────────── */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ marginBottom: 12 }}>
             <div style={sectionTitleStyle}>Informasi Dasar</div>
             <div style={{ height: 2, background: COLOR.amber, width: 136, borderRadius: 2 }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+          {isStacked && (
+            <div style={{ marginBottom: 12 }}>
+              <label style={labelStyle}>Upload Gambar</label>
+              {uploadBoxJsx}
+            </div>
+          )}
+
+          <div style={{
+            display:             'grid',
+            gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr 1fr',
+            gap:                 12,
+          }}>
 
             {/* Kolom kiri + tengah */}
-            <div style={{ gridColumn: '1 / 3', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{
+              gridColumn:    isStacked ? 'auto' : '1 / 3',
+              display:       'flex',
+              flexDirection: 'column',
+              gap:           12,
+            }}>
 
-              {/* Nama Barang + Kode SKU */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{
+                display:             'grid',
+                gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr',
+                gap:                 12,
+              }}>
                 <div>
                   <label style={labelStyle}>Nama Barang</label>
                   <input
@@ -138,8 +216,11 @@ export default function TambahBarang({ onNav }) {
                 </div>
               </div>
 
-              {/* Kategori + Merek + Satuan */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div style={{
+                display:             'grid',
+                gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr 1fr',
+                gap:                 12,
+              }}>
                 <div>
                   <label style={labelStyle}>Kategori</label>
                   <select
@@ -175,74 +256,26 @@ export default function TambahBarang({ onNav }) {
               </div>
             </div>
 
-            {/* Upload Gambar */}
-            <div>
-              <label style={labelStyle}>Upload Gambar</label>
-              <label
-                onDrop={handleDrop}
-                onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
-                onDragLeave={() => setIsDragging(false)}
-                style={{
-                  display:        'flex',
-                  flexDirection:  'column',
-                  alignItems:     'center',
-                  justifyContent: 'center',
-                  height:         160,
-                  background:     '#FBFBFB',
-                  borderRadius:   10,
-                  cursor:         'pointer',
-                  border:         isDragging ? '2px dashed #FFCD71' : '2px dashed transparent',
-                  transition:     'border 0.2s',
-                  gap:            6,
-                }}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".jpg,.jpeg,.png"
-                  onChange={e => handleImageSelect(e.target.files?.[0])}
-                  style={{ display: 'none' }}
-                />
-                {uploadedImage ? (
-                  <img
-                    src={uploadedImage}
-                    alt="preview"
-                    style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 10 }}
-                  />
-                ) : (
-                  <>
-                    <Upload size={36} color={COLOR.textMuted} strokeWidth={1} />
-                    <div style={{ textAlign: 'center', lineHeight: 1.6 }}>
-                      <span style={{ fontSize: 12, fontWeight: 500, color: '#000', fontFamily: font }}>
-                        Tarik gambar ke sini{' '}
-                      </span>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: '#FFCD71', fontFamily: font }}>
-                        atau klik untuk pilih
-                      </span>
-                    </div>
-                    <div style={{ fontSize: 11, color: COLOR.textMuted, fontFamily: font }}>
-                      Format: JPG, PNG (Maks. 2MB)
-                    </div>
-                    {uploadedName && (
-                      <div style={{ fontSize: 11, color: COLOR.textMuted, fontFamily: font }}>
-                        {uploadedName}
-                      </div>
-                    )}
-                  </>
-                )}
-              </label>
-            </div>
+            {!isStacked && (
+              <div>
+                <label style={labelStyle}>Upload Gambar</label>
+                {uploadBoxJsx}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* ── Harga & Stok ─────────────────────── */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ marginBottom: 12 }}>
             <div style={sectionTitleStyle}>Harga &amp; Stok</div>
             <div style={{ height: 2, background: COLOR.amber, width: 110, borderRadius: 2 }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
+          <div style={{
+            display:             'grid',
+            gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr 1fr 1fr',
+            gap:                 12,
+          }}>
             <div>
               <label style={labelStyle}>Harga Beli (Modal)</label>
               <input
@@ -290,12 +323,12 @@ export default function TambahBarang({ onNav }) {
           </div>
         </div>
 
-        {/* ── Action Buttons ───────────────────── */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
           <button
             onClick={handleCancel}
             style={{
-              width:        110,
+              width:        isStacked ? undefined : 110,
+              flex:         isStacked ? 1 : undefined,
               height:       40,
               background:   '#F4F5F7',
               border:       'none',
@@ -311,7 +344,8 @@ export default function TambahBarang({ onNav }) {
           </button>
           <button
             style={{
-              width:          160,
+              width:          isStacked ? undefined : 160,
+              flex:           isStacked ? 1 : undefined,
               height:         40,
               background:     '#FFA500',
               border:         'none',

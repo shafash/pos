@@ -130,7 +130,6 @@ function KeranjangItem({ item, onUpdateQty }) {
   )
 }
 
-// ── Komponen isi panel transaksi (dipakai di desktop sidebar & mobile modal) ──
 function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpdateQty, isMobile, onClose }) {
   const subtotal = keranjang.reduce((s, i) => s + i.harga * i.qty, 0)
   const tax      = Math.round(subtotal * 0.03)
@@ -138,7 +137,6 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
 
   return (
     <>
-      {/* Header Transaksi */}
       <div style={{ padding: isMobile ? '16px 16px 14px' : '20px 24px 14px', borderBottom: `1px solid ${COLOR.border}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontWeight: 700, fontSize: 15 }}>Transaksi Detail</div>
@@ -173,7 +171,6 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
         </div>
       </div>
 
-      {/* Keranjang */}
       <div style={{ padding: isMobile ? '14px 16px 10px' : '14px 24px 10px', borderBottom: `1px solid ${COLOR.border}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div>
@@ -197,7 +194,6 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
         </div>
       </div>
 
-      {/* Metode Pembayaran */}
       <div style={{ padding: isMobile ? '14px 16px' : '14px 24px', borderBottom: `1px solid ${COLOR.border}` }}>
         <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 12 }}>Metode Pembayaran</div>
         <div style={{ display: 'flex', gap: 10 }}>
@@ -230,7 +226,6 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
         </div>
       </div>
 
-      {/* Summary */}
       <div style={{ padding: isMobile ? '14px 16px' : '14px 24px', flex: 1 }}>
         {[
           ['Amount',   `${keranjang.reduce((s, i) => s + i.qty, 0)} (Items)`],
@@ -259,7 +254,6 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
         </div>
       </div>
 
-      {/* CTA */}
       <div style={{ padding: isMobile ? '12px 16px 24px' : '12px 24px 28px' }}>
         <button style={{
           width: '100%', background: COLOR.amber, color: '#fff', border: 'none',
@@ -313,7 +307,6 @@ export default function Kasir() {
         paddingTop:    isMobile ? 16 : 24,
       }}>
 
-        {/* ── Kolom Kiri: Produk ───────────────── */}
         <div
           className="no-scrollbar"
           style={{
@@ -327,7 +320,6 @@ export default function Kasir() {
             msOverflowStyle: 'none',
           }}
         >
-          {/* Kategori Tabs */}
           <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 10 }}>
             Kategori Produk/Jasa
           </div>
@@ -366,7 +358,6 @@ export default function Kasir() {
             })}
           </div>
 
-          {/* Pilih Produk */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div style={{ fontWeight: 600, fontSize: 12, color: COLOR.textSub }}>Pilih Produk</div>
             <span style={{ fontSize: 11, color: COLOR.textMuted }}>
@@ -390,7 +381,6 @@ export default function Kasir() {
           </div>
         </div>
 
-        {/* ── Kolom Kanan: Transaksi Detail (DESKTOP ONLY) ── */}
         {!isMobile && (
           <div
             className="no-scrollbar"
@@ -419,7 +409,6 @@ export default function Kasir() {
         )}
       </div>
 
-      {/* ── Floating Button (MOBILE ONLY) ──────── */}
       {isMobile && keranjang.length > 0 && !showMobileCart && (
         <button
           onClick={() => setShowMobileCart(true)}
@@ -467,7 +456,6 @@ export default function Kasir() {
         </button>
       )}
 
-      {/* ── Modal Full Screen Transaksi (MOBILE ONLY) ── */}
       {isMobile && showMobileCart && (
         <div style={{
           position:      'fixed',

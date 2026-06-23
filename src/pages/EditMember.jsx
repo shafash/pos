@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Save, CheckCircle } from 'lucide-react'
 import { COLOR } from '../constants/colors'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const font = "'Geist', sans-serif"
 
@@ -53,19 +54,27 @@ export default function EditMember({ onNav }) {
     email:            'Kael@gmail.com',
   })
 
+  const isMobile    = useIsMobile()
+  const isBelow1024 = useIsMobile(1024)
+  const isTablet    = isBelow1024 && !isMobile
+  const isStacked   = isMobile || isTablet
+
   const handleChange = (field) => (e) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }))
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 16, fontFamily: font }}>
+    <div style={{
+      display:             'grid',
+      gridTemplateColumns: isStacked ? '1fr' : '1fr 320px',
+      gap:                 isMobile ? 14 : 16,
+      fontFamily:          font,
+    }}>
 
-      {/* ── Kolom Kiri: Informasi Member ─────── */}
       <div style={cardStyle}>
         <div style={bannerStyle}>Informasi Member</div>
-        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ padding: isMobile ? '14px' : '16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-          {/* Nama Lengkap */}
           <div>
             <label style={labelStyle}>Nama Lengkap</label>
             <input
@@ -76,8 +85,11 @@ export default function EditMember({ onNav }) {
             />
           </div>
 
-          {/* Member ID + Tanggal Bergabung */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{
+            display:             'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+            gap:                 12,
+          }}>
             <div>
               <label style={labelStyle}>Member ID</label>
               <input
@@ -98,7 +110,6 @@ export default function EditMember({ onNav }) {
             </div>
           </div>
 
-          {/* Nomor Telepon */}
           <div>
             <label style={labelStyle}>Nomor Telepon</label>
             <input
@@ -109,7 +120,6 @@ export default function EditMember({ onNav }) {
             />
           </div>
 
-          {/* Email */}
           <div>
             <label style={labelStyle}>Email</label>
             <input
@@ -122,15 +132,12 @@ export default function EditMember({ onNav }) {
         </div>
       </div>
 
-      {/* ── Kolom Kanan ──────────────────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-        {/* Loyalty & Tiering */}
         <div style={cardStyle}>
           <div style={bannerStyle}>Loyalty &amp; Tiering</div>
           <div style={{ padding: '14px' }}>
 
-            {/* Saldo Poin */}
             <div style={{
               background:   COLOR.amberLight,
               borderRadius: 8,
@@ -174,6 +181,7 @@ export default function EditMember({ onNav }) {
                 display:        'flex',
                 justifyContent: 'space-between',
                 alignItems:     'center',
+                gap:            8,
               }}>
                 <span style={{
                   fontSize:      10,
@@ -181,6 +189,7 @@ export default function EditMember({ onNav }) {
                   color:         COLOR.amberDark,
                   fontFamily:    font,
                   letterSpacing: 1,
+                  whiteSpace:    'nowrap',
                 }}>
                   MEMBER SEJAK: 2076
                 </span>
@@ -193,13 +202,14 @@ export default function EditMember({ onNav }) {
                   color:        COLOR.amberDark,
                   fontFamily:   font,
                   border:       `1px solid ${COLOR.amber}`,
+                  whiteSpace:   'nowrap',
+                  flexShrink:   0,
                 }}>
                   LEVEL UP SOON
                 </div>
               </div>
             </div>
 
-            {/* Status Member */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
                 width:          36,
@@ -241,7 +251,6 @@ export default function EditMember({ onNav }) {
           </div>
         </div>
 
-        {/* Alamat */}
         <div style={cardStyle}>
           <div style={bannerStyle}>Alamat</div>
           <div style={{ padding: '14px' }}>
@@ -256,22 +265,22 @@ export default function EditMember({ onNav }) {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div style={{
           display:        'flex',
           justifyContent: 'flex-end',
-          gap:            10,
+          gap:            isMobile ? 8 : 10,
           marginTop:      4,
         }}>
           <button
             onClick={() => onNav('member')}
             style={{
-              width:        110,
-              height:       40,
+              width:        isMobile ? undefined : 110,
+              flex:         isMobile ? 1 : undefined,
+              height:       isMobile ? 36 : 40,
               background:   '#F4F5F7',
               border:       'none',
               borderRadius: 8,
-              fontSize:     13,
+              fontSize:     isMobile ? 12 : 13,
               fontWeight:   600,
               color:        COLOR.textMuted,
               cursor:       'pointer',
@@ -282,12 +291,13 @@ export default function EditMember({ onNav }) {
           </button>
           <button
             style={{
-              width:          160,
-              height:         40,
+              width:          isMobile ? undefined : 160,
+              flex:           isMobile ? 1 : undefined,
+              height:         isMobile ? 36 : 40,
               background:     COLOR.amber,
               border:         'none',
               borderRadius:   8,
-              fontSize:       13,
+              fontSize:       isMobile ? 12 : 13,
               fontWeight:     600,
               color:          '#fff',
               cursor:         'pointer',
@@ -295,10 +305,11 @@ export default function EditMember({ onNav }) {
               display:        'flex',
               alignItems:     'center',
               justifyContent: 'center',
-              gap:            8,
+              gap:            isMobile ? 6 : 8,
+              whiteSpace:     'nowrap',
             }}
           >
-            <Save size={16} />
+            <Save size={isMobile ? 14 : 16} />
             Simpan Perubahan
           </button>
         </div>

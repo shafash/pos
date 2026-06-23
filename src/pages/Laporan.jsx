@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { Search, ChevronDown, Upload } from 'lucide-react'
 import { COLOR } from '../constants/colors'
 import { laporanBulananData } from '../constants/mockData'
 import { fmt } from '../utils/format'
@@ -19,16 +21,28 @@ const laporanHarianData = Array.from({ length: 6 }, (_, i) => ({
 
 const TABLE_COLS = ['Tanggal', 'Total Transaksi', 'Pendapatan', 'Pajak', 'Bersih']
 
+const CABANG_OPTIONS = ['Semua Cabang', 'Cabang Utama', 'Cabang 2', 'Cabang 3']
+
 export default function Laporan() {
-  const isMobile    = useIsMobile()       // < 768
-  const isBelow1024 = useIsMobile(1024)   // < 1024
-  const isTablet    = isBelow1024 && !isMobile // 768–1024
-  const isStacked   = isMobile || isTablet     // mobile & tablet
+  const isMobile    = useIsMobile()
+  const isBelow1024 = useIsMobile(1024)   
+  const isTablet    = isBelow1024 && !isMobile 
+  const isStacked   = isMobile || isTablet  
+
+  const [search, setSearch] = useState('')
+  const [cabang, setCabang] = useState('Semua Cabang')
+
+  const filtered = laporanHarianData.filter(row =>
+    row.tanggal.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const handleExport = () => {
+    console.log('Export PDF', { search, cabang })
+  }
 
   return (
     <div style={{ paddingTop: isMobile ? 16 : 24 }}>
 
-      {/* ── Stat Cards ───────────────────────── */}
       <div style={{ marginBottom: isMobile ? 16 : 24 }}>
         {isStacked ? (
           <>
@@ -47,7 +61,6 @@ export default function Laporan() {
         )}
       </div>
 
-      {/* ── Chart ────────────────────────────── */}
       <div style={{
         background:   COLOR.card,
         border:       `1px solid ${COLOR.border}`,
@@ -99,18 +112,128 @@ export default function Laporan() {
         </ResponsiveContainer>
       </div>
 
-      {/* ── Tabel Harian ─────────────────────── */}
       <div style={{
         background:   COLOR.card,
         border:       `1px solid ${COLOR.border}`,
         borderRadius: 12,
         overflow:     'hidden',
       }}>
+
+        <div style={{
+          display:        'flex',
+          flexDirection:  isStacked ? 'column' : 'row',
+          justifyContent: isStacked ? undefined : 'space-between',
+          alignItems:     isStacked ? 'stretch' : 'center',
+          gap:            12,
+          padding:        isMobile ? 16 : 20,
+          borderBottom:   `1px solid ${COLOR.border}`,
+        }}>
+          <div style={{ fontWeight: 700, fontSize: 15, whiteSpace: 'nowrap' }}>
+            Laporan Harian
+          </div>
+
+          <div style={{
+            display:       'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap:           10,
+            width:         isStacked ? '100%' : undefined,
+          }}>
+            <div style={{
+              display:      'flex',
+              alignItems:   'center',
+              gap:          8,
+              padding:      '8px 12px',
+              border:       `1px solid ${COLOR.border}`,
+              borderRadius: 8,
+              background:   '#fff',
+              flex:         isMobile ? undefined : '1 1 200px',
+              minWidth:     0,
+            }}>
+              <Search size={14} color={COLOR.textMuted} style={{ flexShrink: 0 }} />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Cari Transaksi..."
+                style={{
+                  border:      'none',
+                  outline:     'none',
+                  fontSize:    13,
+                  fontFamily:  'inherit',
+                  width:       '100%',
+                  color:       COLOR.text,
+                  background:  'transparent',
+                }}
+              />
+            </div>
+
+            <div style={{
+              position:     'relative',
+              flexShrink:   0,
+            }}>
+              <select
+                value={cabang}
+                onChange={e => setCabang(e.target.value)}
+                style={{
+                  appearance:   'none',
+                  width:        isMobile ? '100%' : 'auto',
+                  padding:      '8px 32px 8px 12px',
+                  border:       `1px solid ${COLOR.border}`,
+                  borderRadius: 8,
+                  background:   '#fff',
+                  fontSize:     13,
+                  color:        COLOR.textSub,
+                  cursor:       'pointer',
+                  fontFamily:   'inherit',
+                }}
+              >
+                {CABANG_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+              <ChevronDown
+                size={14}
+                color={COLOR.textMuted}
+                style={{
+                  position:      'absolute',
+                  right:         10,
+                  top:           '50%',
+                  transform:     'translateY(-50%)',
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
+
+            <button
+              onClick={handleExport}
+              style={{
+                display:        'flex',
+                alignItems:     'center',
+                justifyContent: 'center',
+                gap:            6,
+                padding:        '8px 16px',
+                border:         'none',
+                borderRadius:   8,
+                background:     COLOR.amber,
+                color:          '#fff',
+                fontSize:       13,
+                fontWeight:     700,
+                cursor:         'pointer',
+                fontFamily:     'inherit',
+                whiteSpace:     'nowrap',
+                flexShrink:     0,
+              }}
+            >
+              <Upload size={14} />
+              Export PDF
+            </button>
+          </div>
+        </div>
+
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isStacked ? 640 : 'auto' }}>
             <TableHeader cols={TABLE_COLS} />
             <tbody>
-              {laporanHarianData.map((row, i) => (
+              {filtered.map((row, i) => (
                 <tr key={i} style={{ borderBottom: `1px solid ${COLOR.border}` }}>
                   <td style={{ padding: '12px 16px', fontSize: 13, whiteSpace: 'nowrap' }}>{row.tanggal}</td>
                   <td style={{ padding: '12px 16px', fontSize: 13, whiteSpace: 'nowrap' }}>{row.transaksi}</td>
