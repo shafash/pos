@@ -16,7 +16,7 @@ class Produk extends Model
 
     protected $primaryKey = 'sku';
     protected $keyType = 'string';
-    protected $incrementing = false;
+    public $incrementing = false;
 
     protected $fillable = [
         'sku',
