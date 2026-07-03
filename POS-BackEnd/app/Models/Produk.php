@@ -34,7 +34,7 @@ class Produk extends Model
         return [
             'harga_beli' => 'decimal:2',
             'harga_eceran' => 'decimal:2',
-            'harga_grosir' => 'decimak:2',
+            'harga_grosir' => 'decimal:2',
         ];
     }
 

@@ -31,7 +31,7 @@ class StokCabangSeeder extends Seeder
         foreach ($produkList as $produk) {
             foreach ($cabangList as $cabang) {
                 $stokDasar = $stokAcuan[$produk->nama_barang] ?? 12;
-                $stokSaatIni = max(0, $stokDasar - ($cabang->$id - 1) * 2);
+                $stokSaatIni = max(0, $stokDasar - ($cabang->id - 1) * 2);
                 StokCabang::create([
                     'sku' => $produk->sku,
                     'cabang_id' => $cabang->id,
