@@ -1,28 +1,39 @@
-import { useState } from 'react'
-import { Package, ClipboardList, Users, Minus, Plus, Banknote, QrCode, ShoppingCart, X } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  Package, ClipboardList, Users, Minus, Plus,
+  Banknote, QrCode, ShoppingCart, X, Search, Loader,
+} from 'lucide-react'
 import { COLOR } from '../constants/colors'
-import { kasirProdukData, keranjangInitData } from '../constants/mockData'
+import { produkService, memberService, transaksiService } from '../services/api'
+import { useApi, useMutation } from '../hooks/useApi'
+import { useAuth } from '../context/AuthContext'
 import { fmt } from '../utils/format'
-import Badge from '../components/ui/Badge'
+import Badge        from '../components/ui/Badge'
 import ProductImage from '../components/shared/ProductImage'
 import { useIsMobile } from '../hooks/useIsMobile'
 
+// ─────────────────────────────────────────────────────────────
+// ProductCard
+// ─────────────────────────────────────────────────────────────
 function ProductCard({ produk, onAdd, isActive, isMobile }) {
+  const stok = produk.stok_saat_ini ?? 0
+
   return (
     <div
-      onClick={() => onAdd(produk)}
+      onClick={() => stok > 0 && onAdd(produk)}
       style={{
         background:   isActive ? COLOR.amberLight : COLOR.card,
         border:       `2px solid ${isActive ? COLOR.amber : COLOR.border}`,
         borderRadius: 12,
         padding:      isMobile ? 12 : 16,
-        cursor:       'pointer',
+        cursor:       stok > 0 ? 'pointer' : 'not-allowed',
         position:     'relative',
         transition:   'all 0.15s',
+        opacity:      stok === 0 ? 0.5 : 1,
       }}
     >
       <div style={{ position: 'absolute', top: 10, right: 10 }}>
-        <Badge color="amber">{produk.stok} Tersedia</Badge>
+        <Badge color={stok <= 3 ? 'red' : 'amber'}>{stok} Tersedia</Badge>
       </div>
       <div style={{
         height:         isMobile ? 80 : 100,
@@ -43,9 +54,11 @@ function ProductCard({ produk, onAdd, isActive, isMobile }) {
         WebkitLineClamp: 2,
         WebkitBoxOrient: 'vertical',
       }}>
-        {produk.nama}
+        {produk.nama_barang}
       </div>
-      <div style={{ fontSize: 12, color: COLOR.textMuted, marginBottom: 8 }}>{produk.tipe}</div>
+      <div style={{ fontSize: 12, color: COLOR.textMuted, marginBottom: 8 }}>
+        {produk.kategori}
+      </div>
       <div style={{
         display:        'flex',
         flexDirection:  isMobile ? 'column' : 'row',
@@ -55,12 +68,12 @@ function ProductCard({ produk, onAdd, isActive, isMobile }) {
       }}>
         <div>
           <Badge color="gray">Eceran</Badge>
-          <div style={{ fontSize: 13, marginTop: 4 }}>{fmt(produk.hargaEceran)}</div>
+          <div style={{ fontSize: 13, marginTop: 4 }}>{fmt(produk.harga_eceran)}</div>
         </div>
         <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
           <span style={{ color: COLOR.amber, fontWeight: 600, fontSize: 12 }}>Grosir</span>
           <div style={{ color: COLOR.amber, fontWeight: 700, fontSize: 13 }}>
-            {fmt(produk.hargaGrosir)}
+            {fmt(produk.harga_grosir)}
           </div>
         </div>
       </div>
@@ -68,6 +81,9 @@ function ProductCard({ produk, onAdd, isActive, isMobile }) {
   )
 }
 
+// ─────────────────────────────────────────────────────────────
+// KeranjangItem
+// ─────────────────────────────────────────────────────────────
 function KeranjangItem({ item, onUpdateQty }) {
   return (
     <div style={{
@@ -86,23 +102,22 @@ function KeranjangItem({ item, onUpdateQty }) {
           overflow:     'hidden',
           textOverflow: 'ellipsis',
         }}>
-          {item.nama}
+          {item.nama_barang}
         </div>
-        <div style={{ fontSize: 11, color: COLOR.textMuted }}>{item.tipe}</div>
-        <div style={{ fontSize: 11, color: COLOR.textSub }}>1 x {fmt(item.harga)}</div>
+        <div style={{ fontSize: 11, color: COLOR.textMuted }}>{item.kategori}</div>
+        <div style={{ fontSize: 11, color: COLOR.textSub }}>
+          {item.qty} x {fmt(item.harga_satuan)}
+        </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <button
-          onClick={() => onUpdateQty(item.id, -1)}
+          onClick={() => onUpdateQty(item.sku, -1)}
           style={{
-            width:          24, height: 24,
-            border:         `1px solid ${COLOR.border}`,
-            borderRadius:   4,
-            background:     '#fff',
-            cursor:         'pointer',
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: 'center',
+            width: 24, height: 24,
+            border: `1px solid ${COLOR.border}`,
+            borderRadius: 4, background: '#fff',
+            cursor: 'pointer', display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
           }}
         >
           <Minus size={10} />
@@ -111,16 +126,12 @@ function KeranjangItem({ item, onUpdateQty }) {
           {item.qty}
         </span>
         <button
-          onClick={() => onUpdateQty(item.id, 1)}
+          onClick={() => onUpdateQty(item.sku, 1)}
           style={{
-            width:          24, height: 24,
-            border:         'none',
-            borderRadius:   4,
-            background:     COLOR.amber,
-            cursor:         'pointer',
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: 'center',
+            width: 24, height: 24,
+            border: 'none', borderRadius: 4,
+            background: COLOR.amber, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
           <Plus size={10} color="#fff" />
@@ -130,18 +141,160 @@ function KeranjangItem({ item, onUpdateQty }) {
   )
 }
 
-function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpdateQty, isMobile, onClose }) {
-  const subtotal = keranjang.reduce((s, i) => s + i.harga * i.qty, 0)
+// ─────────────────────────────────────────────────────────────
+// MemberSearch — popup cari & pilih member
+// ─────────────────────────────────────────────────────────────
+function MemberSearch({ selectedMember, onSelect, onClear }) {
+  const [query,  setQuery]  = useState('')
+  const [open,   setOpen]   = useState(false)
+  const { data: results, loading, execute: cariMember } = useApi(memberService.getAll)
+
+  const handleSearch = useCallback((q) => {
+    setQuery(q)
+    if (q.length >= 2) {
+      cariMember({ search: q, status: 'aktif' })
+      setOpen(true)
+    } else {
+      setOpen(false)
+    }
+  }, [cariMember])
+
+  if (selectedMember) {
+    return (
+      <div style={{
+        display:      'flex',
+        alignItems:   'center',
+        gap:          10,
+        background:   COLOR.amberLight,
+        borderRadius: 8,
+        padding:      '8px 12px',
+      }}>
+        <div style={{
+          width: 30, height: 30, background: COLOR.amber,
+          borderRadius: '50%', display: 'flex',
+          alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Users size={14} color="#fff" />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>{selectedMember.nama_member}</div>
+          <div style={{ fontSize: 11, color: COLOR.textMuted }}>
+            {selectedMember.id_member} · {selectedMember.poin} poin · {selectedMember.tier_loyalty}
+          </div>
+        </div>
+        <button
+          onClick={onClear}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+        >
+          <X size={14} color={COLOR.textMuted} />
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{
+        display:      'flex',
+        alignItems:   'center',
+        gap:          8,
+        border:       `1px solid ${COLOR.border}`,
+        borderRadius: 8,
+        padding:      '8px 12px',
+        background:   '#fff',
+      }}>
+        {loading ? <Loader size={14} color={COLOR.textMuted} /> : <Search size={14} color={COLOR.textMuted} />}
+        <input
+          value={query}
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Cari member (nama / no. HP)..."
+          style={{
+            flex: 1, border: 'none', outline: 'none',
+            fontSize: 12, background: 'transparent', fontFamily: 'inherit',
+          }}
+        />
+      </div>
+
+      {open && results && results.length > 0 && (
+        <div style={{
+          position:  'absolute',
+          top:       '110%',
+          left:      0,
+          right:     0,
+          background: '#fff',
+          border:    `1px solid ${COLOR.border}`,
+          borderRadius: 8,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+          zIndex:    50,
+          maxHeight: 200,
+          overflowY: 'auto',
+        }}>
+          {results.map((m) => (
+            <div
+              key={m.id_member}
+              onClick={() => { onSelect(m); setOpen(false); setQuery('') }}
+              style={{
+                padding:  '10px 14px',
+                cursor:   'pointer',
+                fontSize: 13,
+                borderBottom: `1px solid ${COLOR.border}`,
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = COLOR.amberLight}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+            >
+              <div style={{ fontWeight: 600 }}>{m.nama_member}</div>
+              <div style={{ fontSize: 11, color: COLOR.textMuted }}>
+                {m.id_member} · {m.no_telepon} · {m.poin} poin
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {open && results && results.length === 0 && !loading && (
+        <div style={{
+          position:   'absolute',
+          top:        '110%',
+          left:       0,
+          right:      0,
+          background: '#fff',
+          border:     `1px solid ${COLOR.border}`,
+          borderRadius: 8,
+          padding:    '12px 14px',
+          fontSize:   13,
+          color:      COLOR.textMuted,
+          zIndex:     50,
+        }}>
+          Member tidak ditemukan.
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────
+// TransaksiPanel
+// ─────────────────────────────────────────────────────────────
+function TransaksiPanel({
+  keranjang, setKeranjang,
+  metode, setMetode,
+  handleUpdateQty,
+  selectedMember, setSelectedMember,
+  isMobile, onClose,
+  onProses, prosesLoading, prosesError,
+}) {
+  const subtotal = keranjang.reduce((s, i) => s + i.harga_satuan * i.qty, 0)
   const tax      = Math.round(subtotal * 0.03)
   const total    = subtotal + tax
 
   return (
     <>
+      {/* Header */}
       <div style={{ padding: isMobile ? '16px 16px 14px' : '20px 24px 14px', borderBottom: `1px solid ${COLOR.border}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontWeight: 700, fontSize: 15 }}>Transaksi Detail</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 12, color: COLOR.textMuted }}>#TRX-001</span>
+            <span style={{ fontSize: 12, color: COLOR.textMuted }}>Baru</span>
             {isMobile && (
               <button
                 onClick={onClose}
@@ -157,20 +310,21 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
             )}
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
-          <div style={{
-            width: 34, height: 34, background: COLOR.amberLight, borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Users size={15} color={COLOR.amber} />
+
+        {/* Member search */}
+        <div style={{ marginTop: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub, marginBottom: 8 }}>
+            Member (opsional)
           </div>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>Pelanggan Umum</div>
-            <div style={{ fontSize: 11, color: COLOR.textMuted }}>Harga Eceran Normal</div>
-          </div>
+          <MemberSearch
+            selectedMember={selectedMember}
+            onSelect={setSelectedMember}
+            onClear={() => setSelectedMember(null)}
+          />
         </div>
       </div>
 
+      {/* Keranjang */}
       <div style={{ padding: isMobile ? '14px 16px 10px' : '14px 24px 10px', borderBottom: `1px solid ${COLOR.border}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div>
@@ -188,18 +342,25 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
           className="no-scrollbar"
           style={{ maxHeight: isMobile ? 240 : 280, overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {keranjang.map(item => (
-            <KeranjangItem key={item.id} item={item} onUpdateQty={handleUpdateQty} />
-          ))}
+          {keranjang.length === 0 ? (
+            <div style={{ textAlign: 'center', color: COLOR.textMuted, fontSize: 13, padding: '20px 0' }}>
+              Belum ada produk dipilih.
+            </div>
+          ) : (
+            keranjang.map(item => (
+              <KeranjangItem key={item.sku} item={item} onUpdateQty={handleUpdateQty} />
+            ))
+          )}
         </div>
       </div>
 
+      {/* Metode pembayaran */}
       <div style={{ padding: isMobile ? '14px 16px' : '14px 24px', borderBottom: `1px solid ${COLOR.border}` }}>
         <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 12 }}>Metode Pembayaran</div>
         <div style={{ display: 'flex', gap: 10 }}>
           {[
-            { key: 'tunai', label: 'Uang Tunai', icon: Banknote },
-            { key: 'qris',  label: 'QRIS',       icon: QrCode   },
+            { key: 'cash',  label: 'Uang Tunai', icon: Banknote },
+            { key: 'qris',  label: 'QRIS',        icon: QrCode   },
           ].map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -208,7 +369,7 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
                 flex: 1, padding: '12px 8px', borderRadius: 8,
                 border: `2px solid ${metode === key ? COLOR.amber : COLOR.border}`,
                 background: metode === key ? COLOR.amberLight : '#fff',
-                color: metode === key ? COLOR.amberDark : COLOR.textSub,
+                color: metode === key ? COLOR.amber : COLOR.textSub,
                 cursor: 'pointer', display: 'flex', flexDirection: 'column',
                 alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
               }}
@@ -226,6 +387,7 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
         </div>
       </div>
 
+      {/* Rincian */}
       <div style={{ padding: isMobile ? '14px 16px' : '14px 24px', flex: 1 }}>
         {[
           ['Amount',   `${keranjang.reduce((s, i) => s + i.qty, 0)} (Items)`],
@@ -252,52 +414,184 @@ function TransaksiPanel({ keranjang, setKeranjang, metode, setMetode, handleUpda
           <span style={{ color: COLOR.textSub }}>Kembali</span>
           <span>{fmt(Math.max(0, subtotal - total))}</span>
         </div>
+
+        {/* Error dari API */}
+        {prosesError && (
+          <div style={{
+            marginTop:    12,
+            background:   '#FEF2F2',
+            border:       '1px solid #FECACA',
+            borderRadius: 8,
+            padding:      '8px 12px',
+            fontSize:     12,
+            color:        '#DC2626',
+          }}>
+            {prosesError}
+          </div>
+        )}
       </div>
 
+      {/* Tombol proses */}
       <div style={{ padding: isMobile ? '12px 16px 24px' : '12px 24px 28px' }}>
-        <button style={{
-          width: '100%', background: COLOR.amber, color: '#fff', border: 'none',
-          borderRadius: 10, padding: 16, fontWeight: 800, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
-        }}>
-          Proses Transaksi
+        <button
+          onClick={onProses}
+          disabled={prosesLoading || keranjang.length === 0}
+          style={{
+            width:        '100%',
+            background:   keranjang.length === 0 ? COLOR.border : COLOR.amber,
+            color:        keranjang.length === 0 ? COLOR.textMuted : '#fff',
+            border:       'none',
+            borderRadius: 10,
+            padding:      16,
+            fontWeight:   800,
+            fontSize:     14,
+            cursor:       keranjang.length === 0 || prosesLoading ? 'not-allowed' : 'pointer',
+            fontFamily:   'inherit',
+            display:      'flex',
+            alignItems:   'center',
+            justifyContent: 'center',
+            gap:          8,
+          }}
+        >
+          {prosesLoading && <Loader size={16} color="#fff" />}
+          {prosesLoading ? 'Memproses...' : 'Proses Transaksi'}
         </button>
       </div>
     </>
   )
 }
 
+// ─────────────────────────────────────────────────────────────
+// Main Kasir
+// ─────────────────────────────────────────────────────────────
 export default function Kasir() {
-  const [tab,           setTab]           = useState('produk')
-  const [keranjang,     setKeranjang]     = useState(keranjangInitData)
-  const [metode,        setMetode]        = useState('tunai')
-  const [selectedId,    setSelectedId]    = useState(null)
-  const [showMobileCart, setShowMobileCart] = useState(false)   // ← state modal mobile
+  const { user } = useAuth()
+
+  const [tab,            setTab]            = useState('produk')
+  const [keranjang,      setKeranjang]      = useState([])
+  const [metode,         setMetode]         = useState('cash')
+  const [selectedSku,    setSelectedSku]    = useState(null)
+  const [selectedMember, setSelectedMember] = useState(null)
+  const [showMobileCart, setShowMobileCart] = useState(false)
+  const [searchProduk,   setSearchProduk]   = useState('')
+  const [successMsg,     setSuccessMsg]     = useState(null)
 
   const isMobile = useIsMobile()
 
-  const subtotal   = keranjang.reduce((s, i) => s + i.harga * i.qty, 0)
-  const totalItems = keranjang.reduce((s, i) => s + i.qty, 0)
-  const tax         = Math.round(subtotal * 0.03)
-  const total       = subtotal + tax
+  // Fetch produk dari API sesuai cabang user yang login
+  const cabangId = user?.cabang_id ?? 1
+  const { data: produkList, loading: loadingProduk, execute: fetchProduk } = useApi(produkService.getAll)
 
+  useEffect(() => {
+    fetchProduk({ cabang_id: cabangId })
+  }, [cabangId])
+
+  // Mutation untuk POST transaksi
+  const { loading: prosesLoading, error: prosesError, execute: kirimTransaksi } = useMutation(transaksiService.create)
+
+  // Filter produk berdasarkan search dan tab kategori
+  const produkTampil = (produkList ?? []).filter((p) => {
+    const matchSearch = searchProduk.trim() === '' ||
+      p.nama_barang.toLowerCase().includes(searchProduk.toLowerCase()) ||
+      p.sku.toLowerCase().includes(searchProduk.toLowerCase())
+
+    const matchTab = tab === 'produk'
+      ? true  // semua produk masuk tab produk (jasa bisa ditambah nanti)
+      : false
+
+    return matchSearch && matchTab
+  })
+
+  const subtotal   = keranjang.reduce((s, i) => s + i.harga_satuan * i.qty, 0)
+  const totalItems = keranjang.reduce((s, i) => s + i.qty, 0)
+  const tax        = Math.round(subtotal * 0.03)
+  const total      = subtotal + tax
+
+  // Tambah produk ke keranjang
   const handleAddToCart = (produk) => {
-    setSelectedId(produk.id)
+    setSelectedSku(produk.sku)
     setKeranjang(prev => {
-      const exist = prev.find(x => x.id === produk.id)
-      if (exist) return prev.map(x => x.id === produk.id ? { ...x, qty: x.qty + 1 } : x)
-      return [...prev, { id: produk.id, nama: produk.nama, tipe: produk.tipe, harga: produk.hargaEceran, qty: 1 }]
+      const exist = prev.find(x => x.sku === produk.sku)
+      if (exist) {
+        // Cek stok tidak melebihi yang tersedia
+        const stokTersedia = produk.stok_saat_ini ?? 0
+        if (exist.qty >= stokTersedia) return prev
+        return prev.map(x => x.sku === produk.sku ? { ...x, qty: x.qty + 1 } : x)
+      }
+      return [...prev, {
+        sku:         produk.sku,
+        nama_barang: produk.nama_barang,
+        kategori:    produk.kategori,
+        harga_satuan: produk.harga_eceran,  // default eceran, bisa diubah nanti
+        qty:         1,
+      }]
     })
   }
 
-  const handleUpdateQty = (id, delta) => {
+  const handleUpdateQty = (sku, delta) => {
     setKeranjang(prev =>
-      prev.map(i => i.id === id ? { ...i, qty: Math.max(0, i.qty + delta) } : i)
+      prev.map(i => i.sku === sku ? { ...i, qty: Math.max(0, i.qty + delta) } : i)
           .filter(i => i.qty > 0)
     )
   }
 
+  // Proses transaksi ke API
+  const handleProses = async () => {
+    if (keranjang.length === 0) return
+
+    try {
+      const result = await kirimTransaksi({
+        metode_pembayaran: metode,
+        id_member:         selectedMember?.id_member ?? null,
+        cabang_id:         cabangId,
+        items:             keranjang.map(item => ({
+          sku:           item.sku,
+          kuantitas:     item.qty,
+          harga_satuan:  item.harga_satuan,
+        })),
+      })
+
+      // Sukses — reset state dan tampilkan pesan
+      setKeranjang([])
+      setSelectedMember(null)
+      setSelectedSku(null)
+      setShowMobileCart(false)
+      setSuccessMsg(`Transaksi ${result.no_transaksi} berhasil! Total: ${fmt(result.total_bayar)}`)
+
+      // Refresh stok produk setelah transaksi
+      fetchProduk({ cabang_id: cabangId })
+
+      // Sembunyikan pesan sukses setelah 4 detik
+      setTimeout(() => setSuccessMsg(null), 4000)
+    } catch (_) {
+      // Error sudah ditangani oleh useMutation, tampil di prosesError
+    }
+  }
+
   return (
     <div style={{ position: 'relative' }}>
+
+      {/* Success toast */}
+      {successMsg && (
+        <div style={{
+          position:     'fixed',
+          top:          20,
+          left:         '50%',
+          transform:    'translateX(-50%)',
+          background:   '#22C55E',
+          color:        '#fff',
+          borderRadius: 10,
+          padding:      '12px 20px',
+          fontSize:     13,
+          fontWeight:   600,
+          zIndex:       100,
+          boxShadow:    '0 4px 16px rgba(0,0,0,0.15)',
+          whiteSpace:   'nowrap',
+        }}>
+          ✓ {successMsg}
+        </div>
+      )}
+
       <div style={{
         display:       'flex',
         flexDirection: isMobile ? 'column' : 'row',
@@ -307,6 +601,7 @@ export default function Kasir() {
         paddingTop:    isMobile ? 16 : 24,
       }}>
 
+        {/* ── Panel kiri: daftar produk ── */}
         <div
           className="no-scrollbar"
           style={{
@@ -314,16 +609,17 @@ export default function Kasir() {
             overflowY:       isMobile ? 'visible' : 'auto',
             paddingRight:    isMobile ? 16 : 24,
             paddingLeft:     isMobile ? 16 : 0,
-            paddingBottom:   isMobile ? 90 : 0,   // ← ruang biar gak ketutup floating button
+            paddingBottom:   isMobile ? 90 : 0,
             height:          isMobile ? 'auto' : '100%',
             scrollbarWidth:  'none',
             msOverflowStyle: 'none',
           }}
         >
+          {/* Tab kategori */}
           <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 10 }}>
             Kategori Produk/Jasa
           </div>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
             {[
               { key: 'produk', label: 'Produk', icon: Package       },
               { key: 'jasa',   label: 'Jasa',   icon: ClipboardList },
@@ -334,21 +630,16 @@ export default function Kasir() {
                   key={key}
                   onClick={() => setTab(key)}
                   style={{
-                    display:       'flex',
-                    flexDirection: 'column',
-                    alignItems:    'center',
-                    gap:           6,
-                    padding:       isMobile ? '10px 16px' : '12px 22px',
-                    flex:          isMobile ? 1 : 'none',
-                    borderRadius:  10,
-                    border:        `2px solid ${isActive ? COLOR.amber : COLOR.border}`,
-                    background:    '#fff',
-                    color:         isActive ? COLOR.amber : COLOR.textSub,
-                    cursor:        'pointer',
-                    fontWeight:    600,
-                    fontSize:      13,
-                    fontFamily:    'inherit',
-                    transition:    'all 0.15s',
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', gap: 6,
+                    padding:   isMobile ? '10px 16px' : '12px 22px',
+                    flex:      isMobile ? 1 : 'none',
+                    borderRadius: 10,
+                    border:    `2px solid ${isActive ? COLOR.amber : COLOR.border}`,
+                    background: '#fff',
+                    color:     isActive ? COLOR.amber : COLOR.textSub,
+                    cursor:    'pointer', fontWeight: 600, fontSize: 13,
+                    fontFamily: 'inherit', transition: 'all 0.15s',
                   }}
                 >
                   <Icon size={18} />
@@ -358,29 +649,68 @@ export default function Kasir() {
             })}
           </div>
 
+          {/* Search produk */}
+          <div style={{
+            display:      'flex',
+            alignItems:   'center',
+            gap:          8,
+            border:       `1px solid ${COLOR.border}`,
+            borderRadius: 8,
+            padding:      '8px 12px',
+            background:   '#fff',
+            marginBottom: 14,
+          }}>
+            <Search size={14} color={COLOR.textMuted} />
+            <input
+              value={searchProduk}
+              onChange={(e) => setSearchProduk(e.target.value)}
+              placeholder="Cari produk atau SKU..."
+              style={{
+                flex: 1, border: 'none', outline: 'none',
+                fontSize: 13, background: 'transparent', fontFamily: 'inherit',
+              }}
+            />
+            {searchProduk && (
+              <button onClick={() => setSearchProduk('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}>
+                <X size={13} color={COLOR.textMuted} />
+              </button>
+            )}
+          </div>
+
+          {/* Jumlah produk */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div style={{ fontWeight: 600, fontSize: 12, color: COLOR.textSub }}>Pilih Produk</div>
             <span style={{ fontSize: 11, color: COLOR.textMuted }}>
-              Showing {kasirProdukData.length} Items
+              {loadingProduk ? 'Memuat...' : `Showing ${produkTampil.length} Items`}
             </span>
           </div>
-          <div style={{
-            display:             'grid',
-            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
-            gap:                 isMobile ? 10 : 14,
-          }}>
-            {kasirProdukData.map((p) => (
-              <ProductCard
-                key={p.id}
-                produk={p}
-                onAdd={handleAddToCart}
-                isActive={selectedId === p.id}
-                isMobile={isMobile}
-              />
-            ))}
-          </div>
+
+          {/* Grid produk */}
+          {loadingProduk ? (
+            <div style={{ textAlign: 'center', color: COLOR.textMuted, fontSize: 13, padding: '40px 0' }}>
+              <Loader size={20} color={COLOR.amber} />
+              <div style={{ marginTop: 8 }}>Memuat produk...</div>
+            </div>
+          ) : (
+            <div style={{
+              display:             'grid',
+              gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+              gap:                 isMobile ? 10 : 14,
+            }}>
+              {produkTampil.map((p) => (
+                <ProductCard
+                  key={p.sku}
+                  produk={p}
+                  onAdd={handleAddToCart}
+                  isActive={selectedSku === p.sku}
+                  isMobile={isMobile}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
+        {/* ── Panel kanan: transaksi (desktop) ── */}
         {!isMobile && (
           <div
             className="no-scrollbar"
@@ -403,20 +733,24 @@ export default function Kasir() {
               metode={metode}
               setMetode={setMetode}
               handleUpdateQty={handleUpdateQty}
+              selectedMember={selectedMember}
+              setSelectedMember={setSelectedMember}
               isMobile={false}
+              onProses={handleProses}
+              prosesLoading={prosesLoading}
+              prosesError={prosesError}
             />
           </div>
         )}
       </div>
 
+      {/* ── Floating cart button (mobile) ── */}
       {isMobile && keranjang.length > 0 && !showMobileCart && (
         <button
           onClick={() => setShowMobileCart(true)}
           style={{
             position:       'fixed',
-            bottom:         20,
-            left:           16,
-            right:          16,
+            bottom:         20, left: 16, right: 16,
             background:     COLOR.amber,
             color:          '#fff',
             border:         'none',
@@ -433,8 +767,7 @@ export default function Kasir() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
-              background: 'rgba(255,255,255,0.25)',
-              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.25)', borderRadius: '50%',
               width: 28, height: 28,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               position: 'relative',
@@ -456,6 +789,7 @@ export default function Kasir() {
         </button>
       )}
 
+      {/* ── Modal cart (mobile) ── */}
       {isMobile && showMobileCart && (
         <div style={{
           position:      'fixed',
@@ -472,8 +806,13 @@ export default function Kasir() {
             metode={metode}
             setMetode={setMetode}
             handleUpdateQty={handleUpdateQty}
+            selectedMember={selectedMember}
+            setSelectedMember={setSelectedMember}
             isMobile={true}
             onClose={() => setShowMobileCart(false)}
+            onProses={handleProses}
+            prosesLoading={prosesLoading}
+            prosesError={prosesError}
           />
         </div>
       )}
