@@ -13,6 +13,7 @@ import TambahBarang from './pages/TambahBarang'
 import EditBarang from './pages/EditBarang'
 import TambahMember from './pages/TambahMember'
 import EditMember from './pages/EditMember'
+import Login from './pages/Login'
 import { useIsMobile } from './hooks/useIsMobile'
 
 const PAGE_TITLES = {
@@ -44,17 +45,22 @@ const PAGES = (onNav) => ({
 })
 
 export default function App() {
-  const [page, setPage]                     = useState('dashboard')
+  const [isLoggedIn, setIsLoggedIn]             = useState(false)
+  const [page, setPage]                         = useState('dashboard')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen]         = useState(false)
+  const [mobileOpen, setMobileOpen]             = useState(false)
 
   const isMobile     = useIsMobile()
   const sidebarWidth = sidebarCollapsed ? 72 : 220
-  const isKasir       = page === 'kasir'
-
-  // Di mobile, main content tidak punya margin-left karena sidebar jadi overlay
+  const isKasir      = page === 'kasir'
   const mainMarginLeft = isMobile ? 0 : sidebarWidth
 
+  // ── Belum login → tampilkan halaman Login ──
+  if (!isLoggedIn) {
+    return <Login onLogin={() => setIsLoggedIn(true)} />
+  }
+
+  // ── Sudah login → tampilkan app normal ─────
   return (
     <div style={{
       fontFamily: "'Geist', sans-serif",
