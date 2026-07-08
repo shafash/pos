@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { COLOR } from '../constants/colors'
-import api from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 const font = "'Geist', sans-serif"
 
 export default function Login({ onLogin }) {
-  const [username,  setUsername]  = useState('')
+  const [email,     setEmail]     = useState('')
   const [password,  setPassword]  = useState('')
   const [showPass,  setShowPass]  = useState(false)
   const [error,     setError]     = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const isDisabled = !username.trim() || !password.trim()
+  const { login } = useAuth()
+
+  const isDisabled = !email.trim() || !password.trim()
 
   const handleSubmit = async () => {
     if (isDisabled || isLoading) return
@@ -20,35 +22,15 @@ export default function Login({ onLogin }) {
     setIsLoading(true)
 
     try {
-      // POST /api/login → { token, user }
-      const res = await api.post('/login', {
-        username,
-        password,
-      })
-
-      const { token, user } = res.data
-
-      // Simpan token ke localStorage supaya Axios interceptor bisa pakai
-      localStorage.setItem('auth_token', token)
-
-      // Kalau mau simpan info user juga (opsional)
-      localStorage.setItem('auth_user', JSON.stringify(user))
-
-      // Beritahu App.jsx bahwa login berhasil, kirim data user kalau perlu
-      onLogin?.(user)
-
+      await login(email.trim(), password)
+      // Login sukses → AuthContext sudah set user & token
+      // App.jsx akan deteksi user sudah ada dan redirect otomatis
+      onLogin?.()
     } catch (err) {
-      // Laravel biasanya return 401 atau 422 kalau credentials salah
-      const status = err.response?.status
-      const msg    = err.response?.data?.message
-
-      if (status === 401 || status === 422) {
-        setError(msg || 'Username atau password salah.')
-      } else if (status === 429) {
-        setError('Terlalu banyak percobaan. Coba lagi beberapa saat.')
-      } else {
-        setError('Gagal terhubung ke server. Periksa koneksi Anda.')
-      }
+      const msg = err.response?.data?.message
+        ?? err.response?.data?.errors?.email?.[0]
+        ?? 'Email atau password salah.'
+      setError(msg)
     } finally {
       setIsLoading(false)
     }
@@ -100,11 +82,7 @@ export default function Login({ onLogin }) {
           }}>
             POS Elang Anugerah
           </div>
-          <div style={{
-            fontSize:   13,
-            color:      COLOR.textMuted,
-            fontFamily: font,
-          }}>
+          <div style={{ fontSize: 13, color: COLOR.textMuted, fontFamily: font }}>
             Masuk ke akun Anda untuk melanjutkan
           </div>
         </div>
@@ -148,7 +126,7 @@ export default function Login({ onLogin }) {
               </div>
             )}
 
-            {/* Username */}
+            {/* Email */}
             <div style={{ marginBottom: 16 }}>
               <label style={{
                 fontSize:     13,
@@ -158,14 +136,14 @@ export default function Login({ onLogin }) {
                 marginBottom: 6,
                 display:      'block',
               }}>
-                Username
+                Email
               </label>
               <input
-                type="text"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
+                type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setError('') }}
                 onKeyDown={handleKeyDown}
-                placeholder="Masukkan username"
+                placeholder="admin@elanganugerah.com"
                 style={{
                   width:        '100%',
                   height:       42,
@@ -181,7 +159,7 @@ export default function Login({ onLogin }) {
                   transition:   'border 0.15s',
                 }}
                 onFocus={e => e.target.style.border = `1px solid ${COLOR.amber}`}
-                onBlur={e => e.target.style.border  = `1px solid ${COLOR.border}`}
+                onBlur={e  => e.target.style.border = `1px solid ${COLOR.border}`}
               />
             </div>
 
@@ -201,7 +179,7 @@ export default function Login({ onLogin }) {
                 <input
                   type={showPass ? 'text' : 'password'}
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={e => { setPassword(e.target.value); setError('') }}
                   onKeyDown={handleKeyDown}
                   placeholder="Masukkan password"
                   style={{
@@ -219,7 +197,7 @@ export default function Login({ onLogin }) {
                     transition:   'border 0.15s',
                   }}
                   onFocus={e => e.target.style.border = `1px solid ${COLOR.amber}`}
-                  onBlur={e => e.target.style.border  = `1px solid ${COLOR.border}`}
+                  onBlur={e  => e.target.style.border = `1px solid ${COLOR.border}`}
                 />
                 <button
                   type="button"
@@ -244,7 +222,7 @@ export default function Login({ onLogin }) {
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               onClick={handleSubmit}
               disabled={isDisabled || isLoading}
@@ -275,6 +253,24 @@ export default function Login({ onLogin }) {
                 </>
               )}
             </button>
+
+            {/* Hint akun testing */}
+            <div style={{
+              marginTop:    16,
+              padding:      '10px 14px',
+              background:   '#FFFBEB',
+              border:       `1px solid #FDE68A`,
+              borderRadius: 8,
+              fontSize:     11,
+              color:        '#92400E',
+              fontFamily:   font,
+              lineHeight:   1.6,
+            }}>
+              <strong>Akun testing:</strong><br />
+              Admin: admin@elanganugerah.com<br />
+              Kasir Blimbing: kasir.blimbing@elanganugerah.com<br />
+              Password semua: <strong>password123</strong>
+            </div>
           </div>
         </div>
 

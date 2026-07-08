@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/produk/{sku}', [ProdukController::class, 'update']);
     Route::delete('/produk/{sku}', [ProdukController::class, 'destroy']);
     Route::put('/produk/{sku}/stok', [ProdukController::class, 'updateStok']);
+    Route::post('/produk/{sku}/foto', [ProdukController::class, 'uploadFoto']);
 
     Route::get('/kategori', [ProdukController::class, 'kategori']);
 

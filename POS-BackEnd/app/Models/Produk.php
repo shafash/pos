@@ -27,7 +27,14 @@ class Produk extends Model
         'harga_eceran',
         'harga_grosir',
         'satuan',
+        'foto',
     ];
+
+    public function getFotoUrlAttribute(): ?string
+    {
+        if (!$this->foto) return null;
+        return asset('storage/' . $this->foto);
+    }
 
     protected function casts(): array
     {
