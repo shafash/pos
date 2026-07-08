@@ -9,10 +9,14 @@ use App\Models\Kategori;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ProdukController extends Controller
 {
+    /**
+     * GET /api/produk
+     */
     public function index(Request $request): JsonResponse
     {
         $query = Produk::with(['kategori', 'stokCabang.cabang']);
@@ -31,8 +35,7 @@ class ProdukController extends Controller
         }
 
         $produkList = $query->orderBy('nama_barang')->get();
-
-        $cabangId = $request->cabang_id;
+        $cabangId   = $request->cabang_id;
 
         $data = $produkList->map(function ($produk) use ($cabangId) {
             $stokCabang = $cabangId
@@ -40,18 +43,19 @@ class ProdukController extends Controller
                 : null;
 
             return [
-                'sku'            => $produk->sku,
-                'nama_barang'    => $produk->nama_barang,
-                'merek'          => $produk->merek,
-                'kategori'       => $produk->kategori?->nama_kategori,
-                'kategori_id'    => $produk->kategori_id,
-                'harga_beli'     => $produk->harga_beli,
-                'harga_eceran'   => $produk->harga_eceran,
-                'harga_grosir'   => $produk->harga_grosir,
-                'satuan'         => $produk->satuan,
-                'stok_saat_ini'  => $stokCabang?->stok_saat_ini,
-                'minimum_stok'   => $stokCabang?->minimum_stok,
-                'perlu_restock'  => $stokCabang ? $stokCabang->perlu_restock : null,
+                'sku'             => $produk->sku,
+                'nama_barang'     => $produk->nama_barang,
+                'merek'           => $produk->merek,
+                'kategori'        => $produk->kategori?->nama_kategori,
+                'kategori_id'     => $produk->kategori_id,
+                'harga_beli'      => $produk->harga_beli,
+                'harga_eceran'    => $produk->harga_eceran,
+                'harga_grosir'    => $produk->harga_grosir,
+                'satuan'          => $produk->satuan,
+                'foto_url'        => $produk->foto_url,  // ← URL lengkap foto
+                'stok_saat_ini'   => $stokCabang?->stok_saat_ini,
+                'minimum_stok'    => $stokCabang?->minimum_stok,
+                'perlu_restock'   => $stokCabang ? $stokCabang->perlu_restock : null,
                 'stok_per_cabang' => $produk->stokCabang->map(fn($s) => [
                     'cabang_id'     => $s->cabang_id,
                     'nama_cabang'   => $s->cabang?->nama_cabang,
@@ -65,16 +69,25 @@ class ProdukController extends Controller
         return response()->json(['success' => true, 'data' => $data]);
     }
 
+    /**
+     * GET /api/produk/{sku}
+     */
     public function show(string $sku): JsonResponse
     {
         $produk = Produk::with(['kategori', 'stokCabang.cabang'])->findOrFail($sku);
 
         return response()->json([
             'success' => true,
-            'data'    => $produk->load('kategori', 'stokCabang.cabang'),
+            'data'    => array_merge($produk->toArray(), [
+                'foto_url' => $produk->foto_url,
+            ]),
         ]);
     }
 
+    /**
+     * POST /api/produk
+     * Support multipart/form-data untuk upload foto sekaligus tambah produk
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -88,11 +101,22 @@ class ProdukController extends Controller
             'satuan'       => 'nullable|string|max:20',
             'stok_awal'    => 'nullable|integer|min:0',
             'minimum_stok' => 'nullable|integer|min:0',
+            'foto'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // max 2MB
         ]);
 
         DB::beginTransaction();
         try {
-            $sku = $validated['sku'] ?? $this->generateSku($validated['merek'] ?? $validated['nama_barang']);
+            $sku      = $validated['sku'] ?? $this->generateSku($validated['merek'] ?? $validated['nama_barang']);
+            $fotoPath = null;
+
+            // Simpan foto kalau ada
+            if ($request->hasFile('foto')) {
+                $fotoPath = $request->file('foto')->storeAs(
+                    'produk',
+                    $sku . '.' . $request->file('foto')->extension(),
+                    'public'
+                );
+            }
 
             $produk = Produk::create([
                 'sku'          => $sku,
@@ -103,8 +127,10 @@ class ProdukController extends Controller
                 'harga_eceran' => $validated['harga_eceran'],
                 'harga_grosir' => $validated['harga_grosir'] ?? round($validated['harga_eceran'] * 0.9),
                 'satuan'       => $validated['satuan'] ?? 'pcs',
+                'foto'         => $fotoPath,
             ]);
 
+            // Buat baris stok untuk semua cabang
             $cabangList = DB::table('cabang')->pluck('id');
             foreach ($cabangList as $cabangId) {
                 StokCabang::create([
@@ -118,12 +144,19 @@ class ProdukController extends Controller
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Produk berhasil ditambahkan.',
-                'data'    => $produk->load('kategori', 'stokCabang.cabang'),
+                'success'  => true,
+                'message'  => 'Produk berhasil ditambahkan.',
+                'data'     => array_merge(
+                    $produk->load('kategori', 'stokCabang.cabang')->toArray(),
+                    ['foto_url' => $produk->foto_url]
+                ),
             ], 201);
+
         } catch (\Exception $e) {
             DB::rollBack();
+            // Hapus foto yang sudah terupload kalau ada error
+            if ($fotoPath) Storage::disk('public')->delete($fotoPath);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menambahkan produk: ' . $e->getMessage(),
@@ -131,6 +164,10 @@ class ProdukController extends Controller
         }
     }
 
+    /**
+     * PUT /api/produk/{sku}
+     * Update data produk (bukan foto — foto pakai endpoint terpisah)
+     */
     public function update(Request $request, string $sku): JsonResponse
     {
         $produk = Produk::findOrFail($sku);
@@ -150,10 +187,49 @@ class ProdukController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Produk berhasil diperbarui.',
-            'data'    => $produk->fresh()->load('kategori', 'stokCabang.cabang'),
+            'data'    => array_merge(
+                $produk->fresh()->load('kategori', 'stokCabang.cabang')->toArray(),
+                ['foto_url' => $produk->fresh()->foto_url]
+            ),
         ]);
     }
 
+    /**
+     * POST /api/produk/{sku}/foto
+     * Upload atau ganti foto produk
+     */
+    public function uploadFoto(Request $request, string $sku): JsonResponse
+    {
+        $produk = Produk::findOrFail($sku);
+
+        $request->validate([
+            'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        // Hapus foto lama kalau ada
+        if ($produk->foto) {
+            Storage::disk('public')->delete($produk->foto);
+        }
+
+        // Simpan foto baru dengan nama SKU
+        $fotoPath = $request->file('foto')->storeAs(
+            'produk',
+            $sku . '.' . $request->file('foto')->extension(),
+            'public'
+        );
+
+        $produk->update(['foto' => $fotoPath]);
+
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Foto produk berhasil diperbarui.',
+            'foto_url' => $produk->fresh()->foto_url,
+        ]);
+    }
+
+    /**
+     * DELETE /api/produk/{sku}
+     */
     public function destroy(string $sku): JsonResponse
     {
         $produk = Produk::findOrFail($sku);
@@ -166,6 +242,11 @@ class ProdukController extends Controller
             ], 422);
         }
 
+        // Hapus foto kalau ada
+        if ($produk->foto) {
+            Storage::disk('public')->delete($produk->foto);
+        }
+
         $produk->delete();
 
         return response()->json([
@@ -174,6 +255,9 @@ class ProdukController extends Controller
         ]);
     }
 
+    /**
+     * PUT /api/produk/{sku}/stok
+     */
     public function updateStok(Request $request, string $sku): JsonResponse
     {
         $validated = $request->validate([
@@ -198,16 +282,20 @@ class ProdukController extends Controller
         ]);
     }
 
+    /**
+     * GET /api/kategori
+     */
     public function kategori(): JsonResponse
     {
         $kategori = Kategori::orderBy('nama_kategori')->get();
-
         return response()->json(['success' => true, 'data' => $kategori]);
     }
 
+    // ── Private helpers ──────────────────────────────────────
+
     private function generateSku(string $merek): string
     {
-        $prefix = strtoupper(substr(str_replace(' ', '', $merek), 0, 3));
+        $prefix     = strtoupper(substr(str_replace(' ', '', $merek), 0, 3));
         $lastNumber = Produk::where('sku', 'like', "{$prefix}-%")->count();
         $nextNumber = str_pad((string) ($lastNumber + 1), 3, '0', STR_PAD_LEFT);
         return "{$prefix}-{$nextNumber}";
