@@ -302,7 +302,7 @@ export default function StokBarang({ onNav }) {
                     <td style={{ padding: '12px 16px', fontSize: 13 }}>{i + 1}.</td>
                     <td style={{ padding: '12px 16px', fontSize: 13, whiteSpace: 'nowrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <ProductImage width={28} height={22} />
+                        <ProductImage src={p.foto_url} alt={p.nama_barang} width={28} height={28} />
                         <div>
                           <div>{p.nama_barang}</div>
                           <div style={{ fontSize: 11, color: COLOR.textMuted }}>{p.sku}</div>
@@ -391,7 +391,7 @@ export default function StokBarang({ onNav }) {
                 padding:       isStacked ? 0 : '8px 0',
                 borderBottom:  (!isStacked && i < barangBaru.length - 1) ? `1px solid ${COLOR.border}` : 'none',
               }}>
-                <ProductImage width={isStacked ? 48 : 36} height={isStacked ? 36 : 28} />
+                <ProductImage src={b.foto_url} alt={b.nama_barang} width={isStacked ? 48 : 48} height={isStacked ? 48 : 36} />
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 600 }}>{b.nama_barang}</div>
                   <div style={{ fontSize: 11, color: COLOR.textMuted }}>
