@@ -141,16 +141,80 @@ export default function Laporan() {
   const hariDalamPeriode = tabelData.length || 1
   const rataHari        = totalPendapatan / hariDalamPeriode
 
-  // ── Export handler ───────────────────────────────────────
-  const handleExport = () => {
-    // Buka tab baru ke endpoint laporan (bisa dikembangkan ke PDF nanti)
-    const params = new URLSearchParams({
-      tipe:   'harian',
-      dari:   dariTgl,
-      sampai: sampaiTgl,
-      ...(cabangId ? { cabang_id: cabangId } : {}),
-    })
-    window.open(`http://127.0.0.1:8000/api/laporan?${params.toString()}`, '_blank')
+  // ── Export PDF handler (generate di frontend, tidak butuh request baru) ──
+  const [loadingExport, setLoadingExport] = useState(false)
+
+  const handleExport = async () => {
+    if (filteredTabel.length === 0) {
+      alert('Tidak ada data untuk di-export.')
+      return
+    }
+
+    setLoadingExport(true)
+    try {
+      // Import jsPDF dan autoTable secara dynamic (lazy load)
+      const { default: jsPDF }    = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
+
+      const doc = new jsPDF()
+
+      // ── Header PDF ─────────────────────────────────
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Laporan Penjualan Harian', 14, 18)
+
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(100)
+      doc.text('POS Elang Anugerah', 14, 26)
+
+      const namaCabang = CABANG_LIST.find(c => c.id === cabangId)?.nama ?? 'Semua Cabang'
+      doc.text(`Cabang: ${namaCabang}`, 14, 32)
+      doc.text(`Periode: ${formatTanggal(dariTgl)} – ${formatTanggal(sampaiTgl)}`, 14, 38)
+      doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, 14, 44)
+
+      doc.setTextColor(0)
+
+      // ── Tabel data ──────────────────────────────────
+      autoTable(doc, {
+        startY: 52,
+        head: [['Tanggal', 'Transaksi', 'Pendapatan', 'Pajak (3%)', 'Bersih']],
+        body: filteredTabel.map(row => [
+          row.tanggal,
+          String(row.transaksi),
+          `Rp ${row.pendapatan.toLocaleString('id-ID')}`,
+          `Rp ${row.pajak.toLocaleString('id-ID')}`,
+          `Rp ${row.bersih.toLocaleString('id-ID')}`,
+        ]),
+        foot: [[
+          'TOTAL',
+          String(filteredTabel.reduce((s, r) => s + r.transaksi, 0)),
+          `Rp ${filteredTabel.reduce((s, r) => s + r.pendapatan, 0).toLocaleString('id-ID')}`,
+          `Rp ${filteredTabel.reduce((s, r) => s + r.pajak, 0).toLocaleString('id-ID')}`,
+          `Rp ${filteredTabel.reduce((s, r) => s + r.bersih, 0).toLocaleString('id-ID')}`,
+        ]],
+        headStyles:  { fillColor: [255, 165, 0], textColor: 255, fontStyle: 'bold' },
+        footStyles:  { fillColor: [245, 245, 245], fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [255, 253, 245] },
+        styles: { fontSize: 9, cellPadding: 3 },
+        columnStyles: {
+          0: { cellWidth: 35 },
+          1: { cellWidth: 22, halign: 'center' },
+          2: { cellWidth: 42, halign: 'right' },
+          3: { cellWidth: 35, halign: 'right' },
+          4: { cellWidth: 42, halign: 'right' },
+        },
+      })
+
+      // ── Simpan file PDF ─────────────────────────────
+      const fileName = `laporan-${dariTgl}-sampai-${sampaiTgl}.pdf`
+      doc.save(fileName)
+    } catch (err) {
+      console.error('Export PDF error:', err)
+      alert('Gagal export PDF. Pastikan sudah install: npm install jspdf jspdf-autotable')
+    } finally {
+      setLoadingExport(false)
+    }
   }
 
   // ── Render ───────────────────────────────────────────────
@@ -400,6 +464,7 @@ export default function Laporan() {
             {/* Export */}
             <button
               onClick={handleExport}
+              disabled={loadingExport || filteredTabel.length === 0}
               style={{
                 display:        'flex',
                 alignItems:     'center',
@@ -408,18 +473,21 @@ export default function Laporan() {
                 padding:        '8px 16px',
                 border:         'none',
                 borderRadius:   8,
-                background:     COLOR.amber,
+                background:     loadingExport || filteredTabel.length === 0 ? '#ccc' : COLOR.amber,
                 color:          '#fff',
                 fontSize:       13,
                 fontWeight:     700,
-                cursor:         'pointer',
+                cursor:         loadingExport || filteredTabel.length === 0 ? 'not-allowed' : 'pointer',
                 fontFamily:     'inherit',
                 whiteSpace:     'nowrap',
                 flexShrink:     0,
               }}
             >
-              <Upload size={14} />
-              Export PDF
+              {loadingExport
+                ? <Loader size={14} />
+                : <Upload size={14} />
+              }
+              {loadingExport ? 'Generating...' : 'Export PDF'}
             </button>
           </div>
         </div>
