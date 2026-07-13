@@ -209,6 +209,7 @@ export default function EditBarang({ onNav, params }) {
 
   // ── Render ───────────────────────────────────────────────
   return (
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 16 : 20, fontFamily: font }}>
 
       {/* Success / Error toast */}
@@ -520,6 +521,7 @@ export default function EditBarang({ onNav, params }) {
           {loadingUpdate || loadingStok ? 'Menyimpan...' : 'Simpan Perubahan'}
         </button>
       </div>
+    </div>
     </div>
   )
 }

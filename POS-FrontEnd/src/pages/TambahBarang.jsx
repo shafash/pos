@@ -209,7 +209,7 @@ export default function TambahBarang({ onNav }) {
   )
 
   return (
-    <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: `1px solid ${COLOR.border}`, fontFamily: font }}>
+    <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: `1px solid ${COLOR.border}`, fontFamily: font, maxWidth: 860, margin: '0 auto' }}>
       <div style={{ background: '#FFCD71', padding: '12px 18px', fontSize: 15, fontWeight: 500, color: '#000', fontFamily: font }}>
         Tambah Barang Baru
       </div>

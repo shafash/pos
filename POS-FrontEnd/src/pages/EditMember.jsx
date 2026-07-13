@@ -178,6 +178,7 @@ export default function EditMember({ onNav, params }) {
 
   // ── Render ───────────────────────────────────────────────
   return (
+    <div style={{ maxWidth: 900, margin: '0 auto' }}>
     <div style={{
       display:             'grid',
       gridTemplateColumns: isStacked ? '1fr' : '1fr 320px',
@@ -459,6 +460,7 @@ export default function EditMember({ onNav, params }) {
           </button>
         </div>
       </div>
+    </div>
     </div>
   )
 }

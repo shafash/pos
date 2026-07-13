@@ -150,16 +150,6 @@ export default function Login({ onLogin }) {
             alignItems:  'center',
             gap:         10,
           }}>
-            <div style={{
-              width:          40, height: 40,
-              background:     COLOR.amber,
-              borderRadius:   10,
-              display:        'flex',
-              alignItems:     'center',
-              justifyContent: 'center',
-            }}>
-              <span style={{ color: '#fff', fontWeight: 900, fontSize: 16, fontFamily: font }}>EA</span>
-            </div>
             <span style={{ color: '#fff', fontWeight: 700, fontSize: 15, fontFamily: font }}>
               ElangAnugerah
             </span>

@@ -136,6 +136,8 @@ export default function TambahMember({ onNav }) {
       overflow:     'hidden',
       border:       `1px solid ${COLOR.border}`,
       fontFamily:   font,
+      maxWidth:     760,
+      margin:       '0 auto',
     }}>
 
       {/* Banner */}

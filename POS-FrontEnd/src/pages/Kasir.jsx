@@ -42,7 +42,12 @@ function ProductCard({ produk, onAdd, isActive, isMobile }) {
         justifyContent: 'center',
         marginBottom:   12,
       }}>
-        <ProductImage width={isMobile ? 60 : 80} height={isMobile ? 45 : 60} />
+        <ProductImage
+          src={produk.foto_url}
+          alt={produk.nama_barang}
+          width={isMobile ? 60 : 80}
+          height={isMobile ? 60 : 80}
+        />
       </div>
       <div style={{
         fontSize:        13,
@@ -93,7 +98,7 @@ function KeranjangItem({ item, onUpdateQty }) {
       padding:      '10px 0',
       borderBottom: `1px solid ${COLOR.border}`,
     }}>
-      <ProductImage width={36} height={28} />
+      <ProductImage src={item.foto_url} alt={item.nama_barang} width={36} height={36} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
           fontSize:     12,
@@ -519,11 +524,12 @@ export default function Kasir() {
         return prev.map(x => x.sku === produk.sku ? { ...x, qty: x.qty + 1 } : x)
       }
       return [...prev, {
-        sku:         produk.sku,
-        nama_barang: produk.nama_barang,
-        kategori:    produk.kategori,
-        harga_satuan: produk.harga_eceran,  // default eceran, bisa diubah nanti
-        qty:         1,
+        sku:          produk.sku,
+        nama_barang:  produk.nama_barang,
+        kategori:     produk.kategori,
+        harga_satuan: produk.harga_eceran,
+        foto_url:     produk.foto_url ?? null,   // ← tambah ini
+        qty:          1,
       }]
     })
   }
