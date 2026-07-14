@@ -10,6 +10,7 @@ use App\Support\IdGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class TransaksiController extends Controller
 {
@@ -106,7 +107,12 @@ class TransaksiController extends Controller
 
             $noTransaksi = $this->generateNoTransaksi();
 
-            $transaksi = Transaksi::create([
+            $poinBaru = null;
+            if ($validated['id_member']) {
+                $poinBaru = (int) floor($totalBayar / 10000);
+            }
+
+            $transactionData = [
                 'no_transaksi'      => $noTransaksi,
                 'waktu'             => now(),
                 'total_bayar'       => $totalBayar,
@@ -115,7 +121,13 @@ class TransaksiController extends Controller
                 'user_id'           => $user->id,
                 'id_member'         => $validated['id_member'] ?? null,
                 'cabang_id'         => $cabangId,
-            ]);
+            ];
+
+            if (Schema::hasColumn('transaksi', 'poin_diberikan')) {
+                $transactionData['poin_diberikan'] = $poinBaru ?? 0;
+            }
+
+            $transaksi = Transaksi::create($transactionData);
 
             foreach ($itemsInsert as $item) {
                 $transaksi->detailTransaksi()->create([
@@ -128,8 +140,7 @@ class TransaksiController extends Controller
                 $item['stok']->decrement('stok_saat_ini', $item['kuantitas']);
             }
 
-            if ($validated['id_member']) {
-                $poinBaru = (int) floor($totalBayar / 10000);
+            if ($validated['id_member'] && $poinBaru !== null) {
                 $member = \App\Models\Member::find($validated['id_member']);
                 if ($member) {
                     $member->increment('poin', $poinBaru);
@@ -169,13 +180,23 @@ class TransaksiController extends Controller
 
         DB::beginTransaction();
         try {
-            foreach ($transaksi->detailTransaksi as $detail) {
-                StokCabang::where('sku', $detail->sku)
-                    ->where('cabang_id', $transaksi->cabang_id)
-                    ->increment('stok_saat_ini', $detail->kuantitas);
-            }
+            if ($transaksi->status !== 'batal') {
+                foreach ($transaksi->detailTransaksi as $detail) {
+                    StokCabang::where('sku', $detail->sku)
+                        ->where('cabang_id', $transaksi->cabang_id)
+                        ->increment('stok_saat_ini', $detail->kuantitas);
+                }
 
-            $transaksi->update(['status' => 'batal']);
+                if ($transaksi->id_member && (int) $transaksi->poin_diberikan > 0) {
+                    $member = \App\Models\Member::find($transaksi->id_member);
+                    if ($member) {
+                        $member->decrement('poin', (int) $transaksi->poin_diberikan);
+                        $this->updateTierMember($member);
+                    }
+                }
+
+                $transaksi->update(['status' => 'batal']);
+            }
 
             DB::commit();
 

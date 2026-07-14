@@ -21,11 +21,12 @@ class Transaksi extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'no_transaksi', 
+        'no_transaksi',
         'waktu',
         'total_bayar',
         'metode_pembayaran',
         'status',
+        'poin_diberikan',
         'user_id',
         'id_member',
         'cabang_id',
@@ -36,6 +37,7 @@ class Transaksi extends Model
         return [
             'waktu' => 'datetime',
             'total_bayar' => 'decimal:2',
+            'poin_diberikan' => 'integer',
         ];
     }
 

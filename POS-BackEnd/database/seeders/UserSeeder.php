@@ -6,7 +6,6 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Cabang;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -33,7 +32,7 @@ class UserSeeder extends Seeder
                 'nama_lengkap' => 'Kasir ' . $cabang->nama_cabang,
                 'role' => 'kasir',
                 'email' => "kasir.{$slug}@elanganugerah.com",
-                'password' => Hash::make('password123'),
+                'password' => 'password123',
                 'cabang_id' => $cabang->id,
             ]);
         }

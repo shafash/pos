@@ -15,7 +15,7 @@ class IdGenerator
     {
         $tanggal = now()->format('Ymd');
 
-        return "TRX-{$tanggal}-" . (string) Str::ulid();
+        return 'TRX-' . $tanggal . '-' . strtoupper(substr((string) Str::ulid(), 0, 8));
     }
 
     public function produkSku(string $merek): string

@@ -494,8 +494,10 @@ export default function Kasir() {
   // Mutation untuk POST transaksi
   const { loading: prosesLoading, error: prosesError, execute: kirimTransaksi } = useMutation(transaksiService.create)
 
+  const produkListArray = Array.isArray(produkList) ? produkList : []
+
   // Filter produk berdasarkan search dan tab kategori
-  const produkTampil = (produkList ?? []).filter((p) => {
+  const produkTampil = produkListArray.filter((p) => {
     const matchSearch = searchProduk.trim() === '' ||
       p.nama_barang.toLowerCase().includes(searchProduk.toLowerCase()) ||
       p.sku.toLowerCase().includes(searchProduk.toLowerCase())
