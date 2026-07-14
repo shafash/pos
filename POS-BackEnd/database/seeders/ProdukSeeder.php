@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Kategori;
 use App\Models\Produk;
+use Illuminate\Support\Str;
 
 class ProdukSeeder extends Seeder
 {
@@ -48,9 +49,7 @@ class ProdukSeeder extends Seeder
     private function generateSku(string $merek): string
     {
         $prefix = strtoupper(substr(str_replace(' ', '', $merek), 0, 3));
-        $lastNumber = Produk::where('sku', 'like', "{$prefix}-%")->count();
-        $nextNumber = str_pad((string) ($lastNumber + 1), 3, '0', STR_PAD_LEFT);
-
-        return "{$prefix}-{$nextNumber}";
+        $ulid = (string) Str::ulid();
+        return "{$prefix}-{$ulid}";
     }
 }

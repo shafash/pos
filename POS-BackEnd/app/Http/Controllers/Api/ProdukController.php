@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Produk;
 use App\Models\StokCabang;
 use App\Models\Kategori;
+use App\Support\IdGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -300,9 +301,6 @@ class ProdukController extends Controller
 
     private function generateSku(string $merek): string
     {
-        $prefix     = strtoupper(substr(str_replace(' ', '', $merek), 0, 3));
-        $lastNumber = Produk::where('sku', 'like', "{$prefix}-%")->count();
-        $nextNumber = str_pad((string) ($lastNumber + 1), 3, '0', STR_PAD_LEFT);
-        return "{$prefix}-{$nextNumber}";
+        return app(IdGenerator::class)->produkSku($merek);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
 use App\Models\StokCabang;
+use App\Support\IdGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -191,12 +192,7 @@ class TransaksiController extends Controller
 
     private function generateNoTransaksi(): string
     {
-        $tanggal   = now()->format('Ymd');
-        $prefix    = "TRX-{$tanggal}-";
-        $lastCount = Transaksi::where('no_transaksi', 'like', "{$prefix}%")->count();
-        $nextNum   = str_pad((string) ($lastCount + 1), 3, '0', STR_PAD_LEFT);
-
-        return "{$prefix}{$nextNum}";
+        return app(IdGenerator::class)->transaksiNo();
     }
 
     private function updateTierMember(\App\Models\Member $member): void

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Member;
+use App\Support\IdGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -107,15 +108,6 @@ class MemberController extends Controller
 
     private function generateIdMember(): string
     {
-        $last = Member::orderByDesc('id_member')->first();
-
-        if (! $last) {
-            return 'MBR-0001';
-        }
-
-        $lastNumber = (int) substr($last->id_member, 4);
-        $nextNumber = str_pad((string) ($lastNumber + 1), 4, '0', STR_PAD_LEFT);
-
-        return "MBR-{$nextNumber}";
+        return app(IdGenerator::class)->memberId();
     }
 }
