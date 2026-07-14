@@ -163,9 +163,18 @@ class AuditController extends Controller
         DB::beginTransaction();
         try {
             foreach ($audit->detailAudit as $detail) {
-                StokCabang::where('sku', $detail->sku)
+                $stokCabang = StokCabang::where('sku', $detail->sku)
                     ->where('cabang_id', $audit->cabang_id)
-                    ->update(['stok_saat_ini' => $detail->stok_fisik]);
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $stokCabang) {
+                    continue;
+                }
+
+                $delta = $detail->stok_fisik - $detail->stok_sistem;
+                $stokCabang->stok_saat_ini = $stokCabang->stok_saat_ini + $delta;
+                $stokCabang->save();
             }
 
             $audit->update(['status' => 'selesai']);
@@ -174,7 +183,7 @@ class AuditController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Audit selesai. Stok sistem telah disesuaikan dengan stok fisik.',
+                'message' => 'Audit selesai. Stok sistem telah disesuaikan berdasarkan selisih audit.',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
