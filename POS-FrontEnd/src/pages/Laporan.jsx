@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Search, ChevronDown, Upload, Loader } from 'lucide-react'
 import { COLOR } from '../constants/colors'
-import { laporanService } from '../services/api'
+import { cabangService, laporanService } from '../services/api'
 import { useApi } from '../hooks/useApi'
 import { fmt } from '../utils/format'
 import { useAuth } from '../context/AuthContext'
@@ -15,14 +15,7 @@ import {
 
 const TABLE_COLS = ['Tanggal', 'Total Transaksi', 'Pendapatan', 'Pajak (3%)', 'Bersih']
 
-// Nama cabang sesuai seeder — dipakai untuk filter dropdown
-const CABANG_LIST = [
-  { id: null, nama: 'Semua Cabang'              },
-  { id: 1,    nama: 'Elang Anugerah Blimbing'   },
-  { id: 2,    nama: 'Elang Anugerah Kepanjen'   },
-  { id: 3,    nama: 'Elang Anugerah Turen'      },
-  { id: 4,    nama: 'Elang Anugerah Singosari'  },
-]
+const DEFAULT_CABANG_LIST = [{ id: null, nama: 'Semua Cabang' }]
 
 // Helper: format tanggal YYYY-MM-DD ke "01 Jun 2026"
 function formatTanggal(dateStr) {
@@ -64,6 +57,24 @@ export default function Laporan() {
   const [cabangId,  setCabangId]  = useState(user?.cabang_id ?? null)
   const [dariTgl,   setDariTgl]   = useState(`${tahunIni}-${bulanIni}-01`)
   const [sampaiTgl, setSampaiTgl] = useState(`${tahunIni}-${bulanIni}-${String(new Date(tahunIni, now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`)
+  const [cabangList, setCabangList] = useState(DEFAULT_CABANG_LIST)
+
+  const {
+    data: cabangData,
+    loading: loadingCabang,
+    error: errorCabang,
+    execute: fetchCabang,
+  } = useApi(cabangService.getAll)
+
+  useEffect(() => {
+    fetchCabang()
+  }, [fetchCabang])
+
+  useEffect(() => {
+    if (Array.isArray(cabangData)) {
+      setCabangList([{ id: null, nama: 'Semua Cabang' }, ...cabangData])
+    }
+  }, [cabangData])
 
   // ── Fetch laporan harian (untuk tabel) ───────────────────
   const {
@@ -168,7 +179,7 @@ export default function Laporan() {
       doc.setTextColor(100)
       doc.text('POS Elang Anugerah', 14, 26)
 
-      const namaCabang = CABANG_LIST.find(c => c.id === cabangId)?.nama ?? 'Semua Cabang'
+      const namaCabang = cabangList.find(c => c.id === cabangId)?.nama ?? 'Semua Cabang'
       doc.text(`Cabang: ${namaCabang}`, 14, 32)
       doc.text(`Periode: ${formatTanggal(dariTgl)} – ${formatTanggal(sampaiTgl)}`, 14, 38)
       doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, 14, 44)
@@ -448,11 +459,17 @@ export default function Laporan() {
                   fontFamily:   'inherit',
                 }}
               >
-                {CABANG_LIST.map(c => (
-                  <option key={c.id ?? 'all'} value={c.id ?? ''}>
-                    {c.nama}
-                  </option>
-                ))}
+                {loadingCabang ? (
+                  <option value="">Memuat cabang...</option>
+                ) : errorCabang ? (
+                  <option value="">Gagal memuat cabang</option>
+                ) : (
+                  cabangList.map(c => (
+                    <option key={c.id ?? 'all'} value={c.id ?? ''}>
+                      {c.nama}
+                    </option>
+                  ))
+                )}
               </select>
               <ChevronDown
                 size={14}

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\AuditController;
+use App\Http\Controllers\Api\CabangController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -40,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/transaksi/{no_transaksi}/batal', [TransaksiController::class, 'batal']);
 
     Route::get('/laporan', [LaporanController::class, 'index']);
+    Route::get('/cabang', [CabangController::class, 'index']);
 
     Route::get('/audit', [AuditController::class, 'index']);
     Route::post('/audit', [AuditController::class, 'store']);

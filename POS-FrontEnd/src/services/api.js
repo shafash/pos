@@ -130,6 +130,11 @@ export const laporanService = {
     api.get('/laporan', { params }),
 }
 
+export const cabangService = {
+  getAll: () =>
+    api.get('/cabang'),
+}
+
 export const auditService = {
   getAll: (params = {}) =>
     api.get('/audit', { params }),
