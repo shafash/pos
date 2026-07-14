@@ -42,6 +42,8 @@ class AuditController extends Controller
             'detailAudit.produk:sku,nama_barang,merek',
         ])->findOrFail($id);
 
+        $this->authorize('view', $audit);
+
         return response()->json(['success' => true, 'data' => $audit]);
     }
 
@@ -90,6 +92,8 @@ class AuditController extends Controller
     public function submitDetail(Request $request, int $id): JsonResponse
     {
         $audit = AuditStok::findOrFail($id);
+
+        $this->authorize('update', $audit);
 
         if ($audit->status !== 'berlangsung') {
             return response()->json([
@@ -147,6 +151,8 @@ class AuditController extends Controller
     {
         $audit = AuditStok::with('detailAudit')->findOrFail($id);
 
+        $this->authorize('update', $audit);
+
         if ($audit->status !== 'berlangsung') {
             return response()->json([
                 'success' => false,
@@ -182,6 +188,8 @@ class AuditController extends Controller
     public function batal(int $id): JsonResponse
     {
         $audit = AuditStok::findOrFail($id);
+
+        $this->authorize('update', $audit);
 
         if ($audit->status !== 'berlangsung') {
             return response()->json([

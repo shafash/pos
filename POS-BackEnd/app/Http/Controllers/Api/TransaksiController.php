@@ -46,6 +46,8 @@ class TransaksiController extends Controller
             'detailTransaksi.produk',
         ])->findOrFail($noTransaksi);
 
+        $this->authorize('view', $transaksi);
+
         return response()->json(['success' => true, 'data' => $transaksi]);
     }
 
@@ -152,6 +154,8 @@ class TransaksiController extends Controller
     public function batal(string $noTransaksi): JsonResponse
     {
         $transaksi = Transaksi::with('detailTransaksi')->findOrFail($noTransaksi);
+
+        $this->authorize('update', $transaksi);
 
         if ($transaksi->status === 'batal') {
             return response()->json([

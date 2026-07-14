@@ -35,7 +35,9 @@ class ProdukController extends Controller
         }
 
         $produkList = $query->orderBy('nama_barang')->get();
-        $cabangId   = $request->cabang_id;
+        $user       = $request->user();
+        // If user is kasir, force cabang scope to user's cabang
+        $cabangId   = $user && $user->isKasir() ? $user->cabang_id : $request->cabang_id;
 
         $data = $produkList->map(function ($produk) use ($cabangId) {
             $stokCabang = $cabangId
@@ -266,9 +268,12 @@ class ProdukController extends Controller
             'minimum_stok'  => 'nullable|integer|min:0',
         ]);
 
+
         $stok = StokCabang::where('sku', $sku)
             ->where('cabang_id', $validated['cabang_id'])
             ->firstOrFail();
+
+        $this->authorize('update', $stok);
 
         $stok->update([
             'stok_saat_ini' => $validated['stok_saat_ini'],
