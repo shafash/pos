@@ -20,6 +20,11 @@ class ProdukController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'page'     => ['nullable', 'integer', 'min:1'],
+        ]);
+
         $query = Produk::with(['kategori', 'stokCabang.cabang']);
 
         if ($request->filled('search')) {
@@ -35,12 +40,13 @@ class ProdukController extends Controller
             $query->where('kategori_id', $request->kategori_id);
         }
 
-        $produkList = $query->orderBy('nama_barang')->get();
         $user       = $request->user();
         // If user is kasir, force cabang scope to user's cabang
         $cabangId   = $user && $user->isKasir() ? $user->cabang_id : $request->cabang_id;
+        $perPage    = (int) ($validated['per_page'] ?? 15);
 
-        $data = $produkList->map(function ($produk) use ($cabangId) {
+        $produkList = $query->orderBy('nama_barang')->paginate($perPage);
+        $data = $produkList->getCollection()->map(function ($produk) use ($cabangId) {
             $stokCabang = $cabangId
                 ? $produk->stokCabang->firstWhere('cabang_id', $cabangId)
                 : null;
@@ -55,7 +61,7 @@ class ProdukController extends Controller
                 'harga_eceran'    => $produk->harga_eceran,
                 'harga_grosir'    => $produk->harga_grosir,
                 'satuan'          => $produk->satuan,
-                'foto_url'        => $produk->foto_url,  // ← URL lengkap foto
+                'foto_url'        => $produk->foto_url,
                 'stok_saat_ini'   => $stokCabang?->stok_saat_ini,
                 'minimum_stok'    => $stokCabang?->minimum_stok,
                 'perlu_restock'   => $stokCabang ? $stokCabang->perlu_restock : null,
@@ -69,7 +75,9 @@ class ProdukController extends Controller
             ];
         });
 
-        return response()->json(['success' => true, 'data' => $data]);
+        $produkList->setCollection($data);
+
+        return response()->json(['success' => true, 'data' => $produkList->toArray()]);
     }
 
     /**

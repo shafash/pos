@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
 use App\Models\StokCabang;
+use App\Support\CartItemMerger;
 use App\Support\IdGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -73,10 +74,11 @@ class TransaksiController extends Controller
 
         DB::beginTransaction();
         try {
+            $mergedItems = app(CartItemMerger::class)->merge($validated['items']);
             $totalBayar  = 0;
             $itemsInsert = [];
 
-            foreach ($validated['items'] as $item) {
+            foreach ($mergedItems as $item) {
                 $stok = StokCabang::where('sku', $item['sku'])
                     ->where('cabang_id', $cabangId)
                     ->lockForUpdate()
