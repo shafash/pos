@@ -566,6 +566,9 @@ export default function Kasir() {
       setShowMobileCart(false)
       setSuccessMsg(`Transaksi ${result.no_transaksi} berhasil! Total: ${fmt(result.total_bayar)}`)
 
+      const receiptUrl = `${(import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')}/receipt/${result.no_transaksi}`
+      window.open(receiptUrl, '_blank', 'noopener,noreferrer')
+
       // Refresh stok produk setelah transaksi
       fetchProduk({ cabang_id: cabangId })
 

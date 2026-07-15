@@ -41,14 +41,22 @@ class ProdukController extends Controller
         }
 
         $user       = $request->user();
-        // If user is kasir, force cabang scope to user's cabang
-        $cabangId   = $user && $user->isKasir() ? $user->cabang_id : $request->cabang_id;
+        $cabangId   = $user && ! $user->isAdmin() ? $user->cabang_id : null;
         $perPage    = (int) ($validated['per_page'] ?? 15);
 
         $produkList = $query->orderBy('nama_barang')->paginate($perPage);
         $data = $produkList->getCollection()->map(function ($produk) use ($cabangId) {
-            $stokCabang = $cabangId
-                ? $produk->stokCabang->firstWhere('cabang_id', $cabangId)
+            $stokPerCabang = $produk->stokCabang->map(fn($s) => [
+                'cabang_id'     => $s->cabang_id,
+                'nama_cabang'   => $s->cabang?->nama_cabang,
+                'stok_saat_ini' => $s->stok_saat_ini,
+                'minimum_stok'  => $s->minimum_stok,
+                'perlu_restock' => $s->perlu_restock,
+            ])->values();
+
+            $totalStock = $stokPerCabang->sum('stok_saat_ini');
+            $stockForContext = $cabangId
+                ? $stokPerCabang->firstWhere('cabang_id', $cabangId)
                 : null;
 
             return [
@@ -62,16 +70,13 @@ class ProdukController extends Controller
                 'harga_grosir'    => $produk->harga_grosir,
                 'satuan'          => $produk->satuan,
                 'foto_url'        => $produk->foto_url,
-                'stok_saat_ini'   => $stokCabang?->stok_saat_ini,
-                'minimum_stok'    => $stokCabang?->minimum_stok,
-                'perlu_restock'   => $stokCabang ? $stokCabang->perlu_restock : null,
-                'stok_per_cabang' => $produk->stokCabang->map(fn($s) => [
-                    'cabang_id'     => $s->cabang_id,
-                    'nama_cabang'   => $s->cabang?->nama_cabang,
-                    'stok_saat_ini' => $s->stok_saat_ini,
-                    'minimum_stok'  => $s->minimum_stok,
-                    'perlu_restock' => $s->perlu_restock,
-                ]),
+                'stok_saat_ini'   => $cabangId ? ($stockForContext['stok_saat_ini'] ?? 0) : $totalStock,
+                'stok_total'      => $totalStock,
+                'minimum_stok'    => $cabangId ? ($stockForContext['minimum_stok'] ?? 0) : null,
+                'perlu_restock'   => $cabangId ? ($stockForContext ? $stockForContext['perlu_restock'] : false) : false,
+                'stok_per_cabang' => $cabangId
+                    ? $stokPerCabang->filter(fn($s) => (int) $s['cabang_id'] === (int) $cabangId)->values()
+                    : $stokPerCabang,
             ];
         });
 
@@ -86,11 +91,31 @@ class ProdukController extends Controller
     public function show(string $sku): JsonResponse
     {
         $produk = Produk::with(['kategori', 'stokCabang.cabang'])->findOrFail($sku);
+        $user = request()->user();
+        $cabangId = $user && ! $user->isAdmin() ? $user->cabang_id : null;
+        $stokPerCabang = $produk->stokCabang->map(fn($s) => [
+            'cabang_id'     => $s->cabang_id,
+            'nama_cabang'   => $s->cabang?->nama_cabang,
+            'stok_saat_ini' => $s->stok_saat_ini,
+            'minimum_stok'  => $s->minimum_stok,
+            'perlu_restock' => $s->perlu_restock,
+        ])->values();
+        $totalStock = $stokPerCabang->sum('stok_saat_ini');
+        $stockForContext = $cabangId
+            ? $stokPerCabang->firstWhere('cabang_id', $cabangId)
+            : null;
 
         return response()->json([
             'success' => true,
             'data'    => array_merge($produk->toArray(), [
                 'foto_url' => $produk->foto_url,
+                'stok_saat_ini' => $cabangId ? ($stockForContext['stok_saat_ini'] ?? 0) : $totalStock,
+                'stok_total' => $totalStock,
+                'minimum_stok' => $cabangId ? ($stockForContext['minimum_stok'] ?? 0) : null,
+                'perlu_restock' => $cabangId ? ($stockForContext ? $stockForContext['perlu_restock'] : false) : false,
+                'stok_per_cabang' => $cabangId
+                    ? $stokPerCabang->filter(fn($s) => (int) $s['cabang_id'] === (int) $cabangId)->values()
+                    : $stokPerCabang,
             ]),
         ]);
     }

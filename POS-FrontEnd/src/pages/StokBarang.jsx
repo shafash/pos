@@ -3,6 +3,7 @@ import { Filter, Plus, Pencil, Trash2, Loader } from 'lucide-react'
 import { COLOR }       from '../constants/colors'
 import { produkService } from '../services/api'
 import { useApi, useMutation } from '../hooks/useApi'
+import { useAuth } from '../context/AuthContext'
 import { fmt }         from '../utils/format'
 import StatCard        from '../components/ui/StatCard'
 import Badge           from '../components/ui/Badge'
@@ -22,9 +23,11 @@ function formatRupiah(value) {
 }
 
 export default function StokBarang({ onNav }) {
+  const { user } = useAuth()
   const [search,     setSearch]     = useState('')
   const [filterKat,  setFilterKat]  = useState('semua')
   const [showFilter, setShowFilter] = useState(false)
+  const [showBranchBreakdown, setShowBranchBreakdown] = useState(false)
   const [konfirmHapus, setKonfirmHapus] = useState(null) // sku produk yang mau dihapus
 
   const isMobile    = useIsMobile()
@@ -42,6 +45,7 @@ export default function StokBarang({ onNav }) {
 
   // ── Derived data (dihitung dari produkList) ──────────────
   const semuaProduk = produkList ?? []
+  const isBranchUser = !!user && (user.role === 'kasir' || user.role === 'owner')
 
   const filtered = useMemo(() => {
     return semuaProduk.filter(p => {
@@ -62,7 +66,7 @@ export default function StokBarang({ onNav }) {
     p.stok_per_cabang?.some(s => s.perlu_restock)
   ).length
   const totalAset   = semuaProduk.reduce((sum, p) => {
-    const totalStok = p.stok_per_cabang?.reduce((s, c) => s + (c.stok_saat_ini ?? 0), 0) ?? 0
+    const totalStok = isBranchUser ? (p.stok_saat_ini ?? 0) : (p.stok_total ?? p.stok_per_cabang?.reduce((s, c) => s + (c.stok_saat_ini ?? 0), 0) ?? 0)
     return sum + totalStok * parseFloat(p.harga_beli ?? 0)
   }, 0)
 
@@ -194,7 +198,26 @@ export default function StokBarang({ onNav }) {
         </div>
 
         {!isStacked && (
-          <div style={{ marginLeft: 'auto' }}>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+            {!isBranchUser && (
+              <button
+                onClick={() => setShowBranchBreakdown(v => !v)}
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  border: `1px solid ${showBranchBreakdown ? COLOR.amber : COLOR.border}`,
+                  background: showBranchBreakdown ? COLOR.amberLight : '#fff',
+                  color: showBranchBreakdown ? COLOR.amber : COLOR.textSub,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {showBranchBreakdown ? 'Sembunyikan Cabang' : 'Lihat Per Cabang'}
+              </button>
+            )}
             <PrimaryBtn icon={Plus} onClick={() => onNav('tambahBarang')}>
               Tambah Barang
             </PrimaryBtn>
@@ -288,11 +311,11 @@ export default function StokBarang({ onNav }) {
       {!loading && !error && (
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isMobile ? 640 : 720 }}>
-            <TableHeader cols={['No', 'Nama Produk', 'Kategori', 'Harga Beli', 'Harga Jual', 'Satuan', 'Aksi']} />
+            <TableHeader cols={['No', 'Nama Produk', 'Kategori', 'Stok', 'Harga Beli', 'Harga Jual', 'Satuan', 'Aksi']} />
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '32px 16px', textAlign: 'center', color: COLOR.textMuted, fontSize: 13 }}>
+                  <td colSpan={8} style={{ padding: '32px 16px', textAlign: 'center', color: COLOR.textMuted, fontSize: 13 }}>
                     {search ? `Produk "${search}" tidak ditemukan.` : 'Belum ada produk.'}
                   </td>
                 </tr>
@@ -313,6 +336,14 @@ export default function StokBarang({ onNav }) {
                       <Badge color={p.kategori === 'Basah' ? 'amber' : 'gray'}>
                         {p.kategori}
                       </Badge>
+                    </td>
+                    <td style={{ padding: '12px 16px', fontSize: 13, whiteSpace: 'nowrap' }}>
+                      <div style={{ fontWeight: 700 }}>{isBranchUser ? (p.stok_saat_ini ?? 0) : (p.stok_total ?? 0)}</div>
+                      {!isBranchUser && showBranchBreakdown && p.stok_per_cabang?.length > 0 && (
+                        <div style={{ fontSize: 11, color: COLOR.textMuted, marginTop: 4 }}>
+                          {p.stok_per_cabang.map(s => `${s.nama_cabang}: ${s.stok_saat_ini}`).join(' • ')}
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: '12px 16px', fontSize: 13, whiteSpace: 'nowrap' }}>
                       {fmt(p.harga_beli)}
@@ -381,7 +412,7 @@ export default function StokBarang({ onNav }) {
           gap:                 isStacked ? 12 : 0,
         }}>
           {barangBaru.map((b, i) => {
-            const totalStok = b.stok_per_cabang?.reduce((s, c) => s + (c.stok_saat_ini ?? 0), 0) ?? 0
+            const totalStok = isBranchUser ? (b.stok_saat_ini ?? 0) : (b.stok_total ?? b.stok_per_cabang?.reduce((s, c) => s + (c.stok_saat_ini ?? 0), 0) ?? 0)
             return (
               <div key={b.sku} style={{
                 display:       'flex',

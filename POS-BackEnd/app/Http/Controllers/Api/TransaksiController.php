@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\View\View;
 
 class TransaksiController extends Controller
 {
@@ -52,6 +53,18 @@ class TransaksiController extends Controller
         $this->authorize('view', $transaksi);
 
         return response()->json(['success' => true, 'data' => $transaksi]);
+    }
+
+    public function receipt(string $noTransaksi): View
+    {
+        $transaksi = Transaksi::with([
+            'user:id,nama_lengkap',
+            'member',
+            'cabang:id,nama_cabang',
+            'detailTransaksi.produk',
+        ])->findOrFail($noTransaksi);
+
+        return view('receipt', compact('transaksi'));
     }
 
     public function store(Request $request): JsonResponse
