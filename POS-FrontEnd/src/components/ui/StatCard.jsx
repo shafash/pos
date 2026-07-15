@@ -25,7 +25,7 @@ export default function StatCard({ label, value, sub, compact = false }) {
             </div>
             <div style = {{
                 fontSize: compact ? 20 : 28,
-                fontWeight: 800,
+                fontWeight: 600,
                 color: COLOR.text,
                 letterSpacing: -1,
             }}>

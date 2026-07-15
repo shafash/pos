@@ -59,7 +59,7 @@ export default function Login({ onLogin }) {
       }}>
 
         {/* ── Panel Kiri: Foto + Branding ── */}
-        <div style={{
+        <div className="login-left-panel" style={{
           flex:       1,
           position:   'relative',
           display:    'flex',
@@ -181,8 +181,9 @@ export default function Login({ onLogin }) {
         </div>
 
         {/* ── Panel Kanan: Form Login ── */}
-        <div style={{
+        <div className="login-right-panel" style={{
           width:          380,
+          maxWidth: '100%',
           flexShrink:     0,
           background:     '#fff',
           display:        'flex',
@@ -381,11 +382,22 @@ export default function Login({ onLogin }) {
         </div>
       </div>
 
-      {/* Responsive: sembunyikan panel kiri di layar kecil */}
       <style>{`
         @media (max-width: 640px) {
           .login-left-panel { display: none !important; }
-          .login-right-panel { width: 100% !important; border-radius: 16px !important; }
+          .login-right-panel {
+            width: 100% !important;
+            padding: 32px 24px !important;
+            border-radius: 16px !important;
+          }
+        }
+        @media (max-width: 400px) {
+          .login-right-panel {
+            padding: 24px 18px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .login-left-panel { flex: 0.7 !important; }
         }
       `}</style>
     </div>

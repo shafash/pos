@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import {
   LayoutDashboard, ShoppingCart, Package,
   Users, FileText, Settings, LogOut, PanelLeft, ChevronRight, X,
+  MoreVertical,
 } from 'lucide-react'
 import { COLOR } from '../../constants/colors'
 import Badge from '../ui/Badge'
@@ -20,6 +22,7 @@ export default function Sidebar({
 }) {
   const isMobile = useIsMobile()
   const { user, logout } = useAuth()
+  const [showUserMenu, setShowUserMenu] = useState(false)
 
   const width     = isMobile ? 220 : (collapsed ? 72 : 220)
   const showLabel = isMobile || !collapsed
@@ -144,13 +147,14 @@ export default function Sidebar({
             </button>
           )}
 
-          {/* Avatar + nama user dari API */}
+          {/* Avatar + nama user + tombol titik tiga */}
           <div style={{
             display:        'flex',
             alignItems:     'center',
             justifyContent: showLabel ? 'flex-start' : 'center',
             gap:            10,
-            marginBottom:   16,
+            marginBottom:   showLabel ? 0 : 16,
+            position:       'relative',
           }}>
             <div style={{
               width:          36, height: 36, borderRadius: '50%',
@@ -160,61 +164,109 @@ export default function Sidebar({
             }}>
               {initials}
             </div>
+
             {showLabel && (
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: COLOR.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user?.nama_lengkap ?? 'User'}
+              <>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: COLOR.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {user?.nama_lengkap ?? 'User'}
+                  </div>
+                  <Badge color="amber" style={{ textTransform: 'capitalize' }}>
+                    {user?.role ?? 'kasir'}
+                  </Badge>
                 </div>
-                <Badge color="amber" style={{ textTransform: 'capitalize' }}>
-                  {user?.role ?? 'kasir'}
-                </Badge>
+
+                <button
+                  onClick={() => setShowUserMenu(v => !v)}
+                  style={{
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    padding: 4, borderRadius: 6, flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  <MoreVertical size={16} color={COLOR.textMuted} />
+                </button>
+              </>
+            )}
+
+            {/* Popup menu Settings + Log out */}
+            {showUserMenu && showLabel && (
+              <div style={{
+                position:     'absolute',
+                bottom:       '110%',
+                right:        0,
+                background:   '#fff',
+                border:       `1px solid ${COLOR.border}`,
+                borderRadius: 8,
+                boxShadow:    '0 4px 16px rgba(0,0,0,0.12)',
+                minWidth:     160,
+                overflow:     'hidden',
+                zIndex:       25,
+              }}>
+                <button
+                  onClick={() => { handleNav('settings'); setShowUserMenu(false) }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    width: '100%', padding: '10px 14px',
+                    border: 'none', cursor: 'pointer',
+                    background: active === 'settings' ? COLOR.amberLight : 'transparent',
+                    color: active === 'settings' ? COLOR.amberDark : COLOR.textSub,
+                    fontSize: 13, fontWeight: active === 'settings' ? 700 : 400,
+                    fontFamily: 'inherit', textAlign: 'left',
+                  }}
+                >
+                  <Settings size={15} style={{ flexShrink: 0 }} />
+                  Settings
+                </button>
+                <button
+                  onClick={() => { handleLogout(); setShowUserMenu(false) }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    width: '100%', padding: '10px 14px',
+                    border: 'none', cursor: 'pointer',
+                    background: 'transparent', color: COLOR.red,
+                    fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
+                    textAlign: 'left', borderTop: `1px solid ${COLOR.border}`,
+                  }}
+                >
+                  <LogOut size={15} style={{ flexShrink: 0 }} />
+                  Log out
+                </button>
               </div>
             )}
           </div>
 
-          {/* Settings */}
-          <button
-            onClick={() => handleNav('settings')}
-            title={!showLabel ? 'Settings' : undefined}
-            style={{
-              display:        'flex',
-              alignItems:     'center',
-              justifyContent: showLabel ? 'flex-start' : 'center',
-              gap:            8,
-              width:          '100%',
-              padding:        showLabel ? '8px 10px' : '8px 0',
-              borderRadius:   6, border: 'none', cursor: 'pointer',
-              background:     active === 'settings' ? COLOR.amberLight : 'transparent',
-              color:          active === 'settings' ? COLOR.amberDark  : COLOR.textSub,
-              fontSize:       13,
-              fontWeight:     active === 'settings' ? 700 : 400,
-              marginBottom:   4, fontFamily: 'inherit',
-            }}
-          >
-            <Settings size={15} style={{ flexShrink: 0 }} />
-            {showLabel && 'Settings'}
-          </button>
-
-          {/* Logout — sekarang punya onClick! */}
-          <button
-            onClick={handleLogout}
-            title={!showLabel ? 'Log out' : undefined}
-            style={{
-              display:        'flex',
-              alignItems:     'center',
-              justifyContent: showLabel ? 'flex-start' : 'center',
-              gap:            8,
-              width:          '100%',
-              padding:        showLabel ? '8px 10px' : '8px 0',
-              borderRadius:   6, border: 'none', cursor: 'pointer',
-              background:     'transparent',
-              color:          COLOR.red,
-              fontSize:       13, fontWeight: 600, fontFamily: 'inherit',
-            }}
-          >
-            <LogOut size={15} style={{ flexShrink: 0 }} />
-            {showLabel && 'Log out'}
-          </button>
+          {/* Mode collapsed (desktop, tanpa label): tampilkan icon Settings & Logout langsung */}
+          {!showLabel && (
+            <>
+              <button
+                onClick={() => handleNav('settings')}
+                title="Settings"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '100%', padding: '8px 0', borderRadius: 6,
+                  border: 'none', cursor: 'pointer',
+                  background: active === 'settings' ? COLOR.amberLight : 'transparent',
+                  color: active === 'settings' ? COLOR.amberDark : COLOR.textSub,
+                  marginBottom: 4,
+                }}
+              >
+                <Settings size={15} />
+              </button>
+              <button
+                onClick={handleLogout}
+                title="Log out"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '100%', padding: '8px 0', borderRadius: 6,
+                  border: 'none', cursor: 'pointer',
+                  background: 'transparent', color: COLOR.red,
+                }}
+              >
+                <LogOut size={15} />
+              </button>
+            </>
+          )}
         </div>
       </aside>
     </>

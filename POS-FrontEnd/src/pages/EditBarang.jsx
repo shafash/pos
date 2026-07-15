@@ -209,7 +209,7 @@ export default function EditBarang({ onNav, params }) {
 
   // ── Render ───────────────────────────────────────────────
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+    <div style={{ maxWidth: 1100, margin: '20px auto 0' }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 16 : 20, fontFamily: font }}>
 
       {/* Success / Error toast */}
@@ -483,7 +483,7 @@ export default function EditBarang({ onNav, params }) {
           style={{
             width:        isStacked ? undefined : 152,
             flex:         isStacked ? 1 : undefined,
-            height:       isMobile ? 48 : 56,
+            height:       40,
             background:   '#F4F5F7',
             border:       'none',
             borderRadius: 8,
@@ -502,7 +502,7 @@ export default function EditBarang({ onNav, params }) {
           style={{
             width:          isStacked ? undefined : 253,
             flex:           isStacked ? 1 : undefined,
-            height:         isMobile ? 48 : 56,
+            height:         40,
             background:     loadingUpdate || loadingStok ? COLOR.border : '#FFA500',
             border:         'none',
             borderRadius:   8,

@@ -619,7 +619,7 @@ export default function Kasir() {
             flex:            1,
             overflowY:       isMobile ? 'visible' : 'auto',
             paddingRight:    isMobile ? 16 : 24,
-            paddingLeft:     isMobile ? 16 : 0,
+            paddingLeft:     isMobile ? 16 : 24,
             paddingBottom:   isMobile ? 90 : 0,
             height:          isMobile ? 'auto' : '100%',
             scrollbarWidth:  'none',

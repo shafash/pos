@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Save, Upload, Loader, X } from 'lucide-react'
+import { Camera, Save, Loader, X } from 'lucide-react'
 import { COLOR } from '../constants/colors'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { produkService, kategoriService } from '../services/api'
@@ -15,7 +15,6 @@ const initialFormState = {
   satuan:       'Pcs',
   harga_beli:   '',
   harga_eceran: '',
-  harga_grosir: '',
   stok_awal:    '',
   minimum_stok: '',
 }
@@ -39,8 +38,8 @@ const sectionTitleStyle = {
 
 export default function TambahBarang({ onNav }) {
   const [formState,     setFormState]     = useState(initialFormState)
-  const [fotoFile,      setFotoFile]      = useState(null)   // File object asli
-  const [fotoPreview,   setFotoPreview]   = useState(null)   // URL preview lokal
+  const [fotoFile,      setFotoFile]      = useState(null)
+  const [fotoPreview,   setFotoPreview]   = useState(null)
   const [fotoName,      setFotoName]      = useState('')
   const [isDragging,    setIsDragging]    = useState(false)
   const [errorMsg,      setErrorMsg]      = useState(null)
@@ -118,20 +117,20 @@ export default function TambahBarang({ onNav }) {
     if (!formState.harga_eceran || parseFloat(formState.harga_eceran) <= 0) { setErrorMsg('Harga jual wajib diisi.'); return }
 
     try {
+      const hargaEceran = parseFloat(formState.harga_eceran)
       const payload = {
         nama_barang:  formState.nama_barang.trim(),
         kategori_id:  parseInt(formState.kategori_id),
         merek:        formState.merek.trim() || null,
         satuan:       formState.satuan.trim() || 'Pcs',
         harga_beli:   parseFloat(formState.harga_beli),
-        harga_eceran: parseFloat(formState.harga_eceran),
-        harga_grosir: formState.harga_grosir ? parseFloat(formState.harga_grosir) : null,
+        harga_eceran: hargaEceran,
+        harga_grosir: Math.round(hargaEceran * 0.9),   // default 90% dari eceran
         stok_awal:    formState.stok_awal    ? parseInt(formState.stok_awal)       : 0,
         minimum_stok: formState.minimum_stok ? parseInt(formState.minimum_stok)    : 0,
       }
       if (formState.sku.trim()) payload.sku = formState.sku.trim()
 
-      // produkService.create otomatis kirim multipart kalau fotoFile ada
       const result = await simpanProduk(payload)
 
       setSuccessMsg(`Produk "${result.nama_barang}" berhasil ditambahkan dengan SKU ${result.sku}!`)
@@ -151,8 +150,9 @@ export default function TambahBarang({ onNav }) {
       onDragLeave={() => setIsDragging(false)}
       style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'center', height: 160, background: '#FBFBFB',
-        borderRadius: 10, cursor: 'pointer',
+        justifyContent: 'center', height: isStacked ? 160 : '100%',
+        minHeight: isStacked ? 140 : 160,
+        background: '#FBFBFB', borderRadius: 10, cursor: 'pointer',
         border: isDragging ? '2px dashed #FFCD71' : '2px dashed transparent',
         transition: 'border 0.2s', gap: 6, position: 'relative',
       }}
@@ -172,7 +172,6 @@ export default function TambahBarang({ onNav }) {
             alt="preview"
             style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 10 }}
           />
-          {/* Tombol hapus foto */}
           <button
             onClick={(e) => { e.preventDefault(); handleRemoveFoto() }}
             style={{
@@ -188,7 +187,7 @@ export default function TambahBarang({ onNav }) {
         </>
       ) : (
         <>
-          <Upload size={36} color={COLOR.textMuted} strokeWidth={1} />
+          <Camera size={36} color={COLOR.textMuted} strokeWidth={1.3} />
           <div style={{ textAlign: 'center', lineHeight: 1.6 }}>
             <span style={{ fontSize: 12, fontWeight: 500, color: '#000', fontFamily: font }}>
               Tarik gambar ke sini{' '}
@@ -209,7 +208,7 @@ export default function TambahBarang({ onNav }) {
   )
 
   return (
-    <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: `1px solid ${COLOR.border}`, fontFamily: font, maxWidth: 860, margin: '0 auto' }}>
+    <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: `1px solid ${COLOR.border}`, fontFamily: font, maxWidth: 1100, margin: '20px auto 0' }}>
       <div style={{ background: '#FFCD71', padding: '12px 18px', fontSize: 15, fontWeight: 500, color: '#000', fontFamily: font }}>
         Tambah Barang Baru
       </div>
@@ -228,33 +227,26 @@ export default function TambahBarang({ onNav }) {
         )}
 
         {/* Informasi Dasar */}
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 18 }}>
           <div style={{ marginBottom: 12 }}>
             <div style={sectionTitleStyle}>Informasi Dasar</div>
             <div style={{ height: 2, background: COLOR.amber, width: 136, borderRadius: 2 }} />
           </div>
 
-          {isStacked && (
-            <div style={{ marginBottom: 12 }}>
-              <label style={labelStyle}>Upload Foto (opsional)</label>
-              {uploadBoxJsx}
-            </div>
-          )}
-
-          <div style={{ display: 'grid', gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr 1fr', gap: 12 }}>
-            <div style={{ gridColumn: isStacked ? 'auto' : '1 / 3', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isStacked ? '1fr' : '3fr 2fr', gap: 20 }}>
+            {/* Kolom kiri: field-field teks */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'grid', gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Nama Barang <span style={{ color: '#DC2626' }}>*</span></label>
-                  <input type="text" value={formState.nama_barang} onChange={handleChange('nama_barang')} placeholder="Contoh: GS Astra MF NS40Z" style={inputStyle} />
+                  <input type="text" value={formState.nama_barang} onChange={handleChange('nama_barang')} placeholder="Contoh: AKI GS Astra" style={inputStyle} />
                 </div>
                 <div>
-                  <label style={labelStyle}>
-                    Kode SKU <span style={{ fontSize: 11, color: COLOR.textMuted, fontWeight: 400 }}>(kosongkan = auto)</span>
-                  </label>
-                  <input type="text" value={formState.sku} onChange={handleChange('sku')} placeholder="Contoh: GSA-003" style={inputStyle} />
+                  <label style={labelStyle}>Kode SKU</label>
+                  <input type="text" value={formState.sku} onChange={handleChange('sku')} placeholder="GS-NSXXX" style={inputStyle} />
                 </div>
               </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Kategori <span style={{ color: '#DC2626' }}>*</span></label>
@@ -279,12 +271,12 @@ export default function TambahBarang({ onNav }) {
                 </div>
               </div>
             </div>
-            {!isStacked && (
-              <div>
-                <label style={labelStyle}>Upload Foto (opsional)</label>
-                {uploadBoxJsx}
-              </div>
-            )}
+
+            {/* Kolom kanan: upload gambar, tinggi menyesuaikan kedua baris */}
+            <div style={{ maxWidth: 360 }}>
+              <label style={labelStyle}>Upload Gambar</label>
+              {uploadBoxJsx}
+            </div>
           </div>
         </div>
 
@@ -294,34 +286,25 @@ export default function TambahBarang({ onNav }) {
             <div style={sectionTitleStyle}>Harga &amp; Stok</div>
             <div style={{ height: 2, background: COLOR.amber, width: 110, borderRadius: 2 }} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div>
               <label style={labelStyle}>Harga Beli (Modal) <span style={{ color: '#DC2626' }}>*</span></label>
-              <input type="number" min={0} value={formState.harga_beli} onChange={handleChange('harga_beli')} placeholder="740000" style={inputStyle} />
+              <input type="number" min={0} value={formState.harga_beli} onChange={handleChange('harga_beli')} placeholder="Contoh: Rp. 740.000" style={inputStyle} />
             </div>
             <div>
               <label style={labelStyle}>Harga Jual (Eceran) <span style={{ color: '#DC2626' }}>*</span></label>
-              <input type="number" min={0} value={formState.harga_eceran} onChange={handleChange('harga_eceran')} placeholder="900000" style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>
-                Harga Grosir <span style={{ fontSize: 11, color: COLOR.textMuted, fontWeight: 400 }}>(default: 90% eceran)</span>
-              </label>
-              <input type="number" min={0} value={formState.harga_grosir} onChange={handleChange('harga_grosir')} placeholder="810000" style={inputStyle} />
+              <input type="number" min={0} value={formState.harga_eceran} onChange={handleChange('harga_eceran')} placeholder="Contoh: Rp. 900.000" style={inputStyle} />
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: isStacked ? '1fr' : '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={labelStyle}>Stok Awal <span style={{ fontSize: 11, color: COLOR.textMuted, fontWeight: 400 }}>(semua cabang)</span></label>
-              <input type="number" min={0} value={formState.stok_awal} onChange={handleChange('stok_awal')} placeholder="0" style={inputStyle} />
+              <label style={labelStyle}>Stok Awal</label>
+              <input type="number" min={0} value={formState.stok_awal} onChange={handleChange('stok_awal')} placeholder="Contoh: 42" style={inputStyle} />
             </div>
             <div>
               <label style={labelStyle}>Minimum Stok (Peringatan)</label>
-              <input type="number" min={0} value={formState.minimum_stok} onChange={handleChange('minimum_stok')} placeholder="5" style={inputStyle} />
+              <input type="number" min={0} value={formState.minimum_stok} onChange={handleChange('minimum_stok')} placeholder="Contoh: 5" style={inputStyle} />
             </div>
-          </div>
-          <div style={{ marginTop: 8, fontSize: 11, color: COLOR.textMuted, fontFamily: font }}>
-            Stok awal akan diset ke semua cabang. Sesuaikan per cabang di halaman Edit Barang.
           </div>
         </div>
 
