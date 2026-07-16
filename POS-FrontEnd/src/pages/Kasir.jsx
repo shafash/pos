@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Package, ClipboardList, Users, Minus, Plus,
-  Banknote, QrCode, ShoppingCart, X, Search, Loader,
+  ShoppingCart, X, Search, Loader,
 } from 'lucide-react'
 import { COLOR } from '../constants/colors'
 import { produkService, memberService, transaksiService } from '../services/api'
@@ -282,7 +282,6 @@ function MemberSearch({ selectedMember, onSelect, onClear }) {
 // ─────────────────────────────────────────────────────────────
 function TransaksiPanel({
   keranjang, setKeranjang,
-  metode, setMetode,
   handleUpdateQty,
   selectedMember, setSelectedMember,
   isMobile, onClose,
@@ -356,39 +355,6 @@ function TransaksiPanel({
               <KeranjangItem key={item.sku} item={item} onUpdateQty={handleUpdateQty} />
             ))
           )}
-        </div>
-      </div>
-
-      {/* Metode pembayaran */}
-      <div style={{ padding: isMobile ? '14px 16px' : '14px 24px', borderBottom: `1px solid ${COLOR.border}` }}>
-        <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 12 }}>Metode Pembayaran</div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {[
-            { key: 'cash',  label: 'Uang Tunai', icon: Banknote },
-            { key: 'qris',  label: 'QRIS',        icon: QrCode   },
-          ].map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setMetode(key)}
-              style={{
-                flex: 1, padding: '12px 8px', borderRadius: 8,
-                border: `2px solid ${metode === key ? COLOR.amber : COLOR.border}`,
-                background: metode === key ? COLOR.amberLight : '#fff',
-                color: metode === key ? COLOR.amber : COLOR.textSub,
-                cursor: 'pointer', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
-              }}
-            >
-              <Icon size={20} />
-              {label}
-            </button>
-          ))}
-        </div>
-        <div style={{ marginTop: 14 }}>
-          <div style={{ fontSize: 12, color: COLOR.textSub, marginBottom: 6 }}>Total Dibayar</div>
-          <div style={{ background: '#F7F7F5', borderRadius: 8, padding: '12px 16px', fontSize: 15, fontWeight: 700 }}>
-            {fmt(total)}
-          </div>
         </div>
       </div>
 
