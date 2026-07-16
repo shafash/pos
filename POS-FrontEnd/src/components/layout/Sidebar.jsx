@@ -153,7 +153,7 @@ export default function Sidebar({
             alignItems:     'center',
             justifyContent: showLabel ? 'flex-start' : 'center',
             gap:            10,
-            marginBottom:   showLabel ? 0 : 16,
+            marginBottom:   16,
             position:       'relative',
           }}>
             <div style={{
