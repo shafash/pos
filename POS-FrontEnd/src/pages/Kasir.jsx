@@ -358,6 +358,14 @@ function TransaksiPanel({
         </div>
       </div>
 
+      {/* Total Dibayar (metode pembayaran hanya cash) */}
+      <div style={{ padding: isMobile ? '14px 16px' : '14px 24px', borderBottom: `1px solid ${COLOR.border}` }}>
+        <div style={{ fontSize: 12, color: COLOR.textSub, marginBottom: 6 }}>Total Dibayar</div>
+        <div style={{ background: '#F7F7F5', borderRadius: 8, padding: '12px 16px', fontSize: 15, fontWeight: 700 }}>
+          {fmt(total)}
+        </div>
+      </div>
+
       {/* Rincian */}
       <div style={{ padding: isMobile ? '14px 16px' : '14px 24px', flex: 1 }}>
         {[
@@ -440,7 +448,6 @@ export default function Kasir() {
 
   const [tab,            setTab]            = useState('produk')
   const [keranjang,      setKeranjang]      = useState([])
-  const [metode,         setMetode]         = useState('cash')
   const [selectedSku,    setSelectedSku]    = useState(null)
   const [selectedMember, setSelectedMember] = useState(null)
   const [showMobileCart, setShowMobileCart] = useState(false)
@@ -515,7 +522,7 @@ export default function Kasir() {
 
     try {
       const result = await kirimTransaksi({
-        metode_pembayaran: metode,
+        metode_pembayaran: cash,
         id_member:         selectedMember?.id_member ?? null,
         cabang_id:         cabangId,
         items:             keranjang.map(item => ({
@@ -707,8 +714,6 @@ export default function Kasir() {
             <TransaksiPanel
               keranjang={keranjang}
               setKeranjang={setKeranjang}
-              metode={metode}
-              setMetode={setMetode}
               handleUpdateQty={handleUpdateQty}
               selectedMember={selectedMember}
               setSelectedMember={setSelectedMember}
@@ -780,8 +785,6 @@ export default function Kasir() {
           <TransaksiPanel
             keranjang={keranjang}
             setKeranjang={setKeranjang}
-            metode={metode}
-            setMetode={setMetode}
             handleUpdateQty={handleUpdateQty}
             selectedMember={selectedMember}
             setSelectedMember={setSelectedMember}
