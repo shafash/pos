@@ -530,7 +530,7 @@ export default function Kasir() {
         nama_barang:  produk.nama_barang,
         kategori:     produk.kategori,
         harga_satuan: produk.harga_eceran,
-        foto_url:     produk.foto_url ?? null,   // ← tambah ini
+        foto_url:     produk.foto_url ?? null,
         qty:          1,
       }]
     })
@@ -609,15 +609,15 @@ export default function Kasir() {
         height:        isMobile ? 'auto' : 'calc(100vh - 56px)',
         minHeight:     isMobile ? 'calc(100vh - 56px)' : 'auto',
         overflow:      isMobile ? 'visible' : 'hidden',
-        paddingTop:    isMobile ? 16 : 24,
       }}>
 
-        {/* ── Panel kiri: daftar produk ── */}
+        {/* ── Panel kiri: daftar produk (tanpa gap ke topbar) ── */}
         <div
           className="no-scrollbar"
           style={{
             flex:            1,
             overflowY:       isMobile ? 'visible' : 'auto',
+            paddingTop:      isMobile ? 16 : 24,
             paddingRight:    isMobile ? 16 : 24,
             paddingLeft:     isMobile ? 16 : 24,
             paddingBottom:   isMobile ? 90 : 0,

@@ -101,7 +101,7 @@ export default function TambahMember({ onNav }) {
     border:       'none',
     outline:      'none',
     borderRadius: 8,
-    padding:      '8px 12px',
+    padding:      '11px 14px',
     fontSize:     13,
     color:        COLOR.text,
     fontFamily:   font,
@@ -113,9 +113,9 @@ export default function TambahMember({ onNav }) {
     fontWeight:   400,
     color:        COLOR.text,
     fontFamily:   font,
-    width:        isStacked ? '100%' : 100,
+    width:        isStacked ? '100%' : 140,
     flexShrink:   0,
-    paddingTop:   isStacked ? 0 : 8,
+    paddingTop:   isStacked ? 0 : 11,
     marginBottom: isStacked ? 6 : 0,
     display:      isStacked ? 'block' : undefined,
   }
@@ -124,8 +124,8 @@ export default function TambahMember({ onNav }) {
     display:       'flex',
     flexDirection: isStacked ? 'column' : 'row',
     alignItems:    isStacked ? 'stretch' : 'flex-start',
-    gap:           isStacked ? 0 : 12,
-    marginBottom:  isStacked ? 16 : 12,
+    gap:           isStacked ? 0 : 20,
+    marginBottom:  isStacked ? 18 : 20,
   }
 
   // ── Render ────────────────────────────────────────────────
@@ -136,14 +136,14 @@ export default function TambahMember({ onNav }) {
       overflow:     'hidden',
       border:       `1px solid ${COLOR.border}`,
       fontFamily:   font,
-      maxWidth:     760,
-      margin:       '0 auto',
+      maxWidth:     1100,
+      margin:       '20px auto 0',
     }}>
 
       {/* Banner */}
       <div style={{
         background: '#FFCD71',
-        padding:    isMobile ? '12px 16px' : '12px 18px',
+        padding:    isMobile ? '12px 16px' : '16px 24px',
         fontSize:   15,
         fontWeight: 500,
         color:      '#000',
@@ -152,7 +152,7 @@ export default function TambahMember({ onNav }) {
         Tambah Member Baru
       </div>
 
-      <div style={{ padding: isMobile ? '14px 16px 18px' : '16px 18px 20px' }}>
+      <div style={{ padding: isMobile ? '14px 16px 18px' : '28px 32px 32px' }}>
 
         {/* Toast sukses / error */}
         {successMsg && (
@@ -160,7 +160,7 @@ export default function TambahMember({ onNav }) {
             background:   '#DCFCE7', border: '1px solid #86EFAC',
             borderRadius: 8, padding: '10px 14px',
             fontSize: 13, color: '#16A34A', fontFamily: font,
-            marginBottom: 16,
+            marginBottom: 20,
           }}>
             ✓ {successMsg}
           </div>
@@ -170,7 +170,7 @@ export default function TambahMember({ onNav }) {
             background:   '#FEF2F2', border: '1px solid #FECACA',
             borderRadius: 8, padding: '10px 14px',
             fontSize: 13, color: '#DC2626', fontFamily: font,
-            marginBottom: 16,
+            marginBottom: 20,
           }}>
             {errorMsg}
           </div>
@@ -216,12 +216,12 @@ export default function TambahMember({ onNav }) {
           <label style={labelStyle}>
             No Telepon <span style={{ color: '#DC2626' }}>*</span>
           </label>
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', gap: 8 }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', gap: 10 }}>
             <input
               type="text"
               value={phoneCode}
               onChange={e => setPhoneCode(e.target.value)}
-              style={{ ...inputStyle, width: 60, textAlign: 'center', flex: 'none', padding: '8px 6px' }}
+              style={{ ...inputStyle, width: 68, textAlign: 'center', flex: 'none', padding: '11px 8px' }}
             />
             <input
               type="tel"
@@ -266,7 +266,7 @@ export default function TambahMember({ onNav }) {
               ...inputStyle,
               flex:     1,
               minWidth: 0,
-              height:   80,
+              height:   100,
               resize:   'vertical',
             }}
           />
@@ -275,7 +275,7 @@ export default function TambahMember({ onNav }) {
         {/* Tipe member */}
         <div style={rowStyle}>
           <label style={labelStyle}>Tipe Member</label>
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', gap: isMobile ? 8 : 12 }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', gap: isMobile ? 8 : 16 }}>
             {memberTypeOptions.map(({ label, value }) => {
               const isActive = memberType === value
               return (
@@ -284,7 +284,7 @@ export default function TambahMember({ onNav }) {
                   onClick={() => setMemberType(value)}
                   style={{
                     flex:         1,
-                    padding:      '8px 0',
+                    padding:      '11px 0',
                     borderRadius: 8,
                     border:       isActive ? '1.5px solid #FFA500' : 'none',
                     background:   isActive ? '#fff' : '#FBFBFB',
@@ -308,7 +308,7 @@ export default function TambahMember({ onNav }) {
           display:      'flex',
           alignItems:   'center',
           gap:          6,
-          marginBottom: isStacked ? 8 : 20,
+          marginBottom: isStacked ? 8 : 28,
           marginTop:    -4,
         }}>
           <Info size={12} color={COLOR.textMuted} style={{ flexShrink: 0 }} />
@@ -328,9 +328,9 @@ export default function TambahMember({ onNav }) {
             onClick={handleBatalkan}
             disabled={loadingSimpan}
             style={{
-              width:        isMobile ? undefined : 110,
+              width:        isMobile ? undefined : 120,
               flex:         isMobile ? 1 : undefined,
-              height:       isMobile ? 36 : 40,
+              height:       isMobile ? 36 : 44,
               background:   '#F4F5F7',
               border:       'none',
               borderRadius: 8,
@@ -348,9 +348,9 @@ export default function TambahMember({ onNav }) {
             onClick={handleSimpan}
             disabled={isSubmitDisabled}
             style={{
-              width:          isMobile ? undefined : 160,
+              width:          isMobile ? undefined : 170,
               flex:           isMobile ? 1 : undefined,
-              height:         isMobile ? 36 : 40,
+              height:         isMobile ? 36 : 44,
               background:     isSubmitDisabled ? '#FFCF80' : '#FFA500',
               border:         'none',
               borderRadius:   8,

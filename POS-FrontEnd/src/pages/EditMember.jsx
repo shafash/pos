@@ -178,11 +178,11 @@ export default function EditMember({ onNav, params }) {
 
   // ── Render ───────────────────────────────────────────────
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ maxWidth: 1100, margin: '20px auto 0' }}>
     <div style={{
       display:             'grid',
-      gridTemplateColumns: isStacked ? '1fr' : '1fr 320px',
-      gap:                 isMobile ? 14 : 16,
+      gridTemplateColumns: isStacked ? '1fr' : '1fr 380px',
+      gap:                 isMobile ? 14 : 20,
       fontFamily:          font,
     }}>
 
@@ -211,7 +211,7 @@ export default function EditMember({ onNav, params }) {
 
         <div style={cardStyle}>
           <div style={bannerStyle}>Informasi Member</div>
-          <div style={{ padding: isMobile ? '14px' : '16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ padding: isMobile ? '14px' : '20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             {/* Nama lengkap */}
             <div>
@@ -225,7 +225,7 @@ export default function EditMember({ onNav, params }) {
             </div>
 
             {/* Member ID & Tanggal Bergabung (readonly) */}
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
               <div>
                 <label style={labelStyle}>Member ID</label>
                 <input
@@ -291,14 +291,14 @@ export default function EditMember({ onNav, params }) {
         {/* Loyalty & Tiering */}
         <div style={cardStyle}>
           <div style={bannerStyle}>Loyalty &amp; Tiering</div>
-          <div style={{ padding: '14px' }}>
+          <div style={{ padding: '16px' }}>
 
             {/* Saldo poin */}
             <div style={{
-              background:   COLOR.amberLight,
+              background: 'linear-gradient(to bottom right, rgba(255,165,0,0.1) 0%, rgba(255,165,0,0.9) 100%)',
               borderRadius: 8,
-              padding:      '12px',
-              marginBottom: 12,
+              padding:      '14px',
+              marginBottom: 14,
             }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: COLOR.amberDark, fontFamily: font, marginBottom: 6 }}>
                 Saldo Poin Saat Ini
@@ -390,7 +390,7 @@ export default function EditMember({ onNav, params }) {
         {/* Alamat */}
         <div style={cardStyle}>
           <div style={bannerStyle}>Alamat</div>
-          <div style={{ padding: '14px' }}>
+          <div style={{ padding: '16px' }}>
             <textarea
               value={formData.alamat}
               onChange={handleChange('alamat')}
