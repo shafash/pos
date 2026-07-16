@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   LayoutDashboard, ShoppingCart, Package,
   Users, FileText, Settings, LogOut, PanelLeft, ChevronRight, X,
@@ -8,6 +7,7 @@ import { COLOR } from '../../constants/colors'
 import Badge from '../ui/Badge'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { useAuth } from '../../context/AuthContext'
+import { useState, useRef, useEffect } from 'react'
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard',   icon: LayoutDashboard },
@@ -23,6 +23,7 @@ export default function Sidebar({
   const isMobile = useIsMobile()
   const { user, logout } = useAuth()
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const userMenuRef = useRef(null)
 
   const width     = isMobile ? 220 : (collapsed ? 72 : 220)
   const showLabel = isMobile || !collapsed
@@ -41,6 +42,19 @@ export default function Sidebar({
     await logout()
     // AuthContext akan set user = null → App.jsx otomatis redirect ke Login
   }
+
+  useEffect(() => {
+  if (!showUserMenu) return
+
+  const handleClickOutside = (e) => {
+    if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+      setShowUserMenu(false)
+    }
+  }
+
+  document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showUserMenu])
 
   return (
     <>
@@ -148,14 +162,17 @@ export default function Sidebar({
           )}
 
           {/* Avatar + nama user + tombol titik tiga */}
-          <div style={{
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: showLabel ? 'flex-start' : 'center',
-            gap:            10,
-            marginBottom:   16,
-            position:       'relative',
-          }}>
+          <div
+            ref={userMenuRef}
+            style={{
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: showLabel ? 'flex-start' : 'center',
+              gap:            10,
+              marginBottom:   16,
+              position:       'relative',
+            }}
+          >
             <div style={{
               width:          36, height: 36, borderRadius: '50%',
               background:     COLOR.amberLight,
