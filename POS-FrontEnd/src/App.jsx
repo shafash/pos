@@ -126,7 +126,7 @@ export default function App() {
         onLogout={logout}
       />
       <Topbar
-        title={PAGE_TITLES[page] ?? 'POS Elang Anugerah'}
+        title={PAGE_TITLES[page] ?? 'POS Rakryan'}
         sidebarWidth={sidebarWidth}
         onOpenMobile={() => setMobileOpen(true)}
         user={user}

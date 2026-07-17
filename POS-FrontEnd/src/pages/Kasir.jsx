@@ -1,30 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
-  Package, ClipboardList, Users, Minus, Plus,
+  Users, Minus, Plus,
   ShoppingCart, X, Search, Loader,
 } from 'lucide-react'
 import { COLOR } from '../constants/colors'
-import { produkService, memberService, transaksiService } from '../services/api'
+import { produkService, memberService, transaksiService, pengaturanService } from '../services/api'
 import { useApi, useMutation } from '../hooks/useApi'
 import { useAuth } from '../context/AuthContext'
 import { fmt } from '../utils/format'
 import Badge        from '../components/ui/Badge'
 import ProductImage from '../components/shared/ProductImage'
 import { useIsMobile } from '../hooks/useIsMobile'
-
-// ─────────────────────────────────────────────────────────────
-// Helper: baca PPN dari pengaturan (disimpan Settings.jsx)
-// ─────────────────────────────────────────────────────────────
-function getTaxPercent() {
-  try {
-    const raw = localStorage.getItem('pos_settings')
-    const parsed = raw ? JSON.parse(raw) : null
-    const val = parsed?.transaction?.taxPercent
-    return typeof val === 'number' && !isNaN(val) ? val : 3
-  } catch {
-    return 3
-  }
-}
 
 // ─────────────────────────────────────────────────────────────
 // ProductCard
@@ -300,11 +286,11 @@ function TransaksiPanel({
   selectedMember, setSelectedMember,
   isMobile, onClose,
   onProses, prosesLoading, prosesError,
+  taxPercent,
 }) {
-  const subtotal   = keranjang.reduce((s, i) => s + i.harga_satuan * i.qty, 0)
-  const taxPercent = getTaxPercent()
-  const tax        = Math.round(subtotal * (taxPercent / 100))
-  const total      = subtotal + tax
+  const subtotal = keranjang.reduce((s, i) => s + i.harga_satuan * i.qty, 0)
+  const tax      = Math.round(subtotal * (taxPercent / 100))
+  const total    = subtotal + tax
 
   return (
     <>
@@ -461,7 +447,6 @@ function TransaksiPanel({
 export default function Kasir() {
   const { user } = useAuth()
 
-  const [tab,            setTab]            = useState('produk')
   const [keranjang,      setKeranjang]      = useState([])
   const [selectedSku,    setSelectedSku]    = useState(null)
   const [selectedMember, setSelectedMember] = useState(null)
@@ -479,27 +464,29 @@ export default function Kasir() {
     fetchProduk({ cabang_id: cabangId })
   }, [cabangId])
 
+  // Fetch pengaturan global (PPN, invoice prefix, dll) dari backend
+  const { data: pengaturan, execute: fetchPengaturan } = useApi(pengaturanService.get)
+
+  useEffect(() => {
+    fetchPengaturan()
+  }, [])
+
+  const taxPercent = pengaturan?.tax_percent ?? 3
+
   // Mutation untuk POST transaksi
   const { loading: prosesLoading, error: prosesError, execute: kirimTransaksi } = useMutation(transaksiService.create)
 
   const produkListArray = Array.isArray(produkList) ? produkList : []
 
-  // Filter produk berdasarkan search dan tab kategori
-  const produkTampil = produkListArray.filter((p) => {
-    const matchSearch = searchProduk.trim() === '' ||
-      p.nama_barang.toLowerCase().includes(searchProduk.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchProduk.toLowerCase())
-
-    const matchTab = tab === 'produk'
-      ? true  // semua produk masuk tab produk (jasa bisa ditambah nanti)
-      : false
-
-    return matchSearch && matchTab
-  })
+  // Filter produk berdasarkan search
+  const produkTampil = produkListArray.filter((p) =>
+    searchProduk.trim() === '' ||
+    p.nama_barang.toLowerCase().includes(searchProduk.toLowerCase()) ||
+    p.sku.toLowerCase().includes(searchProduk.toLowerCase())
+  )
 
   const subtotal   = keranjang.reduce((s, i) => s + i.harga_satuan * i.qty, 0)
   const totalItems = keranjang.reduce((s, i) => s + i.qty, 0)
-  const taxPercent = getTaxPercent()
   const tax        = Math.round(subtotal * (taxPercent / 100))
   const total      = subtotal + tax
 
@@ -615,39 +602,6 @@ export default function Kasir() {
             msOverflowStyle: 'none',
           }}
         >
-          {/* Tab kategori */}
-          <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 10 }}>
-            Kategori Produk/Jasa
-          </div>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-            {[
-              { key: 'produk', label: 'Produk', icon: Package       },
-              { key: 'jasa',   label: 'Jasa',   icon: ClipboardList },
-            ].map(({ key, label, icon: Icon }) => {
-              const isActive = tab === key
-              return (
-                <button
-                  key={key}
-                  onClick={() => setTab(key)}
-                  style={{
-                    display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', gap: 6,
-                    padding:   isMobile ? '10px 16px' : '12px 22px',
-                    flex:      isMobile ? 1 : 'none',
-                    borderRadius: 10,
-                    border:    `2px solid ${isActive ? COLOR.amber : COLOR.border}`,
-                    background: '#fff',
-                    color:     isActive ? COLOR.amber : COLOR.textSub,
-                    cursor:    'pointer', fontWeight: 600, fontSize: 13,
-                    fontFamily: 'inherit', transition: 'all 0.15s',
-                  }}
-                >
-                  <Icon size={18} />
-                  {label}
-                </button>
-              )
-            })}
-          </div>
 
           {/* Search produk */}
           <div style={{
@@ -737,6 +691,7 @@ export default function Kasir() {
               onProses={handleProses}
               prosesLoading={prosesLoading}
               prosesError={prosesError}
+              taxPercent={taxPercent}
             />
           </div>
         )}
@@ -809,6 +764,7 @@ export default function Kasir() {
             onProses={handleProses}
             prosesLoading={prosesLoading}
             prosesError={prosesError}
+            taxPercent={taxPercent}
           />
         </div>
       )}

@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Cabang;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -18,7 +19,7 @@ class UserSeeder extends Seeder
         User::create([
             'nama_lengkap' => 'Admin Pusat',
             'role' => 'admin',
-            'email' => 'admin@elanganugerah.com',
+            'email' => 'admin@rakryan.com',
             'password' => Hash::make('password123'),
             'cabang_id' => null,
         ]);
@@ -26,12 +27,13 @@ class UserSeeder extends Seeder
         $cabangList = Cabang::all();
 
         foreach ($cabangList as $cabang) {
-            $slug = strtolower(str_replace(' ', '', explode(' ', $cabang->nama_cabang)[2] ?? 'kasir'));
+            $nama = explode(' ', $cabang->nama_cabang);
+            $slug = strtolower($nama[1] ?? $nama[0]);
 
             User::create([
                 'nama_lengkap' => 'Kasir ' . $cabang->nama_cabang,
                 'role' => 'kasir',
-                'email' => "kasir.{$slug}@elanganugerah.com",
+                'email' => "kasir.{$slug}@rakryan.com",
                 'password' => 'password123',
                 'cabang_id' => $cabang->id,
             ]);

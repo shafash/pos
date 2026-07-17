@@ -369,7 +369,7 @@ export default function EditBarang({ onNav, params }) {
                 borderBottom: i < arr.length - 1 ? `1px solid ${COLOR.border}` : 'none',
               }}>
                 <span style={{ fontSize: 12, color: COLOR.textMuted, fontFamily: font }}>
-                  {s.nama_cabang?.replace('Elang Anugerah ', '') ?? `Cabang ${s.cabang_id}`}
+                  {s.nama_cabang?.replace('Rakryan ', '') ?? `Cabang ${s.cabang_id}`}
                 </span>
                 <span style={{
                   fontSize: 12, fontWeight: 600, fontFamily: font,

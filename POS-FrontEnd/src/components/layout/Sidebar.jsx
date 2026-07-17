@@ -90,7 +90,7 @@ export default function Sidebar({
         }}>
           {showLabel && (
             <span style={{ fontWeight: 500, fontSize: 13, color: COLOR.text, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-              POS ElangAnugerah
+              POS Rakryan
             </span>
           )}
           {isMobile ? (

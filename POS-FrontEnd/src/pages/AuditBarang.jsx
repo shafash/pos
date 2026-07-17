@@ -36,6 +36,10 @@ export default function AuditBarang() {
   const [sessionItems, setSessionItems] = useState([])     // detail audit yang sudah disubmit
   const [totalProduk,  setTotalProduk]  = useState(0)
 
+  // ── State modal konfirmasi (Finish & Discard) ────────────
+  const [konfirmFinish,  setKonfirmFinish]  = useState(false)
+  const [konfirmDiscard, setKonfirmDiscard] = useState(false)
+
   // ── API hooks ────────────────────────────────────────────
   const { data: auditList,  loading: loadingCekSesi, execute: cekSesi     } = useApi(auditService.getAll)
   const { data: produkList, loading: loadingProduk,  execute: fetchProduk } = useApi(produkService.getAll)
@@ -122,35 +126,33 @@ export default function AuditBarang() {
     setActualCount(0)
   }
 
-  // ── 7. Finish & Sync ────────────────────────────────────
+  // ── 7. Finish & Sync (dipicu setelah konfirmasi modal) ───
   const handleFinish = async () => {
     if (!sesiAudit) return
-    const ok = window.confirm(
-      `Selesaikan audit? Stok sistem akan disinkronkan dengan hasil hitungan fisik untuk ${sessionItems.length} produk.`
-    )
-    if (!ok) return
     try {
       await finishAudit(sesiAudit.id)
       setSesiAudit(null)
       setSessionItems([])
       setProdukAktif(null)
+      setKonfirmFinish(false)
       alert('Audit selesai! Stok sistem telah diperbarui.')
     } catch (err) {
+      setKonfirmFinish(false)
       alert(err.response?.data?.message ?? 'Gagal menyelesaikan audit.')
     }
   }
 
-  // ── 8. Discard Session ──────────────────────────────────
+  // ── 8. Discard Session (dipicu setelah konfirmasi modal) ─
   const handleDiscard = async () => {
     if (!sesiAudit) return
-    const ok = window.confirm('Batalkan sesi audit ini? Semua hasil hitungan di sesi ini akan diabaikan.')
-    if (!ok) return
     try {
       await discardAudit(sesiAudit.id)
       setSesiAudit(null)
       setSessionItems([])
       setProdukAktif(null)
+      setKonfirmDiscard(false)
     } catch (err) {
+      setKonfirmDiscard(false)
       alert(err.response?.data?.message ?? 'Gagal membatalkan sesi audit.')
     }
   }
@@ -167,12 +169,125 @@ export default function AuditBarang() {
   // Produk yang tampil di search result (exclude yang sudah diaudit bisa juga)
   const produkTampil = produkList ?? []
 
+  // ── Modal konfirmasi Finish & Sync ───────────────────────
+  const modalFinish = konfirmFinish && (
+    <div style={{
+      position:       'fixed',
+      inset:          0,
+      background:     'rgba(0,0,0,0.4)',
+      zIndex:         50,
+      display:        'flex',
+      alignItems:     'center',
+      justifyContent: 'center',
+      padding:        16,
+    }}>
+      <div style={{
+        background:   '#fff',
+        borderRadius: 12,
+        padding:      24,
+        maxWidth:     360,
+        width:        '100%',
+        boxShadow:    '0 8px 32px rgba(0,0,0,0.15)',
+        fontFamily:   font,
+      }}>
+        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Selesaikan Audit?</div>
+        <div style={{ fontSize: 13, color: COLOR.textSub, marginBottom: 20, lineHeight: 1.6 }}>
+          Stok sistem akan disinkronkan dengan hasil hitungan fisik untuk{' '}
+          <strong>{sessionItems.length} produk</strong>. Tindakan ini tidak dapat dibatalkan.
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={() => setKonfirmFinish(false)}
+            disabled={loadingFinish}
+            style={{
+              flex: 1, padding: '10px 0', borderRadius: 8,
+              border: `1px solid ${COLOR.border}`, background: '#fff',
+              fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            Batal
+          </button>
+          <button
+            onClick={handleFinish}
+            disabled={loadingFinish}
+            style={{
+              flex: 1, padding: '10px 0', borderRadius: 8,
+              border: 'none', background: COLOR.amber, color: '#fff',
+              fontSize: 13, fontWeight: 700, cursor: loadingFinish ? 'not-allowed' : 'pointer',
+              fontFamily: 'inherit', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', gap: 6,
+            }}
+          >
+            {loadingFinish && <Loader size={14} color="#fff" />}
+            {loadingFinish ? 'Menyimpan...' : 'Ya, Selesaikan'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  // ── Modal konfirmasi Discard Session ─────────────────────
+  const modalDiscard = konfirmDiscard && (
+    <div style={{
+      position:       'fixed',
+      inset:          0,
+      background:     'rgba(0,0,0,0.4)',
+      zIndex:         50,
+      display:        'flex',
+      alignItems:     'center',
+      justifyContent: 'center',
+      padding:        16,
+    }}>
+      <div style={{
+        background:   '#fff',
+        borderRadius: 12,
+        padding:      24,
+        maxWidth:     360,
+        width:        '100%',
+        boxShadow:    '0 8px 32px rgba(0,0,0,0.15)',
+        fontFamily:   font,
+      }}>
+        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Batalkan Sesi Audit?</div>
+        <div style={{ fontSize: 13, color: COLOR.textSub, marginBottom: 20, lineHeight: 1.6 }}>
+          Semua hasil hitungan di sesi ini akan diabaikan dan tidak tersimpan.
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={() => setKonfirmDiscard(false)}
+            disabled={loadingDiscard}
+            style={{
+              flex: 1, padding: '10px 0', borderRadius: 8,
+              border: `1px solid ${COLOR.border}`, background: '#fff',
+              fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            Batal
+          </button>
+          <button
+            onClick={handleDiscard}
+            disabled={loadingDiscard}
+            style={{
+              flex: 1, padding: '10px 0', borderRadius: 8,
+              border: 'none', background: COLOR.red, color: '#fff',
+              fontSize: 13, fontWeight: 700, cursor: loadingDiscard ? 'not-allowed' : 'pointer',
+              fontFamily: 'inherit', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', gap: 6,
+            }}
+          >
+            {loadingDiscard && <Loader size={14} color="#fff" />}
+            {loadingDiscard ? 'Membatalkan...' : 'Ya, Batalkan'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
   // ─────────────────────────────────────────────────────────
   // Kalau belum ada sesi audit aktif → tampilkan tombol mulai
   // ─────────────────────────────────────────────────────────
   if (loadingCekSesi) {
     return (
-      <div style={{ padding: '60px 0', textAlign: 'center', color: COLOR.textMuted, fontFamily: font }}>
+      <div style={{ padding: '60px 0', textAlign: 'center', color: COLOR.textMuted, fontFamily: font, marginTop: isMobile ? 16 : 24 }}>
         <Loader size={24} color={COLOR.amber} />
         <div style={{ marginTop: 12, fontSize: 13 }}>Memeriksa sesi audit...</div>
       </div>
@@ -190,6 +305,7 @@ export default function AuditBarang() {
         gap:            16,
         fontFamily:     font,
         textAlign:      'center',
+        marginTop:      isMobile ? 16 : 24,
       }}>
         <div style={{
           width:          72, height: 72,
@@ -242,7 +358,10 @@ export default function AuditBarang() {
       gap:           isMobile ? 16 : 20,
       alignItems:    isStacked ? 'stretch' : 'flex-start',
       fontFamily:    font,
+      paddingTop:    isMobile ? 16 : 24,
     }}>
+      {modalFinish}
+      {modalDiscard}
 
       {/* ── Panel kiri: search + active audit ── */}
       <div style={{ flex: isStacked ? undefined : 2, display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
@@ -645,7 +764,7 @@ export default function AuditBarang() {
         {/* Discard + Finish */}
         <div style={{ display: 'flex', gap: 10, justifyContent: isStacked ? undefined : 'flex-end' }}>
           <button
-            onClick={handleDiscard}
+            onClick={() => setKonfirmDiscard(true)}
             disabled={loadingDiscard}
             style={{
               flex:         isStacked ? 1 : undefined,
@@ -668,7 +787,7 @@ export default function AuditBarang() {
             Discard Session
           </button>
           <button
-            onClick={handleFinish}
+            onClick={() => setKonfirmFinish(true)}
             disabled={loadingFinish || sessionItems.length === 0}
             style={{
               flex:           isStacked ? 1 : undefined,

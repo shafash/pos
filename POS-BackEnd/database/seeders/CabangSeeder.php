@@ -15,10 +15,10 @@ class CabangSeeder extends Seeder
     {
         //
         $cabangList = [
-            ['nama_cabang' => 'Elang Anugerah Blimbing', 'alamat' => 'Blimbing, Kota Malang'],
-            ['nama_cabang' => 'Elang Anugerah Kepanjen', 'alamat' => 'Kepanjen, Kabupaten Malang'],
-            ['nama_cabang' => 'Elang Anugerah Turen', 'alamat' => 'Turen, Kabupaten Malang'],
-            ['nama_cabang' => 'Elang Anugerah Singosari', 'alamat' => 'Singosari, Kabupaten Malang'],
+            ['nama_cabang' => 'Rakryan Blimbing', 'alamat' => 'Blimbing, Kota Malang'],
+            ['nama_cabang' => 'Rakryan Kepanjen', 'alamat' => 'Kepanjen, Kabupaten Malang'],
+            ['nama_cabang' => 'Rakryan Turen', 'alamat' => 'Turen, Kabupaten Malang'],
+            ['nama_cabang' => 'Rakryan Singosari', 'alamat' => 'Singosari, Kabupaten Malang'],
         ];
 
         foreach($cabangList as $cabang) {

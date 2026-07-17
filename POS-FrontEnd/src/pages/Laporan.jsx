@@ -177,7 +177,7 @@ export default function Laporan() {
       doc.setFontSize(10)
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(100)
-      doc.text('POS Elang Anugerah', 14, 26)
+      doc.text('POS Rakryan', 14, 26)
 
       const namaCabang = cabangList.find(c => c.id === cabangId)?.nama ?? 'Semua Cabang'
       doc.text(`Cabang: ${namaCabang}`, 14, 32)

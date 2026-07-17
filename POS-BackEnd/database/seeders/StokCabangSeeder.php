@@ -26,7 +26,7 @@ class StokCabangSeeder extends Seeder
             'Bosch MF 46B24L' => 5,
         ];
 
-        $cabangKepanjen = $cabangList->firstWhere('nama_cabang', 'Elang Anugerah Kepanjen');
+        $cabangKepanjen = $cabangList->firstWhere('nama_cabang', 'Rakryan Kepanjen');
 
         foreach ($produkList as $produk) {
             foreach ($cabangList as $cabang) {

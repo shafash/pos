@@ -208,7 +208,7 @@ export default function Dashboard() {
                 }}>
                   {/* Hilangkan prefix "Elang Anugerah " biar ringkas di bar */}
                   <span style={{ fontWeight: 600 }}>
-                    {c.name.replace('Elang Anugerah ', '')}
+                    {c.name.replace('Rakryan ', '')}
                   </span>
                   <span style={{ color: COLOR.textSub }}>{c.value} Trx</span>
                 </div>
@@ -236,7 +236,7 @@ export default function Dashboard() {
                       overflow:     'hidden',
                       textOverflow: 'ellipsis',
                     }}>
-                      {c.name.replace('Elang Anugerah ', '')}
+                      {c.name.replace('Rakryan ', '')}
                     </span>
                   </div>
                 </div>

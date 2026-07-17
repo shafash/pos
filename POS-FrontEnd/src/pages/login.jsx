@@ -151,7 +151,7 @@ export default function Login({ onLogin }) {
             gap:         10,
           }}>
             <span style={{ color: '#fff', fontWeight: 700, fontSize: 15, fontFamily: font }}>
-              ElangAnugerah
+              Rakryan
             </span>
           </div>
 
@@ -376,7 +376,7 @@ export default function Login({ onLogin }) {
 
           {/* Footer */}
           <div style={{ textAlign: 'center', fontSize: 11, color: '#aaa', fontFamily: font }}>
-            &copy; 2026 ElangAnugerah POS<br />
+            &copy; 2026 Rakryan POS<br />
             Sistem Manajemen Aki Terpercaya v1.0
           </div>
         </div>
