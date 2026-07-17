@@ -13,6 +13,20 @@ import ProductImage from '../components/shared/ProductImage'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 // ─────────────────────────────────────────────────────────────
+// Helper: baca PPN dari pengaturan (disimpan Settings.jsx)
+// ─────────────────────────────────────────────────────────────
+function getTaxPercent() {
+  try {
+    const raw = localStorage.getItem('pos_settings')
+    const parsed = raw ? JSON.parse(raw) : null
+    const val = parsed?.transaction?.taxPercent
+    return typeof val === 'number' && !isNaN(val) ? val : 3
+  } catch {
+    return 3
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
 // ProductCard
 // ─────────────────────────────────────────────────────────────
 function ProductCard({ produk, onAdd, isActive, isMobile }) {
@@ -287,9 +301,10 @@ function TransaksiPanel({
   isMobile, onClose,
   onProses, prosesLoading, prosesError,
 }) {
-  const subtotal = keranjang.reduce((s, i) => s + i.harga_satuan * i.qty, 0)
-  const tax      = Math.round(subtotal * 0.03)
-  const total    = subtotal + tax
+  const subtotal   = keranjang.reduce((s, i) => s + i.harga_satuan * i.qty, 0)
+  const taxPercent = getTaxPercent()
+  const tax        = Math.round(subtotal * (taxPercent / 100))
+  const total      = subtotal + tax
 
   return (
     <>
@@ -371,7 +386,7 @@ function TransaksiPanel({
         {[
           ['Amount',   `${keranjang.reduce((s, i) => s + i.qty, 0)} (Items)`],
           ['Subtotal', fmt(subtotal)],
-          ['Tax (3%)', fmt(tax)],
+          [`Tax (${taxPercent}%)`, fmt(tax)],
         ].map(([label, val]) => (
           <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8 }}>
             <span style={{ color: COLOR.textSub }}>{label}</span>
@@ -484,7 +499,8 @@ export default function Kasir() {
 
   const subtotal   = keranjang.reduce((s, i) => s + i.harga_satuan * i.qty, 0)
   const totalItems = keranjang.reduce((s, i) => s + i.qty, 0)
-  const tax        = Math.round(subtotal * 0.03)
+  const taxPercent = getTaxPercent()
+  const tax        = Math.round(subtotal * (taxPercent / 100))
   const total      = subtotal + tax
 
   // Tambah produk ke keranjang
@@ -516,13 +532,13 @@ export default function Kasir() {
     )
   }
 
-  // Proses transaksi ke API
+  // Proses transaksi ke API (metode pembayaran selalu cash)
   const handleProses = async () => {
     if (keranjang.length === 0) return
 
     try {
       const result = await kirimTransaksi({
-        metode_pembayaran: cash,
+        metode_pembayaran: 'cash',
         id_member:         selectedMember?.id_member ?? null,
         cabang_id:         cabangId,
         items:             keranjang.map(item => ({

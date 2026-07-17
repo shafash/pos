@@ -69,14 +69,17 @@ const DEFAULT_SETTINGS = {
 // ─────────────────────────────────────────────────────────
 // Sub-components
 // ─────────────────────────────────────────────────────────
-function Toggle({ value, onToggle }) {
+function Toggle({ value, onToggle, disabled }) {
   return (
     <div
-      onClick={onToggle}
+      onClick={disabled ? undefined : onToggle}
       style={{
         width: 36, height: 20, borderRadius: 20,
         background: value ? COLOR.amber : '#E5E7EB',
-        position: 'relative', cursor: 'pointer', transition: '0.2s',
+        position: 'relative',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        transition: '0.2s',
         flexShrink: 0,
       }}
     >
@@ -107,6 +110,12 @@ export default function Settings() {
   const { isMobile, isTablet } = useBreakpoint()
   const { user } = useAuth()
 
+  // ── Role check: admin bisa edit semua, kasir cuma lihat ──
+  // NOTE: ini baru pembatasan di sisi tampilan (frontend). Backend
+  // (Laravel) juga HARUS validasi role di setiap endpoint terkait,
+  // karena request API tetap bisa dipanggil langsung tanpa lewat UI ini.
+  const isAdmin = user?.role === 'admin'
+
   // ── Load settings dari localStorage ─────────────────────
   const [settings, setSettings] = useState(() => {
     const saved = loadSettings()
@@ -116,7 +125,6 @@ export default function Settings() {
 
   // ── Store info dari user yang login ──────────────────────
   const cabangNama  = user?.cabang  ?? '-'
-  const cabangId    = user?.cabang_id ?? '-'
   const userNama    = user?.nama_lengkap ?? '-'
   const userRole    = user?.role ?? '-'
   const userEmail   = user?.email ?? '-'
@@ -132,8 +140,9 @@ export default function Settings() {
     fetchLog({ limit: 5, ...(user?.cabang_id ? { cabang_id: user.cabang_id } : {}) })
   }, [user?.cabang_id])
 
-  // ── Helper update nested settings ────────────────────────
+  // ── Helper update nested settings (hanya admin) ──────────
   const updateSetting = (section, key, value) => {
+    if (!isAdmin) return
     setSettings(prev => ({
       ...prev,
       [section]: { ...prev[section], [key]: value },
@@ -141,6 +150,7 @@ export default function Settings() {
   }
 
   const setToggle = (key) => {
+    if (!isAdmin) return
     setSettings(prev => ({
       ...prev,
       toggles: { ...prev.toggles, [key]: !prev.toggles[key] },
@@ -148,7 +158,12 @@ export default function Settings() {
   }
 
   // ── Simpan semua settings ke localStorage ────────────────
+  // NOTE: taxPercent yang disimpan di sini dibaca langsung oleh
+  // halaman Kasir (lihat helper getTaxPercent() di Kasir.jsx),
+  // jadi begitu admin ubah & simpan, perhitungan pajak di Kasir
+  // otomatis ikut berubah.
   const handleSaveAll = () => {
+    if (!isAdmin) return
     saveSettings(settings)
     setSaveMsg('Pengaturan berhasil disimpan.')
     setTimeout(() => setSaveMsg(null), 2500)
@@ -160,6 +175,13 @@ export default function Settings() {
     border: `1px solid ${COLOR.border}`, background: '#fff',
     fontSize: 13, fontFamily: 'inherit', color: COLOR.text,
     boxSizing: 'border-box', marginTop: 6, outline: 'none',
+  }
+
+  const disabledInputStyle = {
+    ...inputStyle,
+    opacity: 0.6,
+    cursor: 'not-allowed',
+    background: '#F4F5F7',
   }
 
   const cardStyle = {
@@ -196,9 +218,31 @@ export default function Settings() {
         </div>
       )}
 
+      {!isAdmin && (
+        <div style={{
+          background:   '#FEF3C7',
+          border:       '1px solid #FDE68A',
+          borderRadius: 8,
+          padding:      '10px 16px',
+          fontSize:     13,
+          color:        '#92400E',
+          marginBottom: 16,
+        }}>
+          Halaman ini hanya bisa diubah oleh Admin. Kamu bisa melihat pengaturan, tapi tidak bisa mengeditnya.
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-        {/* ── Informasi Akun (dari useAuth) ── */}
+        {/* ── Informasi Akun & Cabang ── */}
+        {/*
+          NOTE: Section ini masih menampilkan info akun yang SEDANG LOGIN
+          (readonly), BUKAN form untuk admin membuat akun kasir baru.
+          Membuat form "Tambah Akun Kasir" butuh endpoint backend baru
+          (mis. POST /api/users) yang belum ada di AuthController kamu.
+          Begitu endpoint itu tersedia, section ini bisa diganti jadi
+          form pembuatan akun kasir per cabang.
+        */}
         <div style={cardStyle}>
           <div style={{
             display:        'flex',
@@ -209,29 +253,31 @@ export default function Settings() {
             marginBottom:   16,
           }}>
             <SectionTitle icon={Store} title="Informasi Akun & Cabang" />
-            <PrimaryBtn icon={Save} onClick={handleSaveAll}>Simpan Pengaturan</PrimaryBtn>
+            {isAdmin && (
+              <PrimaryBtn icon={Save} onClick={handleSaveAll}>Simpan Pengaturan</PrimaryBtn>
+            )}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20 }}>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Nama Kasir</label>
-              <input style={{ ...inputStyle, opacity: 0.7, cursor: 'not-allowed' }} type="text" value={userNama} readOnly />
+              <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Nama</label>
+              <input style={disabledInputStyle} type="text" value={userNama} readOnly />
             </div>
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Role</label>
-              <input style={{ ...inputStyle, opacity: 0.7, cursor: 'not-allowed', textTransform: 'capitalize' }} type="text" value={userRole} readOnly />
+              <input style={{ ...disabledInputStyle, textTransform: 'capitalize' }} type="text" value={userRole} readOnly />
             </div>
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Email</label>
-              <input style={{ ...inputStyle, opacity: 0.7, cursor: 'not-allowed' }} type="email" value={userEmail} readOnly />
+              <input style={disabledInputStyle} type="email" value={userEmail} readOnly />
             </div>
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, color: COLOR.textSub }}>Cabang</label>
-              <input style={{ ...inputStyle, opacity: 0.7, cursor: 'not-allowed' }} type="text" value={cabangNama} readOnly />
+              <input style={disabledInputStyle} type="text" value={cabangNama} readOnly />
             </div>
           </div>
           <div style={{ marginTop: 12, fontSize: 12, color: COLOR.textMuted }}>
-            Untuk mengubah informasi akun, hubungi Admin sistem.
+            Untuk mengubah informasi akun atau menambah akun kasir baru, fitur ini masih dalam pengembangan.
           </div>
         </div>
 
@@ -249,10 +295,14 @@ export default function Settings() {
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Alert when stock hits below units</div>
                 </div>
                 <input
-                  style={{ ...inputStyle, width: 60, textAlign: 'center', marginTop: 0, flexShrink: 0 }}
+                  style={{
+                    ...(isAdmin ? inputStyle : disabledInputStyle),
+                    width: 60, textAlign: 'center', marginTop: 0, flexShrink: 0,
+                  }}
                   type="number"
                   value={settings.inventory.lowStockThreshold}
                   onChange={e => updateSetting('inventory', 'lowStockThreshold', parseInt(e.target.value) || 0)}
+                  disabled={!isAdmin}
                 />
               </div>
 
@@ -261,7 +311,7 @@ export default function Settings() {
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Negative Stock Protection</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Prevent sales of out-of-stock items</div>
                 </div>
-                <Toggle value={settings.toggles.negativeStock} onToggle={() => setToggle('negativeStock')} />
+                <Toggle value={settings.toggles.negativeStock} onToggle={() => setToggle('negativeStock')} disabled={!isAdmin} />
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
@@ -269,7 +319,7 @@ export default function Settings() {
                   <div style={{ fontSize: 13, fontWeight: 600 }}>SKU Auto-generation</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Automatic unique ID creation</div>
                 </div>
-                <Toggle value={settings.toggles.skuAuto} onToggle={() => setToggle('skuAuto')} />
+                <Toggle value={settings.toggles.skuAuto} onToggle={() => setToggle('skuAuto')} disabled={!isAdmin} />
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
@@ -277,7 +327,7 @@ export default function Settings() {
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Barcode Scanner Integration</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Enable HID/USB scanner support</div>
                 </div>
-                <Toggle value={settings.toggles.barcode} onToggle={() => setToggle('barcode')} />
+                <Toggle value={settings.toggles.barcode} onToggle={() => setToggle('barcode')} disabled={!isAdmin} />
               </div>
             </div>
           </div>
@@ -294,10 +344,14 @@ export default function Settings() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                   <input
-                    style={{ ...inputStyle, width: 60, textAlign: 'center', marginTop: 0 }}
+                    style={{
+                      ...(isAdmin ? inputStyle : disabledInputStyle),
+                      width: 60, textAlign: 'center', marginTop: 0,
+                    }}
                     type="number"
                     value={settings.transaction.taxPercent}
                     onChange={e => updateSetting('transaction', 'taxPercent', parseFloat(e.target.value) || 0)}
+                    disabled={!isAdmin}
                   />
                   <span style={{ fontSize: 13, fontWeight: 600 }}>%</span>
                 </div>
@@ -309,10 +363,14 @@ export default function Settings() {
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>Starting characters for invoices</div>
                 </div>
                 <input
-                  style={{ ...inputStyle, width: 80, marginTop: 0, flexShrink: 0 }}
+                  style={{
+                    ...(isAdmin ? inputStyle : disabledInputStyle),
+                    width: 80, marginTop: 0, flexShrink: 0,
+                  }}
                   type="text"
                   value={settings.transaction.invoicePrefix}
                   onChange={e => updateSetting('transaction', 'invoicePrefix', e.target.value)}
+                  disabled={!isAdmin}
                 />
               </div>
 
@@ -321,7 +379,7 @@ export default function Settings() {
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Auto-print Receipt</div>
                   <div style={{ fontSize: 11, color: COLOR.textSub }}>After transaction success</div>
                 </div>
-                <Toggle value={settings.toggles.autoprint} onToggle={() => setToggle('autoprint')} />
+                <Toggle value={settings.toggles.autoprint} onToggle={() => setToggle('autoprint')} disabled={!isAdmin} />
               </div>
             </div>
           </div>
@@ -339,15 +397,16 @@ export default function Settings() {
             <SectionTitle icon={Users} title="Member & Loyalty" />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <span style={{ fontSize: 13, fontWeight: 600 }}>Point System</span>
-              <Toggle value={settings.toggles.pointSystem} onToggle={() => setToggle('pointSystem')} />
+              <Toggle value={settings.toggles.pointSystem} onToggle={() => setToggle('pointSystem')} disabled={!isAdmin} />
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontSize: 11, color: COLOR.textSub }}>Point per Rp 10.000 transaksi</label>
               <input
-                style={inputStyle}
+                style={isAdmin ? inputStyle : disabledInputStyle}
                 type="number"
                 value={settings.loyalty.pointPer1000}
                 onChange={e => updateSetting('loyalty', 'pointPer1000', parseInt(e.target.value) || 0)}
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -373,22 +432,34 @@ export default function Settings() {
           </div>
 
           {/* Backup & Security */}
+          {/*
+            NOTE: Tombol "Manual Backup Now" dan dropdown frekuensi di
+            bawah ini BELUM tersambung ke backend — belum ada endpoint
+            backup di Laravel (mis. POST /api/backup) atau job terjadwal
+            di app/Console/Kernel.php. Keduanya masih murni tampilan.
+          */}
           <div style={cardStyle}>
             <SectionTitle icon={Shield} title="Backup & Security" />
-            <button style={{
-              width: '100%', padding: '10px',
-              background: COLOR.amberLight,
-              color: COLOR.amberDark,
-              border: `1px solid ${COLOR.amber}`,
-              borderRadius: 8, fontWeight: 600, fontSize: 13,
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              gap: 8, cursor: 'pointer', marginBottom: 16, fontFamily: 'inherit',
-            }}>
+            <button
+              disabled={!isAdmin}
+              style={{
+                width: '100%', padding: '10px',
+                background: COLOR.amberLight,
+                color: COLOR.amberDark,
+                border: `1px solid ${COLOR.amber}`,
+                borderRadius: 8, fontWeight: 600, fontSize: 13,
+                display: 'flex', justifyContent: 'center', alignItems: 'center',
+                gap: 8,
+                cursor: isAdmin ? 'pointer' : 'not-allowed',
+                opacity: isAdmin ? 1 : 0.5,
+                marginBottom: 16, fontFamily: 'inherit',
+              }}
+            >
               <Clock size={16} /> Manual Backup Now
             </button>
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontSize: 11, color: COLOR.textSub }}>Auto-Backup Frequency</label>
-              <select style={inputStyle}>
+              <select style={isAdmin ? inputStyle : disabledInputStyle} disabled={!isAdmin}>
                 <option>Daily at 12:00 AM</option>
                 <option>Weekly on Sunday</option>
                 <option>Monthly</option>
@@ -396,7 +467,7 @@ export default function Settings() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 13, fontWeight: 600 }}>Two-Factor Auth (2FA)</span>
-              <Toggle value={settings.toggles.twofa} onToggle={() => setToggle('twofa')} />
+              <Toggle value={settings.toggles.twofa} onToggle={() => setToggle('twofa')} disabled={!isAdmin} />
             </div>
           </div>
 
@@ -420,7 +491,12 @@ export default function Settings() {
                     type="checkbox"
                     checked={settings.alerts[key]}
                     onChange={() => updateSetting('alerts', key, !settings.alerts[key])}
-                    style={{ accentColor: COLOR.amber, width: 16, height: 16, cursor: 'pointer' }}
+                    disabled={!isAdmin}
+                    style={{
+                      accentColor: COLOR.amber, width: 16, height: 16,
+                      cursor: isAdmin ? 'pointer' : 'not-allowed',
+                      opacity: isAdmin ? 1 : 0.5,
+                    }}
                   />
                 </div>
               ))}
