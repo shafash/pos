@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Pengaturan;
 use Illuminate\Support\Str;
 
 class IdGenerator
@@ -13,9 +14,10 @@ class IdGenerator
 
     public function transaksiNo(): string
     {
+        $prefix  = Pengaturan::get('invoice_prefix', 'TRX-');
         $tanggal = now()->format('Ymd');
 
-        return 'TRX-' . $tanggal . '-' . strtoupper(substr((string) Str::ulid(), 0, 8));
+        return $prefix . $tanggal . '-' . strtoupper(substr((string) Str::ulid(), 0, 8));
     }
 
     public function produkSku(string $merek): string

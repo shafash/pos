@@ -154,3 +154,11 @@ export const auditService = {
   batal: (id) =>
     api.put(`/audit/${id}/batal`),
 }
+
+export const pengaturanService = {
+  get: () =>
+    api.get('/pengaturan'),
+
+  update: (data) =>
+    api.put('/pengaturan', data),
+}

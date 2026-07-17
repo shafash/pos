@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\AuditController;
 use App\Http\Controllers\Api\CabangController;
+use App\Http\Controllers\Api\PengaturanController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -49,4 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/audit/{id}/detail', [AuditController::class, 'submitDetail']);
     Route::put('/audit/{id}/selesai', [AuditController::class, 'selesai']);
     Route::put('/audit/{id}/batal', [AuditController::class, 'batal']);
+
+    Route::get('/pengaturan', [App\Http\Controllers\Api\PengaturanController::class, 'index']);
+    Route::put('/pengaturan', [App\Http\Controllers\Api\PengaturanController::class, 'update']);
 });

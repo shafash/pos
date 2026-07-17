@@ -5,8 +5,8 @@ import {
 } from 'lucide-react'
 import { COLOR } from '../constants/colors'
 import { useAuth } from '../context/AuthContext'
-import { transaksiService } from '../services/api'
-import { useApi } from '../hooks/useApi'
+import { transaksiService, pengaturanService } from '../services/api'
+import { useApi, useMutation } from '../hooks/useApi'
 import PrimaryBtn from '../components/ui/PrimaryBtn'
 
 // ── Breakpoint hook ────────────────────────────────────────
@@ -20,7 +20,7 @@ function useBreakpoint() {
   return { isMobile: width < 640, isTablet: width < 1024 }
 }
 
-// ── localStorage helpers ───────────────────────────────────
+// ── localStorage helpers (untuk pengaturan LOKAL saja, bukan tax/prefix) ──
 const LS_KEY = 'pos_settings'
 
 function loadSettings() {
@@ -38,7 +38,8 @@ function saveSettings(data) {
   } catch {}
 }
 
-// ── Default settings ───────────────────────────────────────
+// ── Default settings (tax & invoicePrefix sekarang datang dari API,
+//    nilai di bawah cuma fallback sebelum data API selesai di-fetch) ──
 const DEFAULT_SETTINGS = {
   toggles: {
     negativeStock: true,
@@ -109,19 +110,35 @@ function SectionTitle({ icon: Icon, title }) {
 export default function Settings() {
   const { isMobile, isTablet } = useBreakpoint()
   const { user } = useAuth()
-
-  // ── Role check: admin bisa edit semua, kasir cuma lihat ──
-  // NOTE: ini baru pembatasan di sisi tampilan (frontend). Backend
-  // (Laravel) juga HARUS validasi role di setiap endpoint terkait,
-  // karena request API tetap bisa dipanggil langsung tanpa lewat UI ini.
   const isAdmin = user?.role === 'admin'
 
-  // ── Load settings dari localStorage ─────────────────────
+  // ── Load pengaturan lokal (toggle, threshold, dll) ───────
   const [settings, setSettings] = useState(() => {
     const saved = loadSettings()
     return saved ?? DEFAULT_SETTINGS
   })
   const [saveMsg, setSaveMsg] = useState(null)
+
+  // ── Pengaturan global dari backend (tax & invoice prefix) ─
+  const { data: pengaturanData, execute: fetchPengaturan } = useApi(pengaturanService.get)
+  const { loading: savingPengaturan, execute: updatePengaturan } = useMutation(pengaturanService.update)
+
+  useEffect(() => {
+    fetchPengaturan()
+  }, [])
+
+  // Setelah data pengaturan global datang, sinkronkan ke state settings
+  useEffect(() => {
+    if (!pengaturanData) return
+    setSettings(prev => ({
+      ...prev,
+      transaction: {
+        ...prev.transaction,
+        taxPercent:    pengaturanData.tax_percent ?? prev.transaction.taxPercent,
+        invoicePrefix: pengaturanData.invoice_prefix ?? prev.transaction.invoicePrefix,
+      },
+    }))
+  }, [pengaturanData])
 
   // ── Store info dari user yang login ──────────────────────
   const cabangNama  = user?.cabang  ?? '-'
@@ -129,7 +146,7 @@ export default function Settings() {
   const userRole    = user?.role ?? '-'
   const userEmail   = user?.email ?? '-'
 
-  // ── Fetch activity log (transaksi terakhir sebagai proxy) ─
+  // ── Fetch activity log ────────────────────────────────────
   const {
     data:    transaksiList,
     loading: loadingLog,
@@ -157,16 +174,22 @@ export default function Settings() {
     }))
   }
 
-  // ── Simpan semua settings ke localStorage ────────────────
-  // NOTE: taxPercent yang disimpan di sini dibaca langsung oleh
-  // halaman Kasir (lihat helper getTaxPercent() di Kasir.jsx),
-  // jadi begitu admin ubah & simpan, perhitungan pajak di Kasir
-  // otomatis ikut berubah.
-  const handleSaveAll = () => {
+  // ── Simpan: toggle/threshold lain ke localStorage,
+  //    tax_percent & invoice_prefix dikirim ke backend ──────
+  const handleSaveAll = async () => {
     if (!isAdmin) return
-    saveSettings(settings)
-    setSaveMsg('Pengaturan berhasil disimpan.')
-    setTimeout(() => setSaveMsg(null), 2500)
+    try {
+      await updatePengaturan({
+        invoice_prefix: settings.transaction.invoicePrefix,
+        tax_percent:    settings.transaction.taxPercent,
+      })
+      saveSettings(settings)
+      setSaveMsg('Pengaturan berhasil disimpan.')
+      setTimeout(() => setSaveMsg(null), 2500)
+    } catch (err) {
+      setSaveMsg('Gagal menyimpan pengaturan ke server.')
+      setTimeout(() => setSaveMsg(null), 2500)
+    }
   }
 
   // ── Shared styles ────────────────────────────────────────
@@ -191,7 +214,6 @@ export default function Settings() {
     padding:      isMobile ? 16 : 24,
   }
 
-  // ── Format log transaksi sebagai activity log ─────────────
   const activityLogs = (transaksiList?.data ?? transaksiList ?? []).slice(0, 5).map(t => ({
     id:       t.no_transaksi,
     time:     t.waktu ? new Date(t.waktu).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB' : '-',
@@ -203,18 +225,17 @@ export default function Settings() {
   return (
     <div style={{ paddingTop: 24 }}>
 
-      {/* Success toast */}
       {saveMsg && (
         <div style={{
-          background:   '#DCFCE7',
-          border:       '1px solid #86EFAC',
+          background:   saveMsg.startsWith('Gagal') ? '#FEF2F2' : '#DCFCE7',
+          border:       saveMsg.startsWith('Gagal') ? '1px solid #FECACA' : '1px solid #86EFAC',
           borderRadius: 8,
           padding:      '10px 16px',
           fontSize:     13,
-          color:        '#16A34A',
+          color:        saveMsg.startsWith('Gagal') ? '#DC2626' : '#16A34A',
           marginBottom: 16,
         }}>
-          ✓ {saveMsg}
+          {saveMsg.startsWith('Gagal') ? '' : '✓ '}{saveMsg}
         </div>
       )}
 
@@ -235,14 +256,6 @@ export default function Settings() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* ── Informasi Akun & Cabang ── */}
-        {/*
-          NOTE: Section ini masih menampilkan info akun yang SEDANG LOGIN
-          (readonly), BUKAN form untuk admin membuat akun kasir baru.
-          Membuat form "Tambah Akun Kasir" butuh endpoint backend baru
-          (mis. POST /api/users) yang belum ada di AuthController kamu.
-          Begitu endpoint itu tersedia, section ini bisa diganti jadi
-          form pembuatan akun kasir per cabang.
-        */}
         <div style={cardStyle}>
           <div style={{
             display:        'flex',
@@ -254,7 +267,9 @@ export default function Settings() {
           }}>
             <SectionTitle icon={Store} title="Informasi Akun & Cabang" />
             {isAdmin && (
-              <PrimaryBtn icon={Save} onClick={handleSaveAll}>Simpan Pengaturan</PrimaryBtn>
+              <PrimaryBtn icon={savingPengaturan ? Loader : Save} onClick={handleSaveAll}>
+                {savingPengaturan ? 'Menyimpan...' : 'Simpan Pengaturan'}
+              </PrimaryBtn>
             )}
           </div>
 
@@ -284,7 +299,6 @@ export default function Settings() {
         {/* ── Inventory & Transaction ── */}
         <div style={{ display: 'grid', gridTemplateColumns: isTablet ? '1fr' : '1fr 1fr', gap: 24 }}>
 
-          {/* Inventory & Stock */}
           <div style={cardStyle}>
             <SectionTitle icon={Package} title="Inventory & Stock" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -332,7 +346,7 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Transaction Settings */}
+          {/* Transaction Settings — taxPercent & invoicePrefix kini dari backend */}
           <div style={cardStyle}>
             <SectionTitle icon={CreditCard} title="Transaction Settings" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -392,7 +406,6 @@ export default function Settings() {
           gap:                 24,
         }}>
 
-          {/* Member & Loyalty */}
           <div style={cardStyle}>
             <SectionTitle icon={Users} title="Member & Loyalty" />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -431,13 +444,7 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Backup & Security */}
-          {/*
-            NOTE: Tombol "Manual Backup Now" dan dropdown frekuensi di
-            bawah ini BELUM tersambung ke backend — belum ada endpoint
-            backup di Laravel (mis. POST /api/backup) atau job terjadwal
-            di app/Console/Kernel.php. Keduanya masih murni tampilan.
-          */}
+          {/* Backup & Security — masih belum tersambung backend */}
           <div style={cardStyle}>
             <SectionTitle icon={Shield} title="Backup & Security" />
             <button
@@ -504,7 +511,7 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ── Activity Log (dari API transaksi terakhir) ── */}
+        {/* ── Activity Log ── */}
         <div style={cardStyle}>
           <div style={{
             display:        'flex',
