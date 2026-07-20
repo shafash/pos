@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Users, Minus, Plus,
-  ShoppingCart, X, Search, Loader,
+  ShoppingCart, X, Search, Loader, ArrowRight,
 } from 'lucide-react'
 import { COLOR } from '../constants/colors'
 import { produkService, memberService, transaksiService, pengaturanService } from '../services/api'
@@ -287,10 +287,24 @@ function TransaksiPanel({
   isMobile, onClose,
   onProses, prosesLoading, prosesError,
   taxPercent,
+  bayarInput, setBayarInput,
 }) {
   const subtotal = keranjang.reduce((s, i) => s + i.harga_satuan * i.qty, 0)
   const tax      = Math.round(subtotal * (taxPercent / 100))
   const total    = subtotal + tax
+
+  const bayar   = Number(bayarInput) || 0
+  const selisih = bayar - total
+  const isKurang = bayar < total
+
+  const isDisabled = prosesLoading || keranjang.length === 0 || isKurang
+
+  const quickAmounts = [
+    { label: '+100.000',   value: 100000  },
+    { label: '+500.000',   value: 500000  },
+    { label: '+1.000.000', value: 1000000 },
+    { label: '+2.000.000', value: 2000000 },
+  ]
 
   return (
     <>
@@ -337,7 +351,7 @@ function TransaksiPanel({
             <div style={{ fontSize: 12, color: COLOR.textMuted }}>{keranjang.length} Items</div>
           </div>
           <button
-            onClick={() => setKeranjang([])}
+            onClick={() => { setKeranjang([]); setBayarInput('') }}
             style={{ background: 'none', border: 'none', color: COLOR.red, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
           >
             Clear
@@ -359,11 +373,60 @@ function TransaksiPanel({
         </div>
       </div>
 
-      {/* Total Dibayar (metode pembayaran hanya cash) */}
+      {/* Total Dibayar (input uang customer) */}
       <div style={{ padding: isMobile ? '14px 16px' : '14px 24px', borderBottom: `1px solid ${COLOR.border}` }}>
-        <div style={{ fontSize: 12, color: COLOR.textSub, marginBottom: 6 }}>Total Dibayar</div>
-        <div style={{ background: '#F7F7F5', borderRadius: 8, padding: '12px 16px', fontSize: 15, fontWeight: 700 }}>
-          {fmt(total)}
+        <div style={{ fontSize: 11, fontWeight: 700, color: COLOR.textSub, letterSpacing: 0.5, marginBottom: 10 }}>
+          TOTAL DIBAYAR
+        </div>
+        <div style={{
+          display:      'flex',
+          alignItems:   'center',
+          gap:          8,
+          background:   '#F7F7F5',
+          border:       `1px solid ${COLOR.border}`,
+          borderRadius: 8,
+          padding:      '10px 16px',
+          marginBottom: 10,
+        }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: COLOR.textMuted }}>Rp</span>
+          <input
+            type="number"
+            min={0}
+            value={bayarInput}
+            onChange={(e) => setBayarInput(e.target.value)}
+            placeholder="0"
+            style={{
+              flex: 1, border: 'none', outline: 'none', background: 'transparent',
+              fontSize: 18, fontWeight: 700, color: COLOR.text, fontFamily: 'inherit',
+              textAlign: 'right',
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <button
+            onClick={() => setBayarInput(String(total))}
+            style={{
+              padding: '8px 0', borderRadius: 8, border: `1px solid ${COLOR.border}`,
+              background: '#fff', fontSize: 12, fontWeight: 600, color: COLOR.text,
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            Uang Pas
+          </button>
+          {quickAmounts.map(({ label, value }) => (
+            <button
+              key={label}
+              onClick={() => setBayarInput(String(bayar + value))}
+              style={{
+                padding: '8px 0', borderRadius: 8, border: `1px solid ${COLOR.border}`,
+                background: '#fff', fontSize: 12, fontWeight: 600, color: COLOR.text,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -388,11 +451,26 @@ function TransaksiPanel({
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 8 }}>
           <span style={{ color: COLOR.textSub }}>Bayar</span>
-          <span>{fmt(subtotal)}</span>
+          <span>{fmt(bayar)}</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 6 }}>
-          <span style={{ color: COLOR.textSub }}>Kembali</span>
-          <span>{fmt(Math.max(0, subtotal - total))}</span>
+
+        {/* Kembali / Kurang — real-time */}
+        <div style={{
+          display:        'flex',
+          justifyContent: 'space-between',
+          alignItems:     'center',
+          fontSize:       12,
+          marginTop:      6,
+          padding:        isKurang && bayar > 0 ? '6px 10px' : 0,
+          borderRadius:   6,
+          background:     isKurang && bayar > 0 ? '#FEF2F2' : 'transparent',
+        }}>
+          <span style={{ color: isKurang && bayar > 0 ? '#DC2626' : COLOR.textSub, fontWeight: isKurang && bayar > 0 ? 600 : 400 }}>
+            {isKurang && bayar > 0 ? 'Kurang' : 'Kembali'}
+          </span>
+          <span style={{ color: isKurang && bayar > 0 ? '#DC2626' : '#16A34A', fontWeight: 600 }}>
+            {isKurang && bayar > 0 ? `-${fmt(Math.abs(selisih))}` : fmt(Math.max(0, selisih))}
+          </span>
         </div>
 
         {/* Error dari API */}
@@ -415,17 +493,17 @@ function TransaksiPanel({
       <div style={{ padding: isMobile ? '12px 16px 24px' : '12px 24px 28px' }}>
         <button
           onClick={onProses}
-          disabled={prosesLoading || keranjang.length === 0}
+          disabled={isDisabled}
           style={{
             width:        '100%',
-            background:   keranjang.length === 0 ? COLOR.border : COLOR.amber,
-            color:        keranjang.length === 0 ? COLOR.textMuted : '#fff',
+            background:   isDisabled ? '#F4F5F7' : COLOR.amber,
+            color:        isDisabled ? '#DC2626' : '#fff',
             border:       'none',
             borderRadius: 10,
             padding:      16,
             fontWeight:   800,
             fontSize:     14,
-            cursor:       keranjang.length === 0 || prosesLoading ? 'not-allowed' : 'pointer',
+            cursor:       isDisabled ? 'not-allowed' : 'pointer',
             fontFamily:   'inherit',
             display:      'flex',
             alignItems:   'center',
@@ -434,7 +512,12 @@ function TransaksiPanel({
           }}
         >
           {prosesLoading && <Loader size={16} color="#fff" />}
-          {prosesLoading ? 'Memproses...' : 'Proses Transaksi'}
+          {!prosesLoading && isKurang && keranjang.length > 0 && <X size={16} />}
+          {!prosesLoading && (!isKurang || keranjang.length === 0) && <ArrowRight size={16} />}
+          {prosesLoading
+            ? 'Memproses...'
+            : (isKurang && keranjang.length > 0 ? 'Nominal Belum Cukup' : 'Proses Transaksi')
+          }
         </button>
       </div>
     </>
@@ -453,6 +536,7 @@ export default function Kasir() {
   const [showMobileCart, setShowMobileCart] = useState(false)
   const [searchProduk,   setSearchProduk]   = useState('')
   const [successMsg,     setSuccessMsg]     = useState(null)
+  const [bayarInput,     setBayarInput]     = useState('')
 
   const isMobile = useIsMobile()
 
@@ -490,13 +574,11 @@ export default function Kasir() {
   const tax        = Math.round(subtotal * (taxPercent / 100))
   const total      = subtotal + tax
 
-  // Tambah produk ke keranjang
   const handleAddToCart = (produk) => {
     setSelectedSku(produk.sku)
     setKeranjang(prev => {
       const exist = prev.find(x => x.sku === produk.sku)
       if (exist) {
-        // Cek stok tidak melebihi yang tersedia
         const stokTersedia = produk.stok_saat_ini ?? 0
         if (exist.qty >= stokTersedia) return prev
         return prev.map(x => x.sku === produk.sku ? { ...x, qty: x.qty + 1 } : x)
@@ -519,7 +601,6 @@ export default function Kasir() {
     )
   }
 
-  // Proses transaksi ke API (metode pembayaran selalu cash)
   const handleProses = async () => {
     if (keranjang.length === 0) return
 
@@ -535,23 +616,21 @@ export default function Kasir() {
         })),
       })
 
-      // Sukses — reset state dan tampilkan pesan
       setKeranjang([])
       setSelectedMember(null)
       setSelectedSku(null)
       setShowMobileCart(false)
+      setBayarInput('')
       setSuccessMsg(`Transaksi ${result.no_transaksi} berhasil! Total: ${fmt(result.total_bayar)}`)
 
       const receiptUrl = `${(import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')}/receipt/${result.no_transaksi}`
       window.open(receiptUrl, '_blank', 'noopener,noreferrer')
 
-      // Refresh stok produk setelah transaksi
       fetchProduk({ cabang_id: cabangId })
 
-      // Sembunyikan pesan sukses setelah 4 detik
       setTimeout(() => setSuccessMsg(null), 4000)
     } catch (_) {
-      // Error sudah ditangani oleh useMutation, tampil di prosesError
+
     }
   }
 
@@ -587,7 +666,6 @@ export default function Kasir() {
         overflow:      isMobile ? 'visible' : 'hidden',
       }}>
 
-        {/* ── Panel kiri: daftar produk (tanpa gap ke topbar) ── */}
         <div
           className="no-scrollbar"
           style={{
@@ -692,6 +770,8 @@ export default function Kasir() {
               prosesLoading={prosesLoading}
               prosesError={prosesError}
               taxPercent={taxPercent}
+              bayarInput={bayarInput}
+              setBayarInput={setBayarInput}
             />
           </div>
         )}
@@ -765,6 +845,8 @@ export default function Kasir() {
             prosesLoading={prosesLoading}
             prosesError={prosesError}
             taxPercent={taxPercent}
+            bayarInput={bayarInput}
+            setBayarInput={setBayarInput}
           />
         </div>
       )}
