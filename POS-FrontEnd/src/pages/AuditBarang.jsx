@@ -40,6 +40,14 @@ export default function AuditBarang() {
   const [konfirmFinish,  setKonfirmFinish]  = useState(false)
   const [konfirmDiscard, setKonfirmDiscard] = useState(false)
 
+  // ── State toast (sukses/error) ───────────────────────────
+  const [toastMsg, setToastMsg] = useState(null) // { type: 'success' | 'error', text: string }
+
+  const showToast = (type, text) => {
+    setToastMsg({ type, text })
+    setTimeout(() => setToastMsg(null), 4000)
+  }
+
   // ── API hooks ────────────────────────────────────────────
   const { data: auditList,  loading: loadingCekSesi, execute: cekSesi     } = useApi(auditService.getAll)
   const { data: produkList, loading: loadingProduk,  execute: fetchProduk } = useApi(produkService.getAll)
@@ -81,14 +89,13 @@ export default function AuditBarang() {
     fetchProduk({ cabang_id: cabangId, search: debouncedSearch || undefined })
   }, [debouncedSearch, cabangId])
 
-  // ── 3. Buat sesi audit baru ──────────────────────────────
   const handleBuatSesi = async () => {
     try {
       const result = await buatSesi({ cabang_id: cabangId })
       setSesiAudit(result)
       setSessionItems([])
     } catch (err) {
-      alert(err.response?.data?.message ?? 'Gagal membuat sesi audit.')
+      showToast('error', err.response?.data?.message ?? 'Gagal membuat sesi audit.')
     }
   }
 
@@ -100,7 +107,6 @@ export default function AuditBarang() {
     setActualCount(existingDetail?.stok_fisik ?? produk.stok_saat_ini ?? 0)
   }
 
-  // ── 5. Submit stok fisik (Confirm Items Count) ───────────
   const handleConfirm = async () => {
     if (!sesiAudit || !produkAktif) return
     try {
@@ -110,13 +116,12 @@ export default function AuditBarang() {
         alasan:     null,
       }])
 
-      // Update session items dari response
       const updatedDetail = result?.detail_audit ?? []
       setSessionItems(updatedDetail)
       setProdukAktif(null)
       setSearchValue('')
     } catch (err) {
-      alert(err.response?.data?.message ?? 'Gagal menyimpan hasil hitungan.')
+      showToast('error', err.response?.data?.message ?? 'Gagal menyimpan hasil hitungan.')
     }
   }
 
@@ -126,7 +131,6 @@ export default function AuditBarang() {
     setActualCount(0)
   }
 
-  // ── 7. Finish & Sync (dipicu setelah konfirmasi modal) ───
   const handleFinish = async () => {
     if (!sesiAudit) return
     try {
@@ -135,14 +139,13 @@ export default function AuditBarang() {
       setSessionItems([])
       setProdukAktif(null)
       setKonfirmFinish(false)
-      alert('Audit selesai! Stok sistem telah diperbarui.')
+      showToast('success', 'Audit selesai! Stok sistem telah diperbarui.')
     } catch (err) {
       setKonfirmFinish(false)
-      alert(err.response?.data?.message ?? 'Gagal menyelesaikan audit.')
+      showToast('error', err.response?.data?.message ?? 'Gagal menyelesaikan audit.')
     }
   }
 
-  // ── 8. Discard Session (dipicu setelah konfirmasi modal) ─
   const handleDiscard = async () => {
     if (!sesiAudit) return
     try {
@@ -151,9 +154,10 @@ export default function AuditBarang() {
       setSessionItems([])
       setProdukAktif(null)
       setKonfirmDiscard(false)
+      showToast('success', 'Sesi audit berhasil dibatalkan.')
     } catch (err) {
       setKonfirmDiscard(false)
-      alert(err.response?.data?.message ?? 'Gagal membatalkan sesi audit.')
+      showToast('error', err.response?.data?.message ?? 'Gagal membatalkan sesi audit.')
     }
   }
 
@@ -168,6 +172,28 @@ export default function AuditBarang() {
 
   // Produk yang tampil di search result (exclude yang sudah diaudit bisa juga)
   const produkTampil = produkList ?? []
+
+  // ── Toast (dipakai di semua kondisi render) ──────────────
+  const toastEl = toastMsg && (
+    <div style={{
+      position:     'fixed',
+      top:          20,
+      left:         '50%',
+      transform:    'translateX(-50%)',
+      background:   toastMsg.type === 'success' ? '#22C55E' : '#DC2626',
+      color:        '#fff',
+      borderRadius: 10,
+      padding:      '12px 20px',
+      fontSize:     13,
+      fontWeight:   600,
+      zIndex:       100,
+      boxShadow:    '0 4px 16px rgba(0,0,0,0.15)',
+      whiteSpace:   'nowrap',
+      fontFamily:   font,
+    }}>
+      {toastMsg.type === 'success' ? '✓ ' : '✕ '}{toastMsg.text}
+    </div>
+  )
 
   // ── Modal konfirmasi Finish & Sync ───────────────────────
   const modalFinish = konfirmFinish && (
@@ -287,64 +313,70 @@ export default function AuditBarang() {
   // ─────────────────────────────────────────────────────────
   if (loadingCekSesi) {
     return (
-      <div style={{ padding: '60px 0', textAlign: 'center', color: COLOR.textMuted, fontFamily: font, marginTop: isMobile ? 16 : 24 }}>
-        <Loader size={24} color={COLOR.amber} />
-        <div style={{ marginTop: 12, fontSize: 13 }}>Memeriksa sesi audit...</div>
-      </div>
+      <>
+        {toastEl}
+        <div style={{ padding: '60px 0', textAlign: 'center', color: COLOR.textMuted, fontFamily: font, marginTop: isMobile ? 16 : 24 }}>
+          <Loader size={24} color={COLOR.amber} />
+          <div style={{ marginTop: 12, fontSize: 13 }}>Memeriksa sesi audit...</div>
+        </div>
+      </>
     )
   }
 
   if (!sesiAudit) {
     return (
-      <div style={{
-        display:        'flex',
-        flexDirection:  'column',
-        alignItems:     'center',
-        justifyContent: 'center',
-        padding:        '60px 20px',
-        gap:            16,
-        fontFamily:     font,
-        textAlign:      'center',
-        marginTop:      isMobile ? 16 : 24,
-      }}>
+      <>
+        {toastEl}
         <div style={{
-          width:          72, height: 72,
-          background:     '#4A3500',
-          borderRadius:   '50%',
           display:        'flex',
+          flexDirection:  'column',
           alignItems:     'center',
           justifyContent: 'center',
+          padding:        '60px 20px',
+          gap:            16,
+          fontFamily:     font,
+          textAlign:      'center',
+          marginTop:      isMobile ? 16 : 24,
         }}>
-          <CheckCircle size={32} color="#FFD700" />
-        </div>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 8 }}>Mulai Sesi Audit Stok</div>
-          <div style={{ fontSize: 13, color: COLOR.textSub, lineHeight: 1.6, maxWidth: 340 }}>
-            Belum ada sesi audit aktif untuk cabang ini. Mulai sesi baru untuk menghitung stok fisik dan sinkronkan dengan data sistem.
+          <div style={{
+            width:          72, height: 72,
+            background:     '#4A3500',
+            borderRadius:   '50%',
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'center',
+          }}>
+            <CheckCircle size={32} color="#FFD700" />
           </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 8 }}>Mulai Sesi Audit Stok</div>
+            <div style={{ fontSize: 13, color: COLOR.textSub, lineHeight: 1.6, maxWidth: 340 }}>
+              Belum ada sesi audit aktif untuk cabang ini. Mulai sesi baru untuk menghitung stok fisik dan sinkronkan dengan data sistem.
+            </div>
+          </div>
+          <button
+            onClick={handleBuatSesi}
+            disabled={loadingBuatSesi}
+            style={{
+              background:   COLOR.amber,
+              color:        '#fff',
+              border:       'none',
+              borderRadius: 10,
+              padding:      '14px 32px',
+              fontWeight:   700,
+              fontSize:     14,
+              cursor:       loadingBuatSesi ? 'not-allowed' : 'pointer',
+              fontFamily:   font,
+              display:      'flex',
+              alignItems:   'center',
+              gap:          8,
+            }}
+          >
+            {loadingBuatSesi && <Loader size={16} color="#fff" />}
+            {loadingBuatSesi ? 'Membuat Sesi...' : 'Mulai Audit Sekarang'}
+          </button>
         </div>
-        <button
-          onClick={handleBuatSesi}
-          disabled={loadingBuatSesi}
-          style={{
-            background:   COLOR.amber,
-            color:        '#fff',
-            border:       'none',
-            borderRadius: 10,
-            padding:      '14px 32px',
-            fontWeight:   700,
-            fontSize:     14,
-            cursor:       loadingBuatSesi ? 'not-allowed' : 'pointer',
-            fontFamily:   font,
-            display:      'flex',
-            alignItems:   'center',
-            gap:          8,
-          }}
-        >
-          {loadingBuatSesi && <Loader size={16} color="#fff" />}
-          {loadingBuatSesi ? 'Membuat Sesi...' : 'Mulai Audit Sekarang'}
-        </button>
-      </div>
+      </>
     )
   }
 
@@ -360,6 +392,7 @@ export default function AuditBarang() {
       fontFamily:    font,
       paddingTop:    isMobile ? 16 : 24,
     }}>
+      {toastEl}
       {modalFinish}
       {modalDiscard}
 
