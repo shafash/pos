@@ -9,12 +9,10 @@ import { useAuth } from '../context/AuthContext'
 const quickAdds = [1, 5, 10]
 const font = "'Geist', sans-serif"
 
-// ─────────────────────────────────────────────────────────────
-// Helper: hitung selisih dan label untuk Session Activity
-// ─────────────────────────────────────────────────────────────
 function detailLabel(detail) {
-  if (detail.selisih === 0) return { text: `Count: ${detail.stok_fisik} (Match)`, isMatch: true }
-  return { text: `Diff: ${detail.selisih > 0 ? '+' : ''}${detail.selisih} Unit`, isMatch: false }
+  const selisih = Number(detail.selisih)
+  if (selisih === 0) return { text: `Count: ${detail.stok_fisik} (Match)`, isMatch: true }
+  return { text: `Diff: ${selisih > 0 ? '+' : ''}${selisih} Unit`, isMatch: false }
 }
 
 export default function AuditBarang() {
@@ -609,8 +607,20 @@ export default function AuditBarang() {
                   </div>
 
                   {/* Quick physical count */}
-                  <div style={{ fontSize: isMobile ? 11 : 12, fontWeight: 600, color: '#000', marginBottom: 10, fontFamily: font }}>
-                    QUICK PHYSICAL COUNT
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <span style={{ fontSize: isMobile ? 11 : 12, fontWeight: 600, color: '#000', fontFamily: font }}>
+                      QUICK PHYSICAL COUNT
+                    </span>
+                    <button
+                      onClick={() => setActualCount(systemStock)}
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        fontSize: 11, fontWeight: 600, color: COLOR.amber, fontFamily: font,
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      Reset ke Stok Sistem
+                    </button>
                   </div>
                   <div style={{ display: 'flex', gap: isMobile ? 8 : 12, marginBottom: 16 }}>
                     {quickAdds.map(amount => (

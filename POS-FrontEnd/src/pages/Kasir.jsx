@@ -293,11 +293,13 @@ function TransaksiPanel({
   const tax      = Math.round(subtotal * (taxPercent / 100))
   const total    = subtotal + tax
 
-  const bayar   = Number(bayarInput) || 0
-  const selisih = bayar - total
+  const isKeranjangKosong = keranjang.length === 0
+  const bayar    = Number(bayarInput) || 0
+  const selisih  = bayar - total
   const isKurang = bayar < total
 
-  const isDisabled = prosesLoading || keranjang.length === 0 || isKurang
+  const isDisabled    = prosesLoading || isKeranjangKosong || isKurang
+  const isKurangNyata = isKurang && !isKeranjangKosong
 
   const quickAmounts = [
     { label: '+100.000',   value: 100000  },
@@ -382,11 +384,12 @@ function TransaksiPanel({
           display:      'flex',
           alignItems:   'center',
           gap:          8,
-          background:   '#F7F7F5',
+          background:   isKeranjangKosong ? '#F4F5F7' : '#F7F7F5',
           border:       `1px solid ${COLOR.border}`,
           borderRadius: 8,
           padding:      '10px 16px',
           marginBottom: 10,
+          opacity:      isKeranjangKosong ? 0.6 : 1,
         }}>
           <span style={{ fontSize: 15, fontWeight: 700, color: COLOR.textMuted }}>Rp</span>
           <input
@@ -395,10 +398,12 @@ function TransaksiPanel({
             value={bayarInput}
             onChange={(e) => setBayarInput(e.target.value)}
             placeholder="0"
+            disabled={isKeranjangKosong}
             style={{
               flex: 1, border: 'none', outline: 'none', background: 'transparent',
               fontSize: 18, fontWeight: 700, color: COLOR.text, fontFamily: 'inherit',
               textAlign: 'right',
+              cursor: isKeranjangKosong ? 'not-allowed' : 'text',
             }}
           />
         </div>
@@ -406,10 +411,15 @@ function TransaksiPanel({
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <button
             onClick={() => setBayarInput(String(total))}
+            disabled={isKeranjangKosong}
             style={{
               padding: '8px 0', borderRadius: 8, border: `1px solid ${COLOR.border}`,
-              background: '#fff', fontSize: 12, fontWeight: 600, color: COLOR.text,
-              cursor: 'pointer', fontFamily: 'inherit',
+              background: isKeranjangKosong ? '#F4F5F7' : '#fff',
+              fontSize: 12, fontWeight: 600,
+              color: isKeranjangKosong ? COLOR.textMuted : COLOR.text,
+              cursor: isKeranjangKosong ? 'not-allowed' : 'pointer',
+              fontFamily: 'inherit',
+              opacity: isKeranjangKosong ? 0.6 : 1,
             }}
           >
             Uang Pas
@@ -418,10 +428,15 @@ function TransaksiPanel({
             <button
               key={label}
               onClick={() => setBayarInput(String(bayar + value))}
+              disabled={isKeranjangKosong}
               style={{
                 padding: '8px 0', borderRadius: 8, border: `1px solid ${COLOR.border}`,
-                background: '#fff', fontSize: 12, fontWeight: 600, color: COLOR.text,
-                cursor: 'pointer', fontFamily: 'inherit',
+                background: isKeranjangKosong ? '#F4F5F7' : '#fff',
+                fontSize: 12, fontWeight: 600,
+                color: isKeranjangKosong ? COLOR.textMuted : COLOR.text,
+                cursor: isKeranjangKosong ? 'not-allowed' : 'pointer',
+                fontFamily: 'inherit',
+                opacity: isKeranjangKosong ? 0.6 : 1,
               }}
             >
               {label}
@@ -461,15 +476,15 @@ function TransaksiPanel({
           alignItems:     'center',
           fontSize:       12,
           marginTop:      6,
-          padding:        isKurang && bayar > 0 ? '6px 10px' : 0,
+          padding:        isKurangNyata && bayar > 0 ? '6px 10px' : 0,
           borderRadius:   6,
-          background:     isKurang && bayar > 0 ? '#FEF2F2' : 'transparent',
+          background:     isKurangNyata && bayar > 0 ? '#FEF2F2' : 'transparent',
         }}>
-          <span style={{ color: isKurang && bayar > 0 ? '#DC2626' : COLOR.textSub, fontWeight: isKurang && bayar > 0 ? 600 : 400 }}>
-            {isKurang && bayar > 0 ? 'Kurang' : 'Kembali'}
+          <span style={{ color: isKurangNyata && bayar > 0 ? '#DC2626' : COLOR.textSub, fontWeight: isKurangNyata && bayar > 0 ? 600 : 400 }}>
+            {isKurangNyata && bayar > 0 ? 'Kurang' : 'Kembali'}
           </span>
-          <span style={{ color: isKurang && bayar > 0 ? '#DC2626' : '#16A34A', fontWeight: 600 }}>
-            {isKurang && bayar > 0 ? `-${fmt(Math.abs(selisih))}` : fmt(Math.max(0, selisih))}
+          <span style={{ color: isKurangNyata && bayar > 0 ? '#DC2626' : '#16A34A', fontWeight: 600 }}>
+            {isKurangNyata && bayar > 0 ? `-${fmt(Math.abs(selisih))}` : fmt(Math.max(0, selisih))}
           </span>
         </div>
 
@@ -496,8 +511,8 @@ function TransaksiPanel({
           disabled={isDisabled}
           style={{
             width:        '100%',
-            background:   isDisabled ? '#F4F5F7' : COLOR.amber,
-            color:        isDisabled ? '#DC2626' : '#fff',
+            background:   isKurangNyata ? '#F4F5F7' : (isDisabled ? COLOR.border : COLOR.amber),
+            color:        isKurangNyata ? '#DC2626' : (isDisabled ? COLOR.textMuted : '#fff'),
             border:       'none',
             borderRadius: 10,
             padding:      16,
@@ -512,11 +527,11 @@ function TransaksiPanel({
           }}
         >
           {prosesLoading && <Loader size={16} color="#fff" />}
-          {!prosesLoading && isKurang && keranjang.length > 0 && <X size={16} />}
-          {!prosesLoading && (!isKurang || keranjang.length === 0) && <ArrowRight size={16} />}
+          {!prosesLoading && isKurangNyata && <X size={16} />}
+          {!prosesLoading && !isKurangNyata && <ArrowRight size={16} color={isDisabled ? COLOR.textMuted : '#fff'} />}
           {prosesLoading
             ? 'Memproses...'
-            : (isKurang && keranjang.length > 0 ? 'Nominal Belum Cukup' : 'Proses Transaksi')
+            : (isKurangNyata ? 'Nominal Belum Cukup' : 'Proses Transaksi')
           }
         </button>
       </div>
